@@ -15,13 +15,17 @@ class Snake
     @boardx = 20
     @empty_cell = ". "
     @snake = "O "
+    @food_cell = "x "
+    @wall = "Q "
+    @life = []
+    @running = true
     @board = Array.new(@boardy) {Array.new(@boardx, ". ")}
   end
 
   def died
     system "stty -raw echo"
     puts "You crashed!"
-    exit
+    @running = false
   end
 
   def movement(m)
@@ -40,26 +44,42 @@ class Snake
     if m == "x"
       died
     end
+    #if m = "p"
+    #  settings #TODO
+    #end
   end
 
   def tick
-    @x += 1 if @dir == 0
-    @y += 1 if @dir == 1
-    @x -= 1 if @dir == 2
-    @y -= 1 if @dir == 3
-    if @board[@y][@x] != @empty_cell
-      system "stty -raw echo"
+    a = @x
+    b = @y
+    @life[@lon-1] = [@x, @y]
+    a, b = @life.shift
+    @x = ((@x + 1) % @boardx) if @dir == 0
+    @x = ((@x - 1) % @boardx) if @dir == 2
+    @y = ((@y + 1) % @boardx) if @dir == 1
+    @y = ((@y - 1) % @boardx) if @dir == 3
+    if @board[@y][@x] == (@snake || @wall)
       show
       died
     end
+    if @board[@y][@x] == @food_cell
+      @lon += 1
+      @life << [@x, @y]
+      makefood
+    end
     @board[@y][@x] = @snake
+    @board[b][a] = @empty_cell
     show
   end
 
-  def food
-    if @x == x && @y == y
-      @lon += 1
+  def makefood
+    x = rand(@boardx)
+    y = rand(@boardy)
+    while @board[y][x] != @empty_cell
+      x = rand(@boardx)
+      y = rand(@boardy)
     end
+    @board[y][x] = @food_cell
   end
 
   def show
@@ -70,14 +90,16 @@ class Snake
       puts @board[i].join
       i += 1
     end
+    puts "Score: #{@lon}"
       system "stty raw -echo"
   end
 end
 
 game = Snake.new
+game.makefood
 game.show
 
-Thread.new do
+prompt = Thread.new do
   loop do
     game.movement(s = STDIN.getch)
   end
@@ -85,9 +107,16 @@ end
 
 i = 0
 loop do
-game.tick
-  i += 1
-  sleep 0.3
+  if game.instance_variable_get(:@running) == true
+    game.tick
+    i += 1
+    sleep 0.1
+  else
+    prompt = 0
+    break
+  end
 end
 
+prompt = 0
 system "stty -raw echo"
+exit
