@@ -4,7 +4,6 @@
 
 require 'io/console'
 require 'io/wait'
-
 class Snake
 
   def initialize
@@ -14,25 +13,32 @@ class Snake
     @dir = 0 #0=right, 1=down, 2=left, 3=up
     @boardy = 20
     @boardx = 20
+    @empty_cell = ". "
+    @snake = "O "
     @board = Array.new(@boardy) {Array.new(@boardx, ". ")}
   end
 
+  def died
+    system "stty -raw echo"
+    puts "You crashed!"
+    exit
+  end
+
   def movement(m)
-    if m == "a" #Move left
+    if m == "a" && @dir != 0#Move left
       @dir = 2
     end
-    if m == "w" #Move up
+    if m == "w" && @dir != 1 #Move up
       @dir = 3
     end
-    if m == "d" #Move right
+    if m == "d" && @dir != 2 #Move right
       @dir = 0
     end
-    if m == "s" #Move down
+    if m == "s" && @dir != 3 #Move down
       @dir = 1
     end
     if m == "x"
-      system "stty -raw echo"
-      exit
+      died
     end
   end
 
@@ -41,7 +47,12 @@ class Snake
     @y += 1 if @dir == 1
     @x -= 1 if @dir == 2
     @y -= 1 if @dir == 3
-    @board[@y][@x] = "X "
+    if @board[@y][@x] != @empty_cell
+      system "stty -raw echo"
+      show
+      died
+    end
+    @board[@y][@x] = @snake
     show
   end
 
@@ -78,3 +89,5 @@ game.tick
   i += 1
   sleep 0.3
 end
+
+system "stty -raw echo"
