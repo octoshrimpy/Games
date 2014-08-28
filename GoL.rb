@@ -416,6 +416,7 @@ class GoL
 		elsif a == 9 #Line tool
 			puts "H or V for Horizontal or Vertical orientation followed by line length number."
 			len = gets.chomp.downcase
+			lon = 0
 			if ["h", "v"].include?(len[0]) #Checks if first letter is H or V
 				if len[0] == "h"
 					hv = 1
@@ -426,9 +427,6 @@ class GoL
 					len = len.split(" ").map(&:to_i) #Separate letter and num
 					if len[1] != nil #Verifies there IS a num
 						lon = len[1]
-						if lon == 0
-							lon = 1
-						end
 					elsif len[1] == nil
 						lon = 1
 					end
@@ -453,11 +451,8 @@ class GoL
 				y = @y if y >= @y
 				puts "x = #{x}, y = #{y}"
 				i = 0
-				if lon == 0 || nil
-					lon = 1
-				end
 				while i < lon
-					puts "Open loop"
+					#puts "Open loop"
 					if hv == 1
 						switch_cell(x+i-1,y-1)
 					elsif hv == 0
@@ -465,7 +460,7 @@ class GoL
 					end
 					i += 1
 				end
-				puts "Close loop"
+				#puts "Close loop"
 			end
 		else
 			puts "Invalid statement."
