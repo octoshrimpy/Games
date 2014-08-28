@@ -29,16 +29,16 @@ class Snake
   end
 
   def movement(m)
-    if m == "a" && @dir != 0#Move left
+    if m == "a" && @dir != 0 && @board[@y][((@x - 1) % @boardx)] != @snake #Move left
       @dir = 2
     end
-    if m == "w" && @dir != 1 #Move up
+    if m == "w" && @dir != 1 && @board[((@y - 1) % @boardx)][@x] != @snake #Move up
       @dir = 3
     end
-    if m == "d" && @dir != 2 #Move right
+    if m == "d" && @dir != 2 && @board[@y][((@x + 1) % @boardx)] != @snake #Move right
       @dir = 0
     end
-    if m == "s" && @dir != 3 #Move down
+    if m == "s" && @dir != 3 && @board[((@y + 1) % @boardx)][@x] != @snake #Move down
       @dir = 1
     end
     if m == "x"
@@ -54,10 +54,10 @@ class Snake
     b = @y
     @life[@lon-1] = [@x, @y]
     a, b = @life.shift
-    @x = ((@x + 1) % @boardx) if @dir == 0
-    @x = ((@x - 1) % @boardx) if @dir == 2
-    @y = ((@y + 1) % @boardx) if @dir == 1
-    @y = ((@y - 1) % @boardx) if @dir == 3
+    @x = ((@x + 1) % @boardx) if @dir == 0 #right
+    @x = ((@x - 1) % @boardx) if @dir == 2 #left
+    @y = ((@y + 1) % @boardx) if @dir == 1 #down
+    @y = ((@y - 1) % @boardx) if @dir == 3 #up
     if @board[@y][@x] == (@snake || @wall)
       show
       died
