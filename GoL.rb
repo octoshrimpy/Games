@@ -417,17 +417,20 @@ class GoL
 			puts "H or V for Horizontal or Vertical orientation followed by line length number."
 			len = gets.chomp.downcase
 			if ["h", "v"].include?(len[0]) #Checks if first letter is H or V
+				if len[0] == "h"
+					hv = 1
+				elsif len[0] == "v"
+					hv = 0
+				end
 				if len.include?(" ") #Checks if a space follows letter
-					if len[0] == "h"
-						hv = 1
-					elsif len[0] == "v"
-						hv = 0
-					end
 					len = len.split(" ").map(&:to_i) #Separate letter and num
 					if len[1] != nil #Verifies there IS a num
 						lon = len[1]
-					else
-						puts "Error: Expected integer, received string."
+						if lon == 0
+							lon = 1
+						end
+					elsif len[1] == nil
+						lon = 1
 					end
 				end
 				puts "Please input your starting coordinates, separated by a space."
@@ -450,6 +453,9 @@ class GoL
 				y = @y if y >= @y
 				puts "x = #{x}, y = #{y}"
 				i = 0
+				if lon == 0 || nil
+					lon = 1
+				end
 				while i < lon
 					puts "Open loop"
 					if hv == 1
