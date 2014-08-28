@@ -1,4 +1,4 @@
-#cd C:\Ruby193\Scripts
+  #cd C:\Ruby193\Scripts
 
 # cond ? T : F
 
@@ -118,5 +118,18 @@ loop do
 end
 
 prompt = 0
+system "stty -raw echo"
+
+#if File.exists?("./Saves/s_sh.txt") (File.open("./Saves/s_sh.txt", 'w+')
+f = File.read("./Saves/s_sh.txt").to_i
+puts "The old high score is: #{f}"
+f = 0 if f == nil
+if f < game.instance_variable_get(:@lon)
+  File.write("./Saves/s_sh.txt",game.instance_variable_get(:@lon))
+  puts "You have beaten the high score! Your score is: #{game.instance_variable_get(:@lon)}"
+else
+  puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
+end
+
 system "stty -raw echo"
 exit
