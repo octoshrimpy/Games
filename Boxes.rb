@@ -1,14 +1,9 @@
 #cd C:\Ruby193\Scripts
 
 # cond ? T : F
-<<<<<<< HEAD
 #require 'pry'
 require 'io/console'
 
-=======
-require 'pry'
-require 'io/console'
->>>>>>> a6ac97b1cd5d906a5bf248c8777eebce475308dc
 class Boxes
 
   def initialize
