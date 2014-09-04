@@ -9,6 +9,7 @@ class Boxes
   def initialize
     @cx = 0
     @cy = 0
+    @lvl = 1
     @boardy = 0
     @boardx = 0
     @key = "K "
@@ -29,7 +30,12 @@ class Boxes
     #17+ - 012,345-box x,y
     #17+(6*number of boxes) 012,345 extra wall x,y
     #17+(6*box)+(6*wall) 012,345 empty wall(For wrapping)
-    a = loadup[lvl].split("").each_slice(2).to_a #Takes a string of numbers, splits it into groups of 3
+    if loadup[lvl]
+      a = loadup[lvl].split("").each_slice(2).to_a #Takes a string of numbers, splits it into groups of 2
+    else
+      a = loadup[1].split("").each_slice(2).to_a
+      puts "Error: Level maximum reached, reverting back to level 1."
+    end
     i = 0
     while i < a.length #Joins groups together
       a[i] = a[i].join
@@ -184,9 +190,17 @@ class Boxes
       exit
     end
 
+    if m == " "
+      if @left == 0
+        @lvl += 1
+        system("stty -raw echo")
+        system "clear" or system "cls"
+        load(@lvl)
+      end
+    end
     @board[@cy][@cx] = "X "
     show
-    sleep 0.1
+    sleep 0.05
   end
 
   def show
@@ -197,13 +211,36 @@ class Boxes
       puts @board[i].join
       i += 1
     end
+    win_detection
+    puts "Boxes remaining: #{@left}"
+    puts "Press space to move to next level." if @left == 0
     system("stty raw -echo")
   end
+
+  def win_detection
+    @left = 0
+    ix = 0
+    iy = 0
+
+    while (ix < @boardx) && (iy < @boardy)
+      @left += 1 if @board[iy][ix] == @box
+      ix += 1
+      if ix >= @boardx
+        ix = 0
+        iy += 1
+      end
+    end
+  end
+
 end
 
 game = Boxes.new
-game.load(1) if File.exists?("./Saves/Box_sf.txt")
-game.show
+if File.exists?("./Saves/Box_sf.txt")
+  game.load(1)
+  game.show
+else
+  puts "Game laod error: No save file found."
+end
 
 loop do
   game.movement(STDIN.getch.downcase)
