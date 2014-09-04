@@ -1,5 +1,8 @@
 #cd C:\Ruby193\Scripts
 
+require 'io/console'
+require 'io/wait'
+
 #Rules:
 # O < 2cnt = X
 # O == 2..3cnt = O
@@ -13,7 +16,7 @@ Options:
 Settings (y/n)
 	Live cell icon
 	Dead cell icon
-	Life Matrix size, ranged from 5x5 to 79x50
+	Life Matrix size, ranged from 5x5 to 100x50
 	Wrapping (T/F)
 	# of iterations (0-inf)
 	Length of iteration (0.01-10)
@@ -34,7 +37,7 @@ Settings (y/n)
 
 class GoL
 	def initialize
-		@x = 20	#Width of the game 1-79
+		@x = 20	#Width of the game 1-100
 		@y = 20	#Height of the game 1-50
 		@maxx = 101
 		@maxy = 51
@@ -49,9 +52,8 @@ class GoL
 		@cnt = 0 #Count function, used to track how many neighbours a cell has.
 		@wrapping = true #Wrapping feature, on by default
 	end
-	#Array.new(5) {Array.new(5, 5)}
+
 	def scfunc #Pre-made functions
-		# Glider, Solid, Checkered, R Pentomino
 		puts "Options available:"
 		#puts "0: "
 		puts "0: Clear the screen."
@@ -603,7 +605,7 @@ class GoL
 		puts "Would you like to activate wrapping?"
 		puts "Wrapping will cause looping on the edges of the screen."
 		puts "Yes default. N or No to deactivate."
-		wrap = gets.chomp
+		wrap = gets.chomp.downcase
 		if ["n", "no"].include?(wrap)
 			@wrapping = false
 		else
@@ -763,6 +765,7 @@ class GoL
 	end
 
 	def show #Displays the current Life Matrix.
+
 		i = 0
 		while i < @y #Create a loop
 			puts @board[i].join #join causes only one set of arrays to be displayed horizontally, the rest are displayed regularly, or vertical.
@@ -770,6 +773,7 @@ class GoL
 		end
 		(@x).times do print "  " end #Display the coordinate of the very bottom right cell.
 		puts " x#{@x}, y#{@y} "
+		puts "Press space at any time to pause."
 	end
 
 	def switch_cell(x, y) #When called, changed specified cell from live to dead or vice versa
@@ -804,6 +808,7 @@ else
 	game.show
 	game.coords
 end
+
 i = nil #Counter for iterations.
 a = 0
 while game.instance_variable_get(:@its) != i

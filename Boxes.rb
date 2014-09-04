@@ -58,10 +58,8 @@ class Boxes
         @board[i][@boardx-1] = @wall
         i += 1
       end
+      puts "Wall borders built."
     end
-    @cx = a[3]
-    @cy = a[4]
-    @board[@cy][@cx] == @player
 
     i = 0
     while i < a[5]
@@ -108,6 +106,10 @@ class Boxes
       end
       i += 1
     end
+    @cx = a[3]
+    @cy = a[4]
+    @board[@cy][@cx] == @player
+    puts "Player placed at #{@cx},#{@cy}."
   end
 
   def movement(m)

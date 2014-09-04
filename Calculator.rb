@@ -8,7 +8,7 @@ class Calc
 		@comput = 0
 		@disp = 0
 	end
-	
+
 	def fnum
 		puts "Please enter your first number."
 		puts "Enter X to retrieve previous answer."
@@ -20,8 +20,8 @@ class Calc
 		@numf = @numf.to_f
 		puts "\nYou have chosen #{@numf}\n\n"
 	end
-	
-	def getc 
+
+	def getc
 		puts "Please choose a number indicating a computation."
 		puts "1 for addition (x + y), 2 for subtraction (x - y), "
 		puts "3 for multiply (x * y), 4 for division (x / y),"
@@ -56,7 +56,7 @@ class Calc
 		@nums = @nums.to_f
 		puts "\nYou have chosen #{@nums}\n\n"
 	end
-	
+
 	def do_calc
 		if @comput == 1
 			@disp = @numf + @nums
@@ -85,9 +85,9 @@ while i == 0
 	func.do_calc()
 	puts "Would you like to do another calculation? \n
 		(Any key for yes, N or No for exit.)"
-	ans = gets.chomp.downcase
-	if ["n", "no"].include?(ans)
-		i = 1
-	end
+		i = 1 if ["n", "no"].include?(gets.chomp.downcase)
+	# ans = gets.chomp.downcase
+	# if ["n", "no"].include?(ans)
+	# 	i = 1
+	# end
 end
-
