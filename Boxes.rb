@@ -24,7 +24,6 @@ class Boxes
   end
 
   def load(lvl)
-    File.open("./Saves/Box_sf.txt")
     loadup = File.read("./Saves/Box_sf.txt").split("\n")#New line is new level
     # 012-Map x 345-Map y 678-9,10,11-Player x,y 111213-number of boxes,141516-number of walls
     #17+ - 012,345-box x,y
@@ -204,6 +203,7 @@ class Boxes
   end
 
   def show
+    puts "Player: #{@cx},#{@cy}."
     system("stty -raw echo")
     system "clear" or system "cls"
     i = 0
