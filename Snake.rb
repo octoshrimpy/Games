@@ -91,7 +91,7 @@ class Snake
       i += 1
     end
     puts "Score: #{@lon}"
-      system "stty raw -echo"
+    system "stty raw -echo"
   end
 end
 
@@ -110,7 +110,7 @@ loop do
   if game.instance_variable_get(:@running) == true
     game.tick
     i += 1
-    sleep 0.1
+    sleep 0.15
   else
     prompt = 0
     break
