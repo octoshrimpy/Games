@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pin: MyString
+  card: MyString
+
+two:
+  pin: MyString
+  card: MyString
