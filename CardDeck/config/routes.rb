@@ -1,5 +1,17 @@
 Rails.application.routes.draw do
 
+  get 'player/id'
+
+  get 'player/hand'
+
+  get 'player/create'
+
+  get 'player/read'
+
+  get 'player/update'
+
+  get 'player/destroy'
+
   devise_for :users
   get 'home/login'
 

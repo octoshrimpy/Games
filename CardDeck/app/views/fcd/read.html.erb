@@ -1,37 +1,38 @@
 <h1>fcd/read</h1>
 <p>Find me in app/views/fcd/read.html.erb</p>
-<%
- # ///////////////////////////////Move this method to user drawing
-back = "yugi.jpg"
- rbhand = []
- 5.times do
-  rbhand << "#{draw}.png"
-  #//////////////////////////////////////////////
-end  %>
+
+<%= link_to 'Refresh', 'read' %>
+  <% 4.times do %>
+  <!-- # ///////////////////////////////Move this method to user drawing -->
+    <% rbhand = []
+      back = "Bluedrag.jpeg"
+      5.times do
+      rbhand << "#{draw}"
+      end %>
+  <!-- #////////////////////////////////////////////// -->
 <div>
-<table>
-<% rbhand.each do |hcard| %>
-  <td>
-  <div class="flip-container" onclick="this.classList.toggle('flip');">
-    <div class="flipper">
-      <div class="back">
-        <%= image_tag(back, width: 225, height: 315)
-         @flip = 0
-         #rbhand = "#{draw}.png" 
-         %>
-      </div>
-      <div class="front">
-        <%= image_tag(hcard, width: 225, height: 315) %>
-        <%= @flip = 1 %>
-      </div>
-      <%= if @flip == 0
-       rbhand << "#{draw}.png"
-        end %>
+  <table>
+    <% rbhand.each do |hcard| %>
+    <td>
+      <div class="flip-container" onclick="this.classList.toggle('flip');">
+        <div class="flipper">
 
-    </div>
-  </div>
-</td>
+          <div class="back">
+            <%= image_tag(back, width: 112.5, height: 157.5) %>
+            <% @flip = 0 %>
+          </div>
 
-<% end %>
-</table>
+          <div class="front">
+            <%= image_tag(hcard + ".png", width: 112.5, height: 157.5) %>
+            <% @flip = 1 %>
+          </div>
+
+        </div>
+      </div>
+    </td>
+    <% end %>
+  </table>
 </div>
+<%= rbhand %>
+<%= readhand(rbhand) %>
+<% end %>

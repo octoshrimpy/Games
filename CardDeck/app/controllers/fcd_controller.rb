@@ -1,4 +1,6 @@
 class FcdController < ApplicationController
+
+
   def create
     shuffle
   end
@@ -27,9 +29,28 @@ class FcdController < ApplicationController
 
   def update
   end
+ # Sort: 2-9, AJKQT, CDHS
+  def readhand(a)
+     a = a.sort
+     #5kind, StrFlu, 4kind, FlHs, Flu, Str, 3kind, 2pair, pair, A-2
+     # vk,      sf    ivk    fh   fs    str  iiik    iip    ip  ha,hk,hq,hj,hx,hix,hiix...hii
+     ha
+     hk
+     hq
+     
+     sf = ["", "", "", "", ""]
+     ivk = ["", "", "", "", ""]
+     fh = ["", "", "", "", ""]
+     fs = ["", "", "", "", ""]
+     str = ["", "", "", "", ""]
+     iiik = ["", "", "", "", ""]
+     iip = ["", "", "", "", ""]
+     ip = ["", "", "", "", ""]
 
-  def read
+
+     if a =
   end
+  helper_method :readhand
 
   def destroy
   end
