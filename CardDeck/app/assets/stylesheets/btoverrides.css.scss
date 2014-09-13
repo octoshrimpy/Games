@@ -1,7 +1,12 @@
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
+
+
 #gamechoose {
+  h1 {
+    background: blue;
+  }
   width: 100%;
   background:  blue;
   #choose {
@@ -9,4 +14,46 @@
     margin-left: auto;
     margin-right: auto;
   }
+}
+
+#table{
+  margin-left: 50px;
+  background: blue;
+}
+
+.flip-container {
+  margin: 0 1vw;
+	perspective: 800;
+}
+
+.flip-container.flip .flipper {
+	transform: rotateY(180deg);
+}
+
+.flip-container, .front, .back {
+	width: 225px;
+	height: 315px;
+}
+
+.flipper {
+	transition: 1s;
+	transform-style: preserve-3d;
+
+	position: relative;
+}
+
+.front, .back {
+	backface-visibility: hidden;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.back {
+	z-index: 2;
+}
+
+.front {
+	transform: rotateY(180deg);
 }

@@ -1,2 +1,37 @@
-<h1>Fcd#read</h1>
+<h1>fcd/read</h1>
 <p>Find me in app/views/fcd/read.html.erb</p>
+<%
+ # ///////////////////////////////Move this method to user drawing
+back = "yugi.jpg"
+ rbhand = []
+ 5.times do
+  rbhand << "#{draw}.png"
+  #//////////////////////////////////////////////
+end  %>
+<div>
+<table>
+<% rbhand.each do |hcard| %>
+  <td>
+  <div class="flip-container" onclick="this.classList.toggle('flip');">
+    <div class="flipper">
+      <div class="back">
+        <%= image_tag(back, width: 225, height: 315)
+         @flip = 0
+         #rbhand = "#{draw}.png" 
+         %>
+      </div>
+      <div class="front">
+        <%= image_tag(hcard, width: 225, height: 315) %>
+        <%= @flip = 1 %>
+      </div>
+      <%= if @flip == 0
+       rbhand << "#{draw}.png"
+        end %>
+
+    </div>
+  </div>
+</td>
+
+<% end %>
+</table>
+</div>
