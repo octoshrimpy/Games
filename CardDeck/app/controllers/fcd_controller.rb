@@ -1,6 +1,5 @@
 class FcdController < ApplicationController
 
-
   def create
     shuffle
   end
@@ -32,11 +31,10 @@ class FcdController < ApplicationController
  # Sort: 2-9, AJKQT, CDHS
   def readhand(a)
     a = a.sort
-    #5kind, StrFlu, 4kind, FlHs, Flu, Str, 3kind, 2pair, pair, A-2
-    # vk,      sf    ivk    fh   fs    str  iiik    iip    ip  ha,hk,hq,hj,hx,hix,hiix...hii
     str = [["2", "3", "4", "5", "6"], ["3", "4", "5", "6", "7"], ["4", "5", "6", "7", "8"],
             ["5", "6", "7", "8", "9"], ["6", "7", "8", "9", "T"], ["7", "8", "9", "J", "T"],
-            ["8", "9", "J", "Q", "T"], ["9", "J", "K", "Q", "T"], ["A", "J", "K", "Q", "T"]]
+            ["8", "9", "J", "Q", "T"], ["9", "J", "K", "Q", "T"]]
+    ryl = ["A", "J", "K", "Q", "T"]
     suits = []
     suitcount = Array.new (4) {0}
     nums = []
@@ -64,17 +62,88 @@ class FcdController < ApplicationController
       numcnt[12] += 1 if x == "Q"
       numcnt[13] += 1 if x == "K"
     end
-    "#{nums.join},#{suits.join}--#{numcnt.join},#{suitcount.join}"
-    #Str/multiples
-    # if str.include?(a.each_index {|x| a[x][0])
-    #AND flush-T/F
-    #High Card
-    #2 pair If (cnt = 2) & (cnt = 2) and cnt1 != cnt 2
-     # count = 0
-     # b.each {|x| count += 1 if x == 1}
-    #  if a =
+    #StrFlu, 4kind, FlHs, Flu, Str, 3kind, 2pair, pair, A-2
+    #   sf    ivk    fh   fs    str  iiik    iip    ip  ha,hk,hq,hj,hx,hix,hiix...hii
+    #nums = 236AA, suits = SHSDH, numcnt = 01120020, suitcount = 1220
+    royal = false
+    straight = false
+    flush = false
+    ick = false
+    iiik = false
+    iip = false
+    ip = false
+    hc = "0"
+    windex= []
+
+    royal = true if ryl.include?(nums) == true
+    straight = true if str.include?(nums) == true
+    flush = true if suitcount.include?(5) == true
+    if numcnt.include?(4) == true
+      ivk = true
+      windex << numcnt.index{|x| x == 4}
+    end
+    if numcnt.include?(3) == true
+      iiik = true
+      windex << numcnt.index{|x| x == 3}
+    end
+    if numcnt.include?(2) == true
+      paircount = 0
+      15.times do |x|
+        if numcnt[x] == 2
+          paircount += 1
+          windex << x.to_s
+        end
+      end
+      if paircount == 2
+        iip = true
+      else
+        ip = true
+      end
+      if iip == true && iiik == true
+        iip = false
+        iiik = false
+        fh = true
+      end
+    end
+    
+     output = ""
+     output << "Royal " if ryl == true
+     output << "Straight " if straight == true
+     output << "Full House of " if fh == true
+     output << "4 of a Kind: " if ivk == true
+     output << "3 of a Kind: " if iiik == true
+     output << "Two Pair of " if iip == true
+     output << "Pair of " if ip == true
+     if fh == true || iip == true
+       output << cardindextostr(windex[0])
+       output << " and "
+       output << cardindextostr(windex[1])
+     else
+       output << cardindextostr(windex.join)
+     end
+     output << "Flush" if flush == true
+     output << "'s, with a " if output.length > 2
+     output << "High Card: " if royal == false
+     output << cardindextostr(hc)
+     "#{nums},#{suits}--#{numcnt},#{suitcount}"
+     "#{output}"
   end
   helper_method :readhand
+
+  def cardindextostr(highcard)
+    if highcard == "1"
+      hc = "Ace"
+    elsif highcard == "11"
+      hc = "Jack"
+    elsif highcard == "12"
+      hc = "Queen"
+    elsif highcard == "13"
+      hc = "King"
+    else
+      hc = highcard
+    end
+    return hc
+  end
 
   def destroy
   end
