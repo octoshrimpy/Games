@@ -773,7 +773,7 @@ class GoL
 		end
 		(@x).times do print "  " end #Display the coordinate of the very bottom right cell.
 		puts " x#{@x}, y#{@y} "
-		puts "Press space at any time to pause."
+		#puts "Press space at any time to pause."
 	end
 
 	def switch_cell(x, y) #When called, changed specified cell from live to dead or vice versa
