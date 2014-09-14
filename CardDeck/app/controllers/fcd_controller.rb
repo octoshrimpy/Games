@@ -105,7 +105,33 @@ class FcdController < ApplicationController
         fh = true
       end
     end
-    
+    # Sort: 2-9, AJKQT, CDHS
+    # 23456789AJKQT
+    # 0123456789012
+    # AKQJT98765432
+    numcnt.shift
+    temp = numcnt.reverse.rotate(-1).unshift(0).index{|x| x != 0}
+    hc = case temp
+    when 1 then 1
+    when 2 then 13
+    when 3 then 12
+    when 4 then 11
+    when 5 then 10
+    when 6 then 9
+    when 7 then 8
+    when 8 then 7
+    when 9 then 6
+    when 10 then 5
+    when 11 then 4
+    when 12 then 3
+    when 13 then 2
+    end
+    #1#@!098765432
+    #AKQJT98765432
+    #1234567890!@#
+    #
+    #h = numcnt.map(&:to_s)
+    #hc = "0"<<h[8]<<h[10]<<h[11]<<h[9]<<h[12]<<h[7]<<h[6]<<h[5]<<h[4]<<h[3]<<h[2]<<h[1]<<h[0]
      output = ""
      output << "Royal " if ryl == true
      output << "Straight " if straight == true
@@ -124,25 +150,28 @@ class FcdController < ApplicationController
      output << "Flush" if flush == true
      output << "'s, with a " if output.length > 2
      output << "High Card: " if royal == false
-     output << cardindextostr(hc)
+     output << cardindextostr(hc.to_s)
      "#{nums},#{suits}--#{numcnt},#{suitcount}"
      "#{output}"
+    #  "#{numcnt},--#{numcnt.reverse.index{|x| x != 0}}"
+    # "#{hc},#{temp}"
+    # "#{hc.to_i}"
   end
   helper_method :readhand
 
   def cardindextostr(highcard)
     if highcard == "1"
-      hc = "Ace"
+      translate = "Ace"
     elsif highcard == "11"
-      hc = "Jack"
+      translate = "Jack"
     elsif highcard == "12"
-      hc = "Queen"
+      translate = "Queen"
     elsif highcard == "13"
-      hc = "King"
+      translate = "King"
     else
-      hc = highcard
+      translate = highcard
     end
-    return hc
+    return translate
   end
 
   def destroy
