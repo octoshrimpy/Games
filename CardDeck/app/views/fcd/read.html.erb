@@ -1,38 +1,48 @@
 <h1>fcd/read</h1>
 <p>Find me in app/views/fcd/read.html.erb</p>
 
-<%= link_to 'Refresh', 'read' %>
-  <% 4.times do %>
   <!-- # ///////////////////////////////Move this method to user drawing -->
-    <% rbhand = []
-      back = "leapord.gif"
-      5.times do
-      rbhand << "#{draw}"
-      end %>
+  <% rbhand = []
+    back = "leapord.gif"
+    # if session:id
+    5.times do
+    rbhand << "#{draw}"
+    end
+    # rbhand = ["", "", "", "", ""]
+    # rbhand = ["6S","6H","4C","2D","3H"]
+    # rbhand = ["2D", "3H", "4S", "5S", "6S"]
+    %>
   <!-- #////////////////////////////////////////////// -->
-<div>
-  <table>
-    <% rbhand.each do |hcard| %>
-    <td>
-      <div class="flip-container" onclick="this.classList.toggle('flip');">
-        <div class="flipper">
 
-          <div class="back">
-            <%= image_tag(back, width: 112.5, height: 157.5) %>
-            <% @flip = 0 %>
+    <table>
+      <% rbhand.each_index do |x| %><!-- Player.rbhand.each -->
+        <% @flipped = Array.new(5) {0} %>
+
+      <td>
+        <div class="flip-container flip" onclick="this.classList.toggle('flip');">
+          <div class="flipper">
+
+            <div class="back">
+              <%= image_tag(back, width: 112.5, height: 157.5) %>
+            </div>
+
+            <div class="front">
+              <%= image_tag(rbhand[x] + ".png", width: 112.5, height: 157.5) %>
+            </div>
+
           </div>
-
-          <div class="front">
-            <%= image_tag(hcard + ".png", width: 112.5, height: 157.5) %>
-            <% @flip = 1 %>
-          </div>
-
         </div>
-      </div>
-    </td>
-    <% end %>
-  </table>
-</div>
-<%= rbhand %>
-<%= readhand(rbhand) %>
-<% end %>
+      </td>
+      <% end %>
+    <%= rbhand %>
+  <%= readhand(rbhand) if !(@flipped.include?(1)) %>
+  <br/>
+    </table>
+    <form name= "input", action='read', method: "get" >
+      <input type="checkbox" name="discard" value="cookie[1]= 1">
+      <input type="checkbox" name="discard" value=2>
+      <input type="checkbox" name="discard" value=3>
+      <input type="checkbox" name="discard" value=4>
+      <input type="checkbox" name="discard" value=5><br/>
+      <input type="submit" action="read" value="Discard"
+    </form>

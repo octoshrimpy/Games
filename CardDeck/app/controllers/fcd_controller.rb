@@ -1,5 +1,5 @@
 class FcdController < ApplicationController
-
+before_action 
   def create
     shuffle
   end
@@ -19,6 +19,11 @@ class FcdController < ApplicationController
               "QH", "QD", "QS", "QC",
               "KH", "KD", "KS", "KC"]
   end
+
+  def deck_left
+     return @deck.length
+  end
+  helper_method :deckleft
 
   def draw
     shuffle if @deck.nil? || @deck.empty?
@@ -74,27 +79,23 @@ class FcdController < ApplicationController
     ip = false
     hc = "0"
     windex= []
-
-    royal = true if ryl.include?(nums) == true
-    straight = true if str.include?(nums) == true
-    flush = true if suitcount.include?(5) == true
     if numcnt.include?(4) == true
       ivk = true
-      windex << numcnt.index{|x| x == 4}
+      windex << numcnt.index{|x| x == 4}.to_s
     end
     if numcnt.include?(3) == true
       iiik = true
-      windex << numcnt.index{|x| x == 3}
+      windex << numcnt.index{|x| x == 3}.to_s
     end
     if numcnt.include?(2) == true
       paircount = 0
-      15.times do |x|
-        if numcnt[x] == 2
-          paircount += 1
+      14.times do |x|
+        if numcnt[x] >= 2
           windex << x.to_s
+          paircount += 1
         end
       end
-      if paircount == 2
+      if paircount >= 2
         iip = true
       else
         ip = true
@@ -133,26 +134,30 @@ class FcdController < ApplicationController
     #h = numcnt.map(&:to_s)
     #hc = "0"<<h[8]<<h[10]<<h[11]<<h[9]<<h[12]<<h[7]<<h[6]<<h[5]<<h[4]<<h[3]<<h[2]<<h[1]<<h[0]
      output = ""
-     output << "Royal " if ryl == true
-     output << "Straight " if straight == true
+     output << "Royal " if ryl == nums
+     output << "Straight " if str.include?(nums) == true
      output << "Full House of " if fh == true
-     output << "4 of a Kind: " if ivk == true
-     output << "3 of a Kind: " if iiik == true
+     output << "Four of a Kind: " if ivk == true
+     output << "Three of a Kind: " if iiik == true
      output << "Two Pair of " if iip == true
      output << "Pair of " if ip == true
      if fh == true || iip == true
        output << cardindextostr(windex[0])
-       output << " and "
+       output << "'s and "
        output << cardindextostr(windex[1])
      else
        output << cardindextostr(windex.join)
      end
-     output << "Flush" if flush == true
-     output << "'s, with a " if output.length > 2
-     output << "High Card: " if royal == false
+     output << "Flush " if suitcount.include?(5) == true
+     output << "'s, with a " if output.length > 2 &&
+                                fh != true &&
+                                str.include?(nums) == false &&
+                                ryl != nums
+     output << "High Card: " if ryl != nums
      output << cardindextostr(hc.to_s)
+     #sf,4k,fh,
      "#{nums},#{suits}--#{numcnt},#{suitcount}"
-     "#{output}"
+     "#{nums}, #{output}"
     #  "#{numcnt},--#{numcnt.reverse.index{|x| x != 0}}"
     # "#{hc},#{temp}"
     # "#{hc.to_i}"
@@ -172,6 +177,10 @@ class FcdController < ApplicationController
       translate = highcard
     end
     return translate
+  end
+
+  def flipping
+
   end
 
   def destroy
