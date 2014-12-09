@@ -68,7 +68,7 @@ class Tetris
   end
 
   def step
-    @level = (@score / 50) + 1
+    @level = (@score / 100) + 1
     @level = 10 if @level > 10
     bps = (11 - @level) * 2
     bps = 1 if @fast
@@ -116,9 +116,9 @@ class Tetris
     @height.times do |row|
       if !(@board[row].join.include?(". ") || @board[row].join.include?("x "))
         completed << row
+        @score += (@level * 10) * (completed.length)
       end
     end
-    @score += @level * (completed.length * 20)
     removeRow(completed)
     checkCeiling
   end
@@ -222,8 +222,6 @@ class Tetris
       else
       [[1,1],[1,3],[3,3],[3,1]]
       end
-    else
-      [[1,1],[1,3],[3,3],[3,1]]
     end
     new_matrix.each do |bounceback|
       matrix << [bounceback[0] + offset_y, bounceback[1] + offset_x]
