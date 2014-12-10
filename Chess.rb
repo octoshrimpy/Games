@@ -81,7 +81,7 @@ class Chess
       rules[6] = [[-2,1]]
       rules[7] = [[-2,-1]]
     when "Q ", "q "
-      8.times do |pos|
+      8.times do |pos| # Reverse string detection upward collision
         rules[0] << [pos,pos]
         rules[1] << [-pos,pos]
         rules[2] << [pos,-pos]
@@ -128,7 +128,6 @@ class Chess
             end
             if !(@board[x][y] == @whitecell || @board[x][y] == @blackcell)
               broken = true
-              p "Broken at: #{x}, #{y}"
             end
           end
         end
