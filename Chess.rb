@@ -11,6 +11,9 @@ class Chess
     @turn = "white"
     @allow = true
     @error = ""
+    @specialWhite = true
+    @specialBlack = true
+    @condition = false
     # Pawn = N
     # Bishop = B
     # Knight/Horse = T
@@ -23,39 +26,39 @@ class Chess
   def start
     boardNew
     drawPiece("a1", "R ")
-    drawPiece("b1", "T ")
-    drawPiece("c1", "B ")
+    # drawPiece("b1", "T ")
+    # drawPiece("c1", "B ")
     drawPiece("e1", "Q ")
     drawPiece("d1", "K ")
-    drawPiece("f1", "B ")
-    drawPiece("g1", "T ")
+    # drawPiece("f1", "B ")
+    # drawPiece("g1", "T ")
     drawPiece("h1", "R ")
 
-    drawPiece("a2", "N ")
-    drawPiece("b2", "N ")
-    drawPiece("c2", "N ")
-    drawPiece("d2", "N ")
-    drawPiece("e2", "N ")
-    drawPiece("f2", "N ")
-    drawPiece("g2", "N ")
-    drawPiece("h2", "N ")
+    # drawPiece("a2", "N ")
+    # drawPiece("b2", "N ")
+    # drawPiece("c2", "N ")
+    # drawPiece("d2", "N ")
+    # drawPiece("e2", "N ")
+    # drawPiece("f2", "N ")
+    # drawPiece("g2", "N ")
+    # drawPiece("h2", "N ")
 
-    drawPiece("a7", "n ")
-    drawPiece("b7", "n ")
-    drawPiece("c7", "n ")
-    drawPiece("d7", "n ")
-    drawPiece("e7", "n ")
-    drawPiece("f7", "n ")
-    drawPiece("g7", "n ")
-    drawPiece("h7", "n ")
+    # drawPiece("a7", "n ")
+    # drawPiece("b7", "n ")
+    # drawPiece("c7", "n ")
+    # drawPiece("d7", "n ")
+    # drawPiece("e7", "n ")
+    # drawPiece("f7", "n ")
+    # drawPiece("g7", "n ")
+    # drawPiece("h7", "n ")
 
     drawPiece("a8", "r ")
-    drawPiece("b8", "t ")
-    drawPiece("c8", "b ")
+    # drawPiece("b8", "t ")
+    # drawPiece("c8", "b ")
     drawPiece("e8", "q ")
     drawPiece("d8", "k ")
-    drawPiece("f8", "b ")
-    drawPiece("g8", "t ")
+    # drawPiece("f8", "b ")
+    # drawPiece("g8", "t ")
     drawPiece("h8", "r ")
 
     turn
@@ -134,6 +137,12 @@ class Chess
             end
             enemy = @black if piece == "N "
             enemy = @white if piece == "n "
+            if (@specialWhite && piece == "K ") || (@specialBlack && piece == "k ") && @condition == true
+              oneUp = (@board[from[0]-3][from[1]] == @blackcell) || (@board[from[0]-3][from[1]] == @whitecell)
+              twoUp = (@board[from[0]-6][from[1]] == @blackcell) || (@board[from[0]-6][from[1]] == @whitecell)
+              allowed << [from[0]-6, from[1]] if oneUp && twoUp
+              @condition = [from[0], from[1]]
+            end
             if enemy
               if @allow == true
                 allowed << [x, y-3] if from[1] == 19 && !(enemy.include?(@board[x][y-3]) || enemy.include?(@board[x][y])) && enemy == @white
@@ -231,11 +240,6 @@ class Chess
     return output
   end
 
-  def cheat
-    highlight([[13,13]], true)
-    highlight([[13,13]], false)
-  end
-
   def crownPawn(type, y)
     puts "A pawn has reached the end!"
     puts "Type a letter representing the piece you would like."
@@ -314,11 +318,6 @@ class Chess
         @running = false
       end
       @allow = true
-      # √√ Check for King's Possible moves
-      # √√ Find Piece(s) putting King in check
-      # √√ If King moves == 0, && mater in range of friendly
-      # √√ Is friendly piece able to kill mater?
-      # √√ **Is friendly piece able to block mater
       return false
     else
       return true
@@ -335,7 +334,7 @@ class Chess
       enemy = @white
     end
     # p safeKing
-    if safeKing
+    # if safeKing
       can_move = false
       @board.each_with_index do |x, pos|
         x.each_with_index do |y, loc|
@@ -346,7 +345,7 @@ class Chess
       end
       if can_move == false
         p "No moves!"
-        loser(@turn)
+        @running = false
       end
       8.times do |y|
         if @board[y*3-2][22] == "N "
@@ -365,6 +364,7 @@ class Chess
       from = inputToCoord(input_from)
       piece = @board[from[0]][from[1]] if from.length > 0
       if friendly.include?(piece)
+        @condition = true
         allowed = exceptions(pieceRules(from, piece), piece)
         if allowed.length > 0
           highlight(allowed, true)
@@ -373,8 +373,16 @@ class Chess
           to = inputToCoord(input_to)
           if allowed.include?(to)
             movePiece(from, to)
+            p from
+            p to
+            p @condition
+            p "[#{to[0]+3},#{to[1]}],[#{to[0]-3}, #{to[1]}]"
+            movePiece([to[0]-3, to[1]], [to[0]+3, to[1]]) if from == @condition
+            @condition = false
             if safeKing
               highlight(allowed, false)
+              @specialWhite = false if piece == "K " || (piece == "R " && from == [1, 1])
+              @specialBlack = false if piece == "k " || (piece == "r " && from == [1, 22])
               if @turn == "white"
                 @turn = "black"
               else
@@ -395,7 +403,7 @@ class Chess
       else
         @error = "Invalid Choice."
       end
-    end
+    # end
   end
 
   def draw
