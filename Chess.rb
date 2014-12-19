@@ -14,11 +14,11 @@ class Chess
     @specialWhite = true
     @specialBlack = true
     @condition = false
-    # Pawn = N
-    # Bishop = B
-    # Knight/Horse = T
-    # Rook/Castle = R
-    # Queen = Q
+    # Pawn = N - 1
+    # Bishop = B - X
+    # Knight/Horse = T- T
+    # Rook/Castle = R- +
+    # Queen = Q = +X
     # King = K
     #  White uppercase - Black lowercase
   end
@@ -291,6 +291,19 @@ class Chess
     end
   end
 
+  def checkBlockable(king, friendly, baddie)
+    baddie_moves = pieceRules(baddie[0], @board[baddie[0][0]][baddie[0][1]])
+    friendly_moves = findAllMoves(friendly - [friendly.last])
+    king_safe = false
+    (baddie_moves & friendly_moves).each do |intersection|
+      hold = @board[intersection[0]][intersection[1]]
+      @board[intersection[0]][intersection[1]] = "x"
+      king_safe = true if !(pieceRules(baddie[0], @board[baddie[0][0]][baddie[0][1]]).include?(king))
+      @board[intersection[0]][intersection[1]] = hold
+    end
+    return king_safe
+  end
+
   def safeKing
     if @turn == "white"
       friendly = @white
@@ -301,19 +314,24 @@ class Chess
       enemy = @white
       king_is = "k "
     end
+    block = false
     row = @board.detect{|aa| aa.include?(friendly.last)}
     king = [row.index(friendly.last), @board.index(row)].reverse
     dangerous = findAllMoves(enemy)
+    bad_moves = []
     if dangerous.include?(king)
       baddie = []
       findAllMoves(enemy, true).each do |bad|
-        baddie << bad[1] if [bad[0][0], bad[0][1]] == king
+        if [bad[0][0], bad[0][1]] == king
+          baddie << bad[1]
+        end
       end
       @error = "You're in check! Move or defend your King to continue." # by #{@board[baddie[0][0]][baddie[0][1]]} at (#{toCoord(baddie[0][1])}, #{toCoord(baddie[0][0])})"
       @allow = false
-      # p findAllMoves(friendly, false, true).include?([baddie[0][0], baddie[0][1]]) #Check if any allies can kill the enemy.
-      # p exceptions(pieceRules(king, king_is), king_is).length #Number of possible moves.
-      if !(findAllMoves(friendly, false, true).include?([baddie[0][0], baddie[0][1]])) && exceptions(pieceRules(king, king_is), king_is).length == 0
+      assist = findAllMoves(friendly, false, true).include?([baddie[0][0], baddie[0][1]]) #Check if any allies can kill the enemy.
+      block = checkBlockable(king, friendly, baddie) # Check if any pieces can block for the king.
+      evade = exceptions(pieceRules(king, king_is), king_is).length > 0 #Number of possible moves.
+      if !(assist || evade || block)
         @error = "Check mate! #{@turn.capitalize} has been defeated." # by #{@board[baddie[0][0]][baddie[0][1]]} at (#{toCoord(baddie[0][1])}, #{toCoord(baddie[0][0])})"
         @running = false
       end
@@ -333,32 +351,32 @@ class Chess
       friendly = @black
       enemy = @white
     end
-    # p safeKing
-    # if safeKing
-      can_move = false
-      @board.each_with_index do |x, pos|
-        x.each_with_index do |y, loc|
-          if friendly.include?(y)
-            can_move = true if pieceRules([loc, pos], y).length > 0
-          end
+    safeKing
+    can_move = false
+    @board.each_with_index do |x, pos|
+      x.each_with_index do |y, loc|
+        if friendly.include?(y)
+          can_move = true if pieceRules([loc, pos], y).length > 0
         end
       end
-      if can_move == false
-        p "No moves!"
-        @running = false
+    end
+    if can_move == false
+      p "No moves!"
+      @running = false
+    end
+    8.times do |y|
+      if @board[y*3-2][22] == "N "
+        crownPawn("white", y)
+        draw
       end
-      8.times do |y|
-        if @board[y*3-2][22] == "N "
-          crownPawn("white", y)
-          draw
-        end
-        if @board[y*3-2][1] == "n "
-          crownPawn("black", y)
-          draw
-        end
+      if @board[y*3-2][1] == "n "
+        crownPawn("black", y)
+        draw
       end
-      puts "#{@error}"
-      @error = ""
+    end
+    puts "#{@error}"
+    @error = ""
+    if @running == true
       puts "#{@turn.capitalize}- Your Turn"
       input_from = (gets.chomp)
       from = inputToCoord(input_from)
@@ -373,10 +391,6 @@ class Chess
           to = inputToCoord(input_to)
           if allowed.include?(to)
             movePiece(from, to)
-            p from
-            p to
-            p @condition
-            p "[#{to[0]+3},#{to[1]}],[#{to[0]-3}, #{to[1]}]"
             movePiece([to[0]-3, to[1]], [to[0]+3, to[1]]) if from == @condition
             @condition = false
             if safeKing
@@ -403,7 +417,7 @@ class Chess
       else
         @error = "Invalid Choice."
       end
-    # end
+    end
   end
 
   def draw
