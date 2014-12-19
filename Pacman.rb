@@ -25,6 +25,7 @@ class Pacman
     @even = true
     @energized = 0
     @dir = 0
+    @mode = "scatter"
     @x = 14
     @y = 26
 
@@ -166,7 +167,6 @@ class Pacman
       moveGhosts if @timer % 0.3 <= 0.02
       moveDeadGhost
       movePacman if @timer % 0.2 <= 0.02
-      displayTargeting
       sleep(0.01)
       @timer += 0.02
       draw
@@ -268,11 +268,11 @@ class Pacman
   def moveGhosts #@mode: Scatter, Chase, Frightened
     seconds = @timer - @offset
     if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
-     reverse if mode == "chase"
-     mode = "scatter"
+     reverse if @mode == "chase"
+     @mode = "scatter"
     else
-     reverse if mode == "scatter"
-     mode = "chase"
+     reverse if @mode == "scatter"
+     @mode = "chase"
     end
     if seconds >= 2 && seconds <= 3
       @pinky = [14, 14, "left", @space]
@@ -286,14 +286,14 @@ class Pacman
       @clyde = [14, 14, "left", @space]
       @board[17][15] = @space
     end
-    mode = "frightened" if @energized > 0
-    if mode == "scatter"
+    @mode = "frightened" if @energized > 0
+    if @mode == "scatter"
       pathFind(@blinky, @blinky_default_target)
       pathFind(@pinky, @pinky_default_target) if seconds > 3
       pathFind(@inky, @inky_default_target) if seconds > 8
       pathFind(@clyde, @clyde_default_target) if seconds > 21
     end
-    if mode == "chase"
+    if @mode == "chase"
       #  Blinky
       pathFind(@blinky, [@y, @x])
       #  Pinky
@@ -320,8 +320,9 @@ class Pacman
         pathFind(@clyde, @clyde_default_target)
       end
     end
-    if mode == "frightened"
+    if @mode == "frightened"
     end
+    @error = @mode
   end
 
   def reverse
