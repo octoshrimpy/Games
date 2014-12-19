@@ -32,13 +32,13 @@ class Snake
     if m == "a" && @dir != 0 && @board[@y][((@x - 1) % @boardx)] != @snake #Move left
       @dir = 2
     end
-    if m == "w" && @dir != 1 && @board[((@y - 1) % @boardx)][@x] != @snake #Move up
+    if m == "w" && @dir != 1 && @board[((@y - 1) % @boardy)][@x] != @snake #Move up
       @dir = 3
     end
     if m == "d" && @dir != 2 && @board[@y][((@x + 1) % @boardx)] != @snake #Move right
       @dir = 0
     end
-    if m == "s" && @dir != 3 && @board[((@y + 1) % @boardx)][@x] != @snake #Move down
+    if m == "s" && @dir != 3 && @board[((@y + 1) % @boardy)][@x] != @snake #Move down
       @dir = 1
     end
     if m == "x"
@@ -101,7 +101,7 @@ game.show
 
 prompt = Thread.new do
   loop do
-    game.movement(s = STDIN.getch)
+    game.movement(s = STDIN.getch.downcase)
   end
 end
 
