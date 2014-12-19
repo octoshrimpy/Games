@@ -2,10 +2,12 @@
 <p>Find me in app/views/fcd/read.html.erb</p>
 
   <!-- # ///////////////////////////////Move this method to user drawing -->
-  <% rbhand = []
+  <%
+    cookies[:discard] ||= []
+    rbhand = cookies[:discard]
     back = "leapord.gif"
     # if session:id
-    5.times do
+    while rbhand.length < 5 do
     rbhand << "#{draw}"
     end
     # rbhand = ["", "", "", "", ""]
@@ -15,6 +17,7 @@
   <!-- #////////////////////////////////////////////// -->
 
     <table>
+      rbhand = rbhand.split
       <% rbhand.each_index do |x| %><!-- Player.rbhand.each -->
         <% @flipped = Array.new(5) {0} %>
 
@@ -38,11 +41,12 @@
   <%= readhand(rbhand) if !(@flipped.include?(1)) %>
   <br/>
     </table>
+  <% cookies[:discard] = rbhand %>
     <form name= "input", action='read', method: "get" >
-      <input type="checkbox" name="discard" value="cookie[1]= 1">
+      <input type="checkbox" name="discard" value=1>
       <input type="checkbox" name="discard" value=2>
       <input type="checkbox" name="discard" value=3>
       <input type="checkbox" name="discard" value=4>
       <input type="checkbox" name="discard" value=5><br/>
-      <input type="submit" action="read" value="Discard"
+      <input type="submit" action="read" value="Discard">
     </form>
