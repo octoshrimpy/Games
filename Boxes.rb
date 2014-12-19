@@ -239,7 +239,7 @@ if File.exists?("./Saves/Box_sf.txt")
   game.load(1)
   game.show
 else
-  puts "Game laod error: No save file found."
+  puts "Game load error: No save file found."
 end
 
 loop do
