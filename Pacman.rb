@@ -1,6 +1,6 @@
 require 'io/console'
 require 'io/wait'
-class Test
+class Pacman
   def initialize
     @boardy = 36
     @boardx = 28
@@ -10,12 +10,35 @@ class Test
     @space = "  "
     @energy = "ø "
     @pacman = "o "
-    @board = Array.new(36) {Array.new(28) {@pellet}}
+    @candy = "å "
+    @lives = 3
+    @score = 0
+    @stop = 5
+    @timer = 0
+    @offset = 0
+    @board = Array.new(35) {Array.new(28) {@pellet}}
     @even = true
-    @dir = 4
-    @mode = "scatter"
-    @x = 6
-    @y = 8
+    @energized = false
+    @dir = 0
+    @x = 14
+    @y = 26
+
+    @blinky_face = "∆ " #J
+    @inky_face = "® " #R
+    @pinky_face = "© " #G
+    @clyde_face = "Ω " #Z
+    @ghosts = ["Ω ", "© ", "® ", "∆ "]
+    @dead_ghost = "ªª"
+
+    @blinky = [14, 14, "left"]
+    @inky = [17, 13, "left"]
+    @pinky = [17, 14, "left"]
+    @clyde = [17, 15, "left"]
+
+    @blinky_default_target = [0, @boardx - 1]
+    @inky_default_target =  [@boardy - 1, @boardx - 1]
+    @pinky_default_target = [0, 0]
+    @clyde_default_target = [@boardy - 1, 0]
   end
 
   def createBoard
@@ -113,7 +136,7 @@ class Test
         end
         (12..22).each do |blocks|
           @board[blocks].each_with_index do |x, block|
-            @board[blocks][block] = @space if @board[blocks][block] == ". " && !([6, 21].include?(block))
+            @board[blocks][block] = @space if @board[blocks][block] == @pellet && !([6, 21].include?(block))
           end
         end
         @board[y][x] = @wall if y == 33
@@ -121,10 +144,15 @@ class Test
       end
     end
     @board[@y][@x] = @pacman
+    @board[@blinky[0]][@blinky[1]] = @blinky_face
+    @board[@pinky[0]][@pinky[1]] = @pinky_face
+    @board[@inky[0]][@inky[1]] = @inky_face
+    @board[@clyde[0]][@clyde[1]] = @clyde_face
     draw
   end
 
   def tick
+    moveGhosts
     if @even == true
       @even = false
       @pacman = case @dir
@@ -153,20 +181,77 @@ class Test
       end
     end
     @board[@y][@x] = @space
-    case @dir
-    when 1
-      @board[@y][((@x + 1) % @boardx)] != @wall ? @x = (@x + 1) % @boardx : @dir = 0
-    when 2
-      @board[((@y + 1) % @boardy)][@x] != @wall ? @y = (@y + 1) % @boardy : @dir = 0
-    when 3
-      @board[@y][((@x - 1) % @boardx)] != @wall ? @x = (@x - 1) % @boardx : @dir = 0
-    when 4
-      @board[((@y - 1) % @boardy)][@x] != @wall ? @y = (@y - 1) % @boardy : @dir = 0
-    when 0
-      @dir = 0
+    if @stop == 0
+      case @dir
+      when 1
+        @board[@y][((@x + 1) % @boardx)] != @wall ? @x = (@x + 1) % @boardx : @dir = 0
+      when 2
+        @board[((@y + 1) % @boardy)][@x] != @wall ? @y = (@y + 1) % @boardy : @dir = 0
+      when 3
+        @board[@y][((@x - 1) % @boardx)] != @wall ? @x = (@x - 1) % @boardx : @dir = 0
+      when 4
+        @board[((@y - 1) % @boardy)][@x] != @wall ? @y = (@y - 1) % @boardy : @dir = 0
+      when 0
+        @dir = 0
+      end
+    else
+      @stop -= 1
     end
-    # @board[@y][@x] = @pacman
+    case @board[@y][@x]
+    when @pellet
+      @score += 1
+    when @blinky_face, @pinky_face, @inky_face, @clyde_face
+      died
+    end
+    @timer += 0.5
+    sleep(0.3)
     createBoard
+  end
+
+  def moveGhosts #@mode: Scatter, Chase, Frightened
+    seconds = @timer - @offset
+    # if seconds < 7 || (seconds > 20 && seconds < 27) || (seconds > 47 && seconds < 54)
+     mode = "scatter"
+    # else
+    #  mode = "chase"
+    # end
+    mode = "energized" if @energized
+    if mode == "scatter"
+      pathFind(@blinky, @blinky_default_target)
+      pathFind(@inky, @inky_default_target)
+      pathFind(@pinky, @pinky_default_target)
+      pathFind(@clyde, @clyde_default_target)
+    end
+    if mode == "chase"
+    end
+    if mode == "frightened"
+    end
+  end
+
+  def pathFind(char, loc) # Array of target location
+    old_x = char[0]
+    old_y = char[1]
+    dir = char[2]
+    new_x = loc[0]
+    new_y = loc[1]
+  end
+
+  def died
+    if @lives > 0
+      @lives -= 1
+      @x = 14
+      @y = 26
+      @dir = 0
+      @stop = 5
+      @offset = @timer
+      @blinky = [14, 14]
+      @inky = [17, 13]
+      @pinky = [17, 14]
+      @clyde = [17, 15]
+    else
+      @running = false
+      exit
+    end
   end
 
   def movement(m)
@@ -208,12 +293,13 @@ class Test
         count += 1 if x == ". "
       end
     end
-    p count
+    p @timer.round
+    p @score
     system "stty raw -echo"
   end
 end
 
-game = Test.new
+game = Pacman.new
 game.createBoard
 
 prompt = Thread.new do
@@ -224,7 +310,6 @@ end
 
 loop do
   if game.instance_variable_get(:@running) == true
-    sleep 0.05
     game.tick
   else
     prompt = 0
