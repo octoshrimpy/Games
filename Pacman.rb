@@ -231,14 +231,16 @@ class Pacman
     else
       @stop -= 1
     end
-    case @board[@y][@x]
-    when @pellet
+    location = @board[@y][@x]
+    if location == @pellet
       @score += 1
-    when @energy
+    elsif @energy_face.include?(location)
       @stop += 1
       @energized = 60
-    when @blinky_face, @pinky_face, @inky_face, @clyde_face
-      # @running = false
+      @energy = (@energy - [[@y, @x]])
+    elsif @ghosts.include?(location)
+      @running = false
+      died
     end
     if @even == true
       @even = false
@@ -339,6 +341,8 @@ class Pacman
       "down" if @board[(@blinky[0] + 1) % @boardy][@blinky[1]] != @wall
     when "down"
       "up" if @board[(@blinky[0] - 1) % @boardy][@blinky[1]] != @wall
+    else
+      @blinky[2]
     end
     @clyde[2] = case @clyde[2]
     when "left"
@@ -349,6 +353,8 @@ class Pacman
       "down" if @board[(@clyde[0] + 1) % @boardy][@clyde[1]] != @wall
     when "down"
       "up" if @board[(@clyde[0] - 1) % @boardy][@clyde[1]] != @wall
+    else
+      @clyde[2]
     end
     @pinky[2] = case @pinky[2]
     when "left"
@@ -359,6 +365,8 @@ class Pacman
       "down" if @board[(@pinky[0] + 1) % @boardy][@pinky[1]] != @wall
     when "down"
       "up" if @board[(@pinky[0] - 1) % @boardy][@pinky[1]] != @wall
+    else
+      @pinky[2]
     end
     @inky[2] = case @inky[2]
     when "left"
@@ -369,6 +377,8 @@ class Pacman
       "down" if @board[(@inky[0] + 1) % @boardy][@inky[1]] != @wall
     when "down"
       "up" if @board[(@inky[0] - 1) % @boardy][@inky[1]] != @wall
+    else
+      @inky[2]
     end
   end
 
@@ -392,6 +402,9 @@ class Pacman
       when "down"
         new_x = old_x
         new_y = ((old_y + 1) % @boardy)
+      else
+        new_x = old_x
+        new_y = old_y
       end
       up = [((new_y - 1) % @boardy), new_x]
       left = [new_y, ((new_x - 1) % @boardx)]
