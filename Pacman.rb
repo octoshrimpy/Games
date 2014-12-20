@@ -327,6 +327,12 @@ class Pacman
       end
     end
     if @mode == "frightened"
+      pathFind(@blinky, [rand(@boardy), rand(@boardx)])
+      pathFind(@pinky, [rand(@boardy), rand(@boardx)])
+      pathFind(@inky, [rand(@boardy), rand(@boardx)])
+      pathFind(@clyde, [rand(@boardy), rand(@boardx)])
+      # Somehow stop frightened after death
+      # slow down in
     end
     @error = @mode
   end
@@ -470,6 +476,7 @@ class Pacman
       @stop = 0
       @offset = @timer
       @board[@y][@x] = @space
+      @next_dir = 0
       @dir = 0
       @x = 14
       @y = 26
