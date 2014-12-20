@@ -203,10 +203,10 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      controlBlinky(seconds) if @timer % ((20 - @blinky_stats[2]).to_f/50) <= 0.02
-      controlPinky(seconds) if @timer % ((20 - @pinky_stats[2]).to_f/50) <= 0.02
-      controlInky(seconds) if @timer % ((20 - @inky_stats[2]).to_f/50) <= 0.02
-      controlClyde(seconds) if @timer % ((20 - @clyde_stats[2]).to_f/50) <= 0.02
+      control(@blinky, seconds) if @timer % ((20 - @blinky_stats[2]).to_f/50) <= 0.02
+      control(@pinky, seconds) if @timer % ((20 - @pinky_stats[2]).to_f/50) <= 0.02
+      control(@inky, seconds) if @timer % ((20 - @inky_stats[2]).to_f/50) <= 0.02
+      control(@clyde, seconds) if @timer % ((20 - @clyde_stats[2]).to_f/50) <= 0.02
       movePacman if @timer % ((20 - @speed).to_f/50) <= 0.02
       sleep(0.01)
       @timer += 0.02
@@ -250,7 +250,8 @@ class Pacman
       @score += 1
     elsif @energy_face.include?(location)
       @stop += 1
-      @energized = 60
+      @score += 5
+      @energized += 60
       [@blinky_stats, @pinky_stats, @inky_stats, @clyde_stats].each { |status| status[1] = "frightened" }
       @energy -= [[@y, @x]]
       # @energy = (@energy - [[@y, @x]])
@@ -289,9 +290,21 @@ class Pacman
     end
   end
 
-  def controlBlinky(seconds)
-    me = @blinky #[14, 14, "left", @space]
-    stats = @blinky_stats #["∆ ", "idle", 9]
+  def control(me, seconds)
+    case me
+    when @blinky
+      stats = @blinky_stats
+      defaults = @defaults[:blinky_stats]
+    when @pinky
+      stats = @pinky_stats
+      defaults = @defaults[:pinky_stats]
+    when @inky
+      stats = @inky_stats
+      defaults = @defaults[:inky_stats]
+    when @clyde
+      stats = @clyde_stats
+      defaults = @defaults[:clyde_stats]
+    end
     myY = me[0]
     myX = me[1]
     dir = me[2]
@@ -303,7 +316,9 @@ class Pacman
     if mode == "frightened"
       if @energized == 0
         mode = "idle"
-        face = @defaults[:blinky]
+        face = defaults[0]
+      else
+        face = @defaults[:scared]
       end
     else
       if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
@@ -314,160 +329,86 @@ class Pacman
         mode = "chase"
       end
     end
-
-    # face = @scared
-    case mode
-      when "scatter"
-        pathFind(@blinky, @blinky_default_target)
-      when "chase"
-        pathFind(@blinky, [@y, @x])
-      when "frightened"
-        pathFind(@blinky, [rand(@boardy), rand(@boardx)])
-        face = @scared
-      when "dead"
-        face = @dead_ghost
+    if me == @pinky
+      if seconds >= 2 && seconds <= 3
+        @board[@pinky[0]][@pinky[1]] = @space
+        @pinky = [14, 14, "left", @space]
+      end
     end
-
-    @blinky_stats[1] = mode
-    @blinky_stats[0] = face
-    #re-update all
-  end
-
-  def controlPinky(seconds)
-    me = @pinky #[14, 14, "left", @space]
-    stats = @pinky_stats #["∆ ", "idle", 9]
-    myY = me[0]
-    myX = me[1]
-    dir = me[2]
-    below = me[3]
-    face = stats[0]
-    mode = stats[1]
-    speed = stats[2]
-
-    mode = "idle" if @energized == 0 && mode == "frightened"
-    if seconds <= 3
-      mode = "idle"
-    elsif seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
-      reverse(me) if mode == "chase"
-      mode = "scatter"
-    else
-      reverse(me) if mode == "scatter"
-      mode = "chase"
+    if me == @inky
+      if seconds <= 8
+        mode = "idle"
+      end
+      if seconds >= 7 && seconds <= 8
+        @board[@inky[0]][@inky[1]] = @space
+        @inky = [14, 14, "left", @space]
+      end
     end
-    if seconds >= 2 && seconds <= 3
-      @board[@pinky[0]][@pinky[1]] = @space
-      @pinky = [14, 14, "left", @space]
+    if me == @clyde
+      if seconds <= 21
+        mode = "idle"
+      end
+      if seconds >= 20 && seconds <= 21
+        @board[@clyde[0]][@clyde[1]] = @space
+        @clyde = [14, 14, "left", @space]
+      end
     end
 
     case mode
     when "scatter"
-      pathFind(@pinky, @pinky_default_target)
+      pathFind(@blinky, @blinky_default_target) if me == @blinky
+      pathFind(@pinky, @pinky_default_target) if me == @pinky
+      pathFind(@inky, @inky_default_target) if me == @inky
+      pathFind(@clyde, @clyde_default_target) if me == @clyde
     when "chase"
-      case @dir
-      when "left"
-        pathFind(@pinky, [@y, (@x - 4) % @boardx])
-      when "right"
-        pathFind(@pinky, [@y, (@x + 4) % @boardx])
-      when "up"
-        pathFind(@pinky, [(@y - 4) % @boardy, @x])
-      when "down"
-        pathFind(@pinky, [(@y + 4) % @boardy, @x])
-      else
-        pathFind(@pinky, [@y, @x])
+      pathFind(@blinky, [@y, @x]) if me == @blinky
+      if me == @pinky
+        case @dir
+        when "left"
+          pathFind(@pinky, [@y, (@x - 4) % @boardx])
+        when "right"
+          pathFind(@pinky, [@y, (@x + 4) % @boardx])
+        when "up"
+          pathFind(@pinky, [(@y - 4) % @boardy, @x])
+        when "down"
+          pathFind(@pinky, [(@y + 4) % @boardy, @x])
+        else
+          pathFind(@pinky, [@y, @x])
+        end
+      end
+      if me == @inky
+        vector = distanceTo([@blinky[0], @blinky[1]], [@y, @x], 2)
+        pathFind(@inky, [@blinky[0]+vector[0], @blinky[1]+vector[1]])
+      end
+      if me == @clyde
+        dist = distanceTo([@clyde[0], @clyde[1]], [@y, @x])
+        if (dist[0].abs + dist[1].abs) >= 8
+          pathFind(@clyde, [@y, @x])
+        else
+          pathFind(@clyde, @clyde_default_target)
+        end
       end
     when "frightened"
-      pathFind(@pinky, [rand(@boardy), rand(@boardx)])
+      pathFind(me, [rand(@boardy), rand(@boardx)])
+      face = @scared
     when "dead"
+      face = @dead_ghost
     end
 
-    @pinky_stats[1] = mode
-    #re-update all
-  end
-
-  def controlInky(seconds)
-    me = @inky #[14, 14, "left", @space]
-    stats = @inky_stats #["∆ ", "idle", 9]
-    myY = me[0]
-    myX = me[1]
-    dir = me[2]
-    below = me[3]
-    face = stats[0]
-    mode = stats[1]
-    speed = stats[2]
-
-    mode = "idle" if @energized == 0 && mode == "frightened"
-    if seconds <= 8
-      mode = "idle"
-    elsif (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
-      reverse(me) if mode == "chase"
-      mode = "scatter"
-    else
-      reverse(me) if mode == "scatter"
-      mode = "chase"
+    case me
+    when @blinky
+      @blinky_stats[0] = face
+      @blinky_stats[1] = mode
+    when @pinky
+      @pinky_stats[0] = face
+      @pinky_stats[1] = mode
+    when @inky
+      @inky_stats[0] = face
+      @inky_stats[1] = mode
+    when @clyde
+      @clyde_stats[0] = face
+      @clyde_stats[1] = mode
     end
-    if seconds >= 7 && seconds <= 8
-      @board[@inky[0]][@inky[1]] = @space
-      @inky = [14, 14, "left", @space]
-    end
-
-    case mode
-    when "scatter"
-      pathFind(@inky, @inky_default_target)
-    when "chase"
-      vector = distanceTo([@blinky[0], @blinky[1]], [@y, @x], 2)
-      pathFind(@inky, [@blinky[0]+vector[0], @blinky[1]+vector[1]])
-    when "frightened"
-      pathFind(@inky, [rand(@boardy), rand(@boardx)])
-    when "dead"
-    end
-
-    @inky_stats[1] = mode
-    #re-update all
-  end
-
-  def controlClyde(seconds)
-    me = @clyde #[14, 14, "left", @space]
-    stats = @clyde_stats #["∆ ", "idle", 9]
-    myY = me[0]
-    myX = me[1]
-    dir = me[2]
-    below = me[3]
-    face = stats[0]
-    mode = stats[1]
-    speed = stats[2]
-
-    mode = "idle" if @energized == 0 && mode == "frightened"
-    if seconds <= 21
-      mode = "idle"
-    elsif (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
-      reverse(me) if mode == "chase"
-      mode = "scatter"
-    else
-      reverse(me) if mode == "scatter"
-      mode = "chase"
-    end
-    if seconds >= 20 && seconds <= 21
-      @board[@clyde[0]][@clyde[1]] = @space
-      @clyde = [14, 14, "left", @space]
-    end
-
-    case mode
-    when "scatter"
-      pathFind(@clyde, @clyde_default_target)
-    when "chase"
-      dist = distanceTo([@clyde[0], @clyde[1]], [@y, @x])
-      if (dist[0].abs + dist[1].abs) >= 8
-        pathFind(@clyde, [@y, @x])
-      else
-        pathFind(@clyde, @clyde_default_target)
-      end
-    when "frightened"
-      pathFind(@clyde, [rand(@boardy), rand(@boardx)])
-    when "dead"
-    end
-
-    @clyde_stats[1] = mode
-    #re-update all
   end
 
   def reverse(char)
