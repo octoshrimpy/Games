@@ -5,20 +5,54 @@ class Pacman
     @error = ""
     @hold = []
     @targeting = []
+    @space = "  "
     @defaults = {
       wall: "[]",
-      blinky: [14, 14, "left", @space],
-      blinky_stats: ["∆ ", "idle", 9],
-      pinky: [17, 14, "left", @space],
-      pinky_stats: ["© ", "idle", 9],
-      inky: [17, 13, "left", @space],
-      inky_stats: ["® ", "idle", 9],
-      clyde: [17, 15, "left", @space],
-      clyde_stats: ["Ω ", "idle", 9],
+      blinky: {
+        y: 14,
+        x: 14,
+        target: [1, 25],
+        direction: "left",
+        below: @space,
+        face: "∆ ",
+        status: "idle",
+        speed: 9
+      },
+      pinky: {
+        y: 17,
+        x: 14,
+        target: [1, 2],
+        direction: "left",
+        below: @space,
+        face: "© ",
+        status: "idle",
+        speed: 9
+      },
+      inky: {
+        y: 17,
+        x: 13,
+        target: [35, 27],
+        direction: "left",
+        below: @space,
+        face: "® ",
+        status: "idle",
+        speed: 9
+      },
+      clyde: {
+        y: 17,
+        x: 15,
+        target: [35, 0],
+        direction: "left",
+        below: @space,
+        face: "Ω ",
+        status: "idle",
+        speed: 9
+      },
       pellet: ". ",
-      space: "  ",
+      space: @space,
       energy: "ø ",
       energy_swollen: "Ø ",
+      candy: "å ",
       pacman_still: "o ",
       pacman_left_open: "> ",
       pacman_left_closed: "- ",
@@ -43,7 +77,6 @@ class Pacman
     @wall = @defaults[:wall]
     @pellet = @defaults[:pellet]
     @door = @defaults[:door]
-    @space = @defaults[:space]
     @energy = []
     [6, 26].each do |blocks|
       [1, 26].each do |block|
@@ -51,7 +84,6 @@ class Pacman
       end
     end
     @energy_face = @defaults[:energy]
-    @pacman = @defaults[:pacman_still]
     @scared = @defaults[:scared]
     @lives = 2
     @score = 0
@@ -62,6 +94,8 @@ class Pacman
     @board = Array.new(37) {Array.new(28) {@pellet}}
     @even = true
     @energized = 0
+
+    @pacman = @defaults[:pacman_still]
     @dir = 0
     @x = @defaults[:x]
     @y = @defaults[:y]
@@ -69,22 +103,10 @@ class Pacman
 
     @dead_ghost = @defaults[:ghost_dead]
 
-    @blinky = @defaults[:blinky]
-    @inky = @defaults[:inky]
-    @pinky = @defaults[:pinky]
-    @clyde = @defaults[:clyde]
-
-    #face, status, speed-- status(idle, scatter, chase, frightened, dead)
-    @blinky_stats = @defaults[:blinky_stats]
-    @inky_stats = @defaults[:inky_stats]
-    @pinky_stats = @defaults[:pinky_stats]
-    @clyde_stats = @defaults[:clyde_stats]
-    @ghosts = [@blinky_stats[0], @inky_stats[0], @pinky_stats[0], @clyde_stats[0]]
-
-    @blinky_default_target = [1, @boardx - 3]
-    @inky_default_target =  [@boardy - 1, @boardx - 1]
-    @pinky_default_target = [1, 2]
-    @clyde_default_target = [@boardy - 1, 0]
+    @blinky = @defaults[:blinky].clone
+    @inky = @defaults[:inky].clone
+    @pinky = @defaults[:pinky].clone
+    @clyde = @defaults[:clyde].clone
   end
 
   def build
@@ -203,10 +225,10 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      control(@blinky, seconds) if @timer % ((20 - @blinky_stats[2]).to_f/50) <= 0.02
-      control(@pinky, seconds) if @timer % ((20 - @pinky_stats[2]).to_f/50) <= 0.02
-      control(@inky, seconds) if @timer % ((20 - @inky_stats[2]).to_f/50) <= 0.02
-      control(@clyde, seconds) if @timer % ((20 - @clyde_stats[2]).to_f/50) <= 0.02
+      control(@blinky, seconds) if @timer % ((20 - @blinky[:speed]).to_f/50) <= 0.02
+      control(@pinky, seconds) if @timer % ((20 - @pinky[:speed]).to_f/50) <= 0.02
+      control(@inky, seconds) if @timer % ((20 - @inky[:speed]).to_f/50) <= 0.02
+      control(@clyde, seconds) if @timer % ((20 - @clyde[:speed]).to_f/50) <= 0.02
       movePacman if @timer % ((20 - @speed).to_f/50) <= 0.02
       sleep(0.01)
       @timer += 0.02
@@ -246,15 +268,17 @@ class Pacman
       @stop -= 1
     end
     location = @board[@y][@x]
-    ghost_locations = [[@blinky[0], @blinky[1]], [@pinky[0], @pinky[1]], [@clyde[0], @clyde[1]], [@inky[0], @inky[1]]]
+    ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     if location == @pellet
       @score += 1
     elsif @energy_face.include?(location)
       @stop += 1
       @score += 5
       @energized += 60
-      [@blinky, @inky, @pinky, @clyde].each { |ghost| reverse(ghost) }
-      [@blinky_stats, @pinky_stats, @inky_stats, @clyde_stats].each { |status| status[1] = "frightened" }
+      [@blinky, @inky, @pinky, @clyde].each do |ghost|
+        reverse(ghost)
+        ghost[:status] = "frightened"
+      end
       @energy -= [[@y, @x]]
     elsif ghost_locations.include?([@y, @x]) && location != @scared
       @running = false
@@ -265,9 +289,9 @@ class Pacman
       @pacman = case @dir
       when 0
         @defaults[:pacman_still]
-      when 1
-        @defaults[:pacman_left_closed]
       when 3
+        @defaults[:pacman_left_closed]
+      when 1
         @defaults[:pacman_right_closed]
       when 2, 4
         @defaults[:pacman_vert_closed]
@@ -294,30 +318,26 @@ class Pacman
   def control(me, seconds)
     case me
     when @blinky
-      stats = @blinky_stats
-      defaults = @defaults[:blinky_stats]
+      defaults = @defaults[:blinky]
     when @pinky
-      stats = @pinky_stats
-      defaults = @defaults[:pinky_stats]
+      defaults = @defaults[:pinky]
     when @inky
-      stats = @inky_stats
-      defaults = @defaults[:inky_stats]
+      defaults = @defaults[:inky]
     when @clyde
-      stats = @clyde_stats
-      defaults = @defaults[:clyde_stats]
+      defaults = @defaults[:clyde]
     end
-    myY = me[0]
-    myX = me[1]
-    dir = me[2]
-    below = me[3]
-    face = stats[0]
-    mode = stats[1]
-    speed = stats[2]
+    myY = defaults[:y]
+    myX = defaults[:x]
+    dir = defaults[:direction]
+    below = defaults[:below]
+    face = defaults[:face]
+    mode = defaults[:status]
+    speed = defaults[:speed]
 
     if mode == "frightened"
       if @energized == 0
         mode = "idle"
-        face = defaults[0]
+        face = defaults[:face]
       else
         face = @defaults[:scared]
       end
@@ -335,8 +355,11 @@ class Pacman
         mode = "idle"
       end
       if seconds >= 1 && seconds <= 2
-        @board[@pinky[0]][@pinky[1]] = @space
-        @pinky = [14, 14, "left", @space]
+        @board[@pinky[:y]][@pinky[:x]] = @space
+        @pinky[:y] = 14
+        @pinky[:x] = 14
+        @pinky[:direction] = "left"
+        @pinky[:below] = @space
       end
     end
     if me == @inky
@@ -344,8 +367,11 @@ class Pacman
         mode = "idle"
       end
       if seconds >= 7 && seconds <= 8
-        @board[@inky[0]][@inky[1]] = @space
-        @inky = [14, 14, "left", @space]
+        @board[@inky[:y]][@inky[:x]] = @space
+        @inky[:y] = 14
+        @inky[:x] = 14
+        @inky[:direction] = "left"
+        @inky[:below] = @space
       end
     end
     if me == @clyde
@@ -353,17 +379,20 @@ class Pacman
         mode = "idle"
       end
       if seconds >= 20 && seconds <= 21
-        @board[@clyde[0]][@clyde[1]] = @space
-        @clyde = [14, 14, "left", @space]
+        @board[@clyde[:y]][@clyde[:x]] = @space
+        @clyde[:y] = 14
+        @clyde[:x] = 14
+        @clyde[:direction] = "left"
+        @clyde[:below] = @space
       end
     end
 
     case mode
     when "scatter"
-      pathFind(@blinky, @blinky_default_target) if me == @blinky
-      pathFind(@pinky, @pinky_default_target) if me == @pinky
-      pathFind(@inky, @inky_default_target) if me == @inky
-      pathFind(@clyde, @clyde_default_target) if me == @clyde
+      pathFind(@blinky, @blinky[:target]) if me == @blinky
+      pathFind(@pinky, @pinky[:target]) if me == @pinky
+      pathFind(@inky, @inky[:target]) if me == @inky
+      pathFind(@clyde, @clyde[:target]) if me == @clyde
       @error = "scatter"
     when "chase"
       @error = "chase"
@@ -383,15 +412,15 @@ class Pacman
         end
       end
       if me == @inky
-        vector = distanceTo([@blinky[0], @blinky[1]], [@y, @x], 2)
-        pathFind(@inky, [@blinky[0]+vector[0], @blinky[1]+vector[1]])
+        vector = distanceTo([@blinky[:y], @blinky[:x]], [@y, @x], 2)
+        pathFind(@inky, [@blinky[:y]+vector[0], @blinky[:x]+vector[1]])
       end
       if me == @clyde
-        dist = distanceTo([@clyde[0], @clyde[1]], [@y, @x])
+        dist = distanceTo([@clyde[:y], @clyde[:x]], [@y, @x])
         if (dist[0].abs + dist[1].abs) >= 8
           pathFind(@clyde, [@y, @x])
         else
-          pathFind(@clyde, @clyde_default_target)
+          pathFind(@clyde, @clyde[:target])
         end
       end
     when "frightened"
@@ -400,45 +429,47 @@ class Pacman
       face = @scared
     when "dead"
       face = @dead_ghost
+      pathFind(me, [17, 14])
     end
 
     case me
     when @blinky
-      @blinky_stats[0] = face
-      @blinky_stats[1] = mode
+      @blinky[:face] = face
+      @blinky[:status] = mode
     when @pinky
-      @pinky_stats[0] = face
-      @pinky_stats[1] = mode
+      @pinky[:face] = face
+      @pinky[:status] = mode
     when @inky
-      @inky_stats[0] = face
-      @inky_stats[1] = mode
+      @inky[:face] = face
+      @inky[:status] = mode
     when @clyde
-      @clyde_stats[0] = face
-      @clyde_stats[1] = mode
+      @clyde[:face] = face
+      @clyde[:status] = mode
     end
   end
 
   def reverse(char)
-    char[2] = case char[2]
+    char[:direction] = case char[:direction]
     when "left"
-      "right" if @board[char[0]][(char[1] + 1) % @boardx] != @wall
+      "right" if @board[char[:y]][(char[:x] + 1) % @boardx] != @wall
     when "right"
-      "left" if @board[char[0]][(char[1] - 1) % @boardx] != @wall
+      "left" if @board[char[:y]][(char[:x] - 1) % @boardx] != @wall
     when "up"
-      "down" if @board[(char[0] + 1) % @boardy][char[1]] != @wall
+      "down" if @board[(char[:y] + 1) % @boardy][char[:x]] != @wall
     when "down"
-      "up" if @board[(char[0] - 1) % @boardy][char[1]] != @wall
+      "up" if @board[(char[:y] - 1) % @boardy][char[:x]] != @wall
     else
-      char[2]
+      char[:direction]
     end
   end
 
   def pathFind(char, loc) # Array of target location
     if @running == true
-      old_y = char[0]
-      old_x = char[1]
-      dir = char[2]
-      @board[old_y][old_x] = char[3]
+      old_y = char[:y]
+      old_x = char[:x]
+      dir = char[:direction]
+      mode = char[:status]
+      @board[old_y][old_x] = char[:below]
       case dir
       when "left"
         new_x = ((old_x - 1) % @boardx)
@@ -490,27 +521,47 @@ class Pacman
         "right"
       end
 
-      # if mode == "frightened"
-      #   mode = "dead" if @board[new_y][new_x] == @pacman
-      # else
-        @running = false if @board[new_y][new_x] == @pacman
-      # end
-
-      if @ghosts.include?(@board[new_y][new_x])
-        tile = @ghosts[@ghosts.index(@board[new_y][new_x])]
+      if mode == "frightened"
+        mode = "dead" if @board[new_y][new_x] == @pacman
       else
-        tile = @board[new_y][new_x]
+        @running = false if @board[new_y][new_x] == @pacman
       end
-      new_loc = [new_y, new_x, new_dir, tile, char[4]]
+      tile = case [new_y, new_x]
+      when [@blinky[:y], @blinky[:x]]
+        @blinky[:below]
+      when [@pinky[:y], @pinky[:x]]
+        @pinky[:below]
+      when [@clyde[:y], @clyde[:x]]
+        @clyde[:below]
+      when [@inky[:y], @inky[:x]]
+        @inky[:below]
+      else @board[new_y][new_x]
+      end
       case char
       when @blinky
-        @blinky = new_loc
+        @blinky[:y] = new_y
+        @blinky[:x] = new_x
+        @blinky[:direction] = new_dir
+        @blinky[:below] = tile
+        @blinky[:status] = mode
       when @inky
-        @inky = new_loc
+        @inky[:y] = new_y
+        @inky[:x] = new_x
+        @inky[:direction] = new_dir
+        @inky[:below] = tile
+        @inky[:status] = mode
       when @pinky
-        @pinky = new_loc
+        @pinky[:y] = new_y
+        @pinky[:x] = new_x
+        @pinky[:direction] = new_dir
+        @pinky[:below] = tile
+        @pinky[:status] = mode
       when @clyde
-        @clyde = new_loc
+        @clyde[:y] = new_y
+        @clyde[:x] = new_x
+        @clyde[:direction] = new_dir
+        @clyde[:below] = tile
+        @clyde[:status] = mode
       end
     end
   end
@@ -530,13 +581,9 @@ class Pacman
       @x = @defaults[:x]
       @y = @defaults[:y]
       @blinky = @defaults[:blinky]
-      @blinky_stats = @defaults[:blinky_stats]
       @pinky = @defaults[:pinky]
-      @pinky_stats = @defaults[:pinky_stats]
       @inky = @defaults[:inky]
-      @inky_stats = @defaults[:inky_stats]
       @clyde = @defaults[:clyde]
-      @clyde_stats = @defaults[:clyde_stats]
       build
       draw
       getReady("Get Ready!")
@@ -579,10 +626,10 @@ class Pacman
 
   def draw
     @board[@y][@x] = @pacman
-    @board[@blinky[0]][@blinky[1]] = @blinky_stats[0]
-    @board[@pinky[0]][@pinky[1]] = @pinky_stats[0]
-    @board[@inky[0]][@inky[1]] = @inky_stats[0]
-    @board[@clyde[0]][@clyde[1]] = @clyde_stats[0]
+    @board[@blinky[:y]][@blinky[:x]] = @blinky[:face]
+    @board[@pinky[:y]][@pinky[:x]] = @pinky[:face]
+    @board[@inky[:y]][@inky[:x]] = @inky[:face]
+    @board[@clyde[:y]][@clyde[:x]] = @clyde[:face]
     @energy.each { |draw| @board[draw[0]][draw[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
@@ -602,9 +649,12 @@ class Pacman
         count += 1 if x == ". "
       end
     end
-    p @timer.round
-    p @score
-    p @error
+    @error = "You win! Moving to the next round..." if count == 0
+    puts "Time: #{@timer.round}"
+    puts "Score: #{@score}"
+    puts "Pellets remaining: #{count}"
+    puts "Message: #{@error}"
+    puts "Energy: #{@energized}"
     system "stty raw -echo"
   end
 
