@@ -12,10 +12,16 @@ class Pacman
     @wall = "[]"
     @pellet = ". "
     @space = "  "
-    @energy = "ø "
+    @energy = []
+    [6, 26].each do |blocks|
+      [1, 26].each do |block|
+        @energy << [blocks, block]
+      end
+    end
+    @energy_face = "ø "
     @pacman = "o "
     @candy = "å "
-    @lives = 3
+    @lives = 2
     @score = 0
     @stop = 0
     @timer = 0
@@ -145,11 +151,6 @@ class Pacman
             @board[blocks][block] = @space
           end
         end
-        [6, 26].each do |blocks|
-          [1, 26].each do |block|
-            @board[blocks][block] = @energy
-          end
-        end
         (12..22).each do |blocks|
           @board[blocks].each_with_index do |x, block|
             @board[blocks][block] = @space if @board[blocks][block] == @pellet && !([6, 21].include?(block))
@@ -157,6 +158,9 @@ class Pacman
         end
         @board[y][x] = @wall if y == 33
         @board[y][x] = @space if y > 33
+        if !([@space, @wall, @pellet, @energy_face].include?(@board[y][x])) && y != 2
+          @board[y][x] = @space
+        end
       end
     end
     draw
@@ -246,10 +250,10 @@ class Pacman
       when 2, 4
         "| "
       end
-      # @energy = "  "
+      @energy_face = "Ø "
     else
       @even = true
-      # @energy = "ø "
+      @energy_face = "ø "
       @pacman = case @dir
       when 0
         "o "
@@ -275,16 +279,16 @@ class Pacman
      @mode = "chase"
     end
     if seconds >= 2 && seconds <= 3
+      @board[@pinky[0]][@pinky[1]] = @space
       @pinky = [14, 14, "left", @space]
-      @board[17][14] = @space
     end
     if seconds >= 7 && seconds <= 8
+      @board[@inky[0]][@inky[1]] = @space
       @inky = [14, 14, "left", @space]
-      @board[17][13] = @space
     end
     if seconds >= 20 && seconds <= 21
+      @board[@clyde[0]][@clyde[1]] = @space
       @clyde = [14, 14, "left", @space]
-      @board[17][15] = @space
     end
     @mode = "frightened" if @energized > 0
     if @mode == "scatter"
@@ -328,43 +332,43 @@ class Pacman
   def reverse
     @blinky[2] = case @blinky[2]
     when "left"
-      "right"
+      "right" if @board[@blinky[0]][(@blinky[1] + 1) % @boardx] != @wall
     when "right"
-      "left"
+      "left" if @board[@blinky[0]][(@blinky[1] - 1) % @boardx] != @wall
     when "up"
-      "down"
+      "down" if @board[(@blinky[0] + 1) % @boardy][@blinky[1]] != @wall
     when "down"
-      "up"
+      "up" if @board[(@blinky[0] - 1) % @boardy][@blinky[1]] != @wall
     end
     @clyde[2] = case @clyde[2]
     when "left"
-      "right"
+      "right" if @board[@clyde[0]][(@clyde[1] + 1) % @boardx] != @wall
     when "right"
-      "left"
+      "left" if @board[@clyde[0]][(@clyde[1] - 1) % @boardx] != @wall
     when "up"
-      "down"
+      "down" if @board[(@clyde[0] + 1) % @boardy][@clyde[1]] != @wall
     when "down"
-      "up"
+      "up" if @board[(@clyde[0] - 1) % @boardy][@clyde[1]] != @wall
     end
     @pinky[2] = case @pinky[2]
     when "left"
-      "right"
+      "right" if @board[@pinky[0]][(@pinky[1] + 1) % @boardx] != @wall
     when "right"
-      "left"
+      "left" if @board[@pinky[0]][(@pinky[1] - 1) % @boardx] != @wall
     when "up"
-      "down"
+      "down" if @board[(@pinky[0] + 1) % @boardy][@pinky[1]] != @wall
     when "down"
-      "up"
+      "up" if @board[(@pinky[0] - 1) % @boardy][@pinky[1]] != @wall
     end
     @inky[2] = case @inky[2]
     when "left"
-      "right"
+      "right" if @board[@inky[0]][(@inky[1] + 1) % @boardx] != @wall
     when "right"
-      "left"
+      "left" if @board[@inky[0]][(@inky[1] - 1) % @boardx] != @wall
     when "up"
-      "down"
+      "down" if @board[(@inky[0] + 1) % @boardy][@inky[1]] != @wall
     when "down"
-      "up"
+      "up" if @board[(@inky[0] - 1) % @boardy][@inky[1]] != @wall
     end
   end
 
@@ -450,7 +454,7 @@ class Pacman
     if @lives > 0
       @lives -= 1
       @running = true
-      @stop = 5
+      @stop = 0
       @offset = @timer
       @board[@y][@x] = @space
       @dir = 0
@@ -464,6 +468,8 @@ class Pacman
       @inky = [17, 13, "left", @space]
       @board[@clyde[0]][@clyde[1]] = @clyde[3]
       @clyde = [17, 15, "left", @space]
+      build
+      draw
       getReady("Get Ready!")
     else
       exit
@@ -488,23 +494,10 @@ class Pacman
 
   def movement(m)
     m = m[0]
-    #stopped = 0
-    # left = 1
-    # up = 2
-    # right = 3
-    # down = 4
-    if m == "d" #&& @board[@y][((@x + 1) % @boardx)] != @wall #Move right
-      @next_dir = 1
-    end
-    if m == "s" #&& @board[((@y + 1) % @boardy)][@x] != @wall #Move down
-      @next_dir = 2
-    end
-    if m == "a" #&& @board[@y][((@x - 1) % @boardx)] != @wall #Move left
-      @next_dir = 3
-    end
-    if m == "w" #&& @board[((@y - 1) % @boardy)][@x] != @wall #Move up
-      @next_dir = 4
-    end
+    @next_dir = 1 if m == "d"
+    @next_dir = 2 if m == "s"
+    @next_dir = 3 if m == "a"
+    @next_dir = 4 if m == "w"
     if m == "x"
       @running = false
       exit
@@ -521,6 +514,7 @@ class Pacman
     @board[@pinky[0]][@pinky[1]] = @pinky_face
     @board[@inky[0]][@inky[1]] = @inky_face
     @board[@clyde[0]][@clyde[1]] = @clyde_face
+    @energy.each { |draw| @board[draw[0]][draw[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
     i = 0
