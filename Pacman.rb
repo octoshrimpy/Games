@@ -246,16 +246,17 @@ class Pacman
       @stop -= 1
     end
     location = @board[@y][@x]
+    ghost_locations = [[@blinky[0], @blinky[1]], [@pinky[0], @pinky[1]], [@clyde[0], @clyde[1]], [@inky[0], @inky[1]]]
     if location == @pellet
       @score += 1
     elsif @energy_face.include?(location)
       @stop += 1
       @score += 5
       @energized += 60
+      [@blinky, @inky, @pinky, @clyde].each { |ghost| reverse(ghost) }
       [@blinky_stats, @pinky_stats, @inky_stats, @clyde_stats].each { |status| status[1] = "frightened" }
       @energy -= [[@y, @x]]
-      # @energy = (@energy - [[@y, @x]])
-    elsif @ghosts.include?(location)
+    elsif ghost_locations.include?([@y, @x]) && location != @scared
       @running = false
       died
     end
@@ -330,7 +331,10 @@ class Pacman
       end
     end
     if me == @pinky
-      if seconds >= 2 && seconds <= 3
+      if seconds <= 2
+        mode = "idle"
+      end
+      if seconds >= 1 && seconds <= 2
         @board[@pinky[0]][@pinky[1]] = @space
         @pinky = [14, 14, "left", @space]
       end
@@ -360,7 +364,9 @@ class Pacman
       pathFind(@pinky, @pinky_default_target) if me == @pinky
       pathFind(@inky, @inky_default_target) if me == @inky
       pathFind(@clyde, @clyde_default_target) if me == @clyde
+      @error = "scatter"
     when "chase"
+      @error = "chase"
       pathFind(@blinky, [@y, @x]) if me == @blinky
       if me == @pinky
         case @dir
@@ -389,6 +395,7 @@ class Pacman
         end
       end
     when "frightened"
+      @error = "frightened"
       pathFind(me, [rand(@boardy), rand(@boardx)])
       face = @scared
     when "dead"
@@ -482,9 +489,15 @@ class Pacman
       when 3
         "right"
       end
-      @running = false if @board[new_y][new_x] == @pacman
+
+      # if mode == "frightened"
+      #   mode = "dead" if @board[new_y][new_x] == @pacman
+      # else
+        @running = false if @board[new_y][new_x] == @pacman
+      # end
+
       if @ghosts.include?(@board[new_y][new_x])
-        tile = @space
+        tile = @ghosts[@ghosts.index(@board[new_y][new_x])]
       else
         tile = @board[new_y][new_x]
       end
@@ -512,19 +525,18 @@ class Pacman
       @running = true
       @stop = 0
       @offset = @timer
-      # @board[@y][@x] = @space
       @next_dir = 0
       @dir = 0
       @x = @defaults[:x]
       @y = @defaults[:y]
-      # @board[@blinky[0]][@blinky[1]] = @blinky[3]
       @blinky = @defaults[:blinky]
-      # @board[@pinky[0]][@pinky[1]] = @pinky[3]
+      @blinky_stats = @defaults[:blinky_stats]
       @pinky = @defaults[:pinky]
-      # @board[@inky[0]][@inky[1]] = @inky[3]
+      @pinky_stats = @defaults[:pinky_stats]
       @inky = @defaults[:inky]
-      # @board[@clyde[0]][@clyde[1]] = @clyde[3]
+      @inky_stats = @defaults[:inky_stats]
       @clyde = @defaults[:clyde]
+      @clyde_stats = @defaults[:clyde_stats]
       build
       draw
       getReady("Get Ready!")
