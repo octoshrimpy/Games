@@ -5,22 +5,54 @@ class Pacman
     @error = ""
     @hold = []
     @targeting = []
+    @defaults = {
+      wall: "[]",
+      blinky: [14, 14, "left", @space],
+      blinky_stats: ["∆ ", "idle", 9],
+      pinky: [17, 14, "left", @space],
+      pinky_stats: ["© ", "idle", 9],
+      inky: [17, 13, "left", @space],
+      inky_stats: ["® ", "idle", 9],
+      clyde: [17, 15, "left", @space],
+      clyde_stats: ["Ω ", "idle", 9],
+      pellet: ". ",
+      space: "  ",
+      energy: "ø ",
+      energy_swollen: "Ø ",
+      pacman_still: "o ",
+      pacman_left_open: "> ",
+      pacman_left_closed: "- ",
+      pacman_right_open: " <",
+      pacman_right_closed: " -",
+      pacman_vert_closed: "| ",
+      pacman_up_open: "v ",
+      pacman_down_open: "^ ",
+      scared: "† ",
+      ghost_dead: "ªª",
+      door: "__",
+      x: 14,
+      y: 26,
+      speed: 11,
+      width: 28,
+      height: 36
+    }
 
-    @boardy = 36
-    @boardx = 28
+    @boardy = @defaults[:height]
+    @boardx = @defaults[:width]
     @running = true
-    @wall = "[]"
-    @pellet = ". "
-    @space = "  "
+    @wall = @defaults[:wall]
+    @pellet = @defaults[:pellet]
+    @door = @defaults[:door]
+    @space = @defaults[:space]
     @energy = []
     [6, 26].each do |blocks|
       [1, 26].each do |block|
         @energy << [blocks, block]
       end
     end
-    @energy_face = "ø "
-    @pacman = "o "
-    @scared = "† "
+    @energy_face = @defaults[:energy]
+    @pacman = @defaults[:pacman_still]
+    @scared = @defaults[:scared]
     @lives = 2
     @score = 0
     @stop = 0
@@ -31,23 +63,22 @@ class Pacman
     @even = true
     @energized = 0
     @dir = 0
-    @mode = "scatter"
-    @x = 14
-    @y = 26
-    @speed = 11
+    @x = @defaults[:x]
+    @y = @defaults[:y]
+    @speed = @defaults[:speed]
 
-    @dead_ghost = "ªª"
+    @dead_ghost = @defaults[:ghost_dead]
 
-    @blinky = [14, 14, "left", @space]
-    @inky = [17, 13, "left", @space]
-    @pinky = [17, 14, "left", @space]
-    @clyde = [17, 15, "left", @space]
+    @blinky = @defaults[:blinky]
+    @inky = @defaults[:inky]
+    @pinky = @defaults[:pinky]
+    @clyde = @defaults[:clyde]
 
     #face, status, speed-- status(idle, scatter, chase, frightened, dead)
-    @blinky_stats = ["∆ ", "idle", 9]
-    @inky_stats = ["® ", "idle", 9]
-    @pinky_stats = ["© ", "idle", 9]
-    @clyde_stats = ["Ω ", "idle", 9]
+    @blinky_stats = @defaults[:blinky_stats]
+    @inky_stats = @defaults[:inky_stats]
+    @pinky_stats = @defaults[:pinky_stats]
+    @clyde_stats = @defaults[:clyde_stats]
     @ghosts = [@blinky_stats[0], @inky_stats[0], @pinky_stats[0], @clyde_stats[0]]
 
     @blinky_default_target = [1, @boardx - 3]
@@ -146,7 +177,7 @@ class Pacman
         end
         [15].each do |blocks|
           [13, 14].each do |block|
-            @board[blocks][block] = "__"
+            @board[blocks][block] = @door
           end
         end
         [13, 14, 15, 19, 20, 21].each do |blocks|
@@ -183,26 +214,6 @@ class Pacman
     else
       died
     end
-  end
-
-  def displayTargeting
-    @hold << [0, 0, @space]
-    @hold.each do |pos|
-      @board[pos[0]][pos[1]] = pos[2]
-    end
-    @hold = []
-    @targeting.each do |pos|
-      if pos[0] == @y && pos[1] == @x
-        @hold << [34, 1, @board[34][1]]
-        @board[34][1] = "XXX"
-      else
-        if pos[0] < @boardy && pos[1] < @boardx
-          @hold << [pos[0], pos[1], @board[pos[0]][pos[1]]]
-          @board[pos[0]][pos[1]] = "XXX"
-        end
-      end
-    end
-    @targeting = []
   end
 
   def movePacman
@@ -251,27 +262,29 @@ class Pacman
       @even = false
       @pacman = case @dir
       when 0
-        "o "
-      when 1, 3
-        "- "
+        @defaults[:pacman_still]
+      when 1
+        @defaults[:pacman_left_closed]
+      when 3
+        @defaults[:pacman_right_closed]
       when 2, 4
-        "| "
+        @defaults[:pacman_vert_closed]
       end
-      @energy_face = "Ø "
+      @energy_face = @defaults[:energy_swollen]
     else
       @even = true
-      @energy_face = "ø "
+      @energy_face = @defaults[:energy]
       @pacman = case @dir
       when 0
-        "o "
+        @defaults[:pacman_still]
       when 1
-        "< "
+        @defaults[:pacman_right_open]
       when 2
-        "^ "
+        @defaults[:pacman_down_open]
       when 3
-        "> "
+        @defaults[:pacman_left_open]
       when 4
-        "v "
+        @defaults[:pacman_up_open]
       end
     end
   end
@@ -290,7 +303,7 @@ class Pacman
     if mode == "frightened"
       if @energized == 0
         mode = "idle"
-        face = "∆ "
+        face = @defaults[:blinky]
       end
     else
       if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
@@ -474,7 +487,6 @@ class Pacman
 
   def pathFind(char, loc) # Array of target location
     if @running == true
-      @targeting << loc if char == @inky
       old_y = char[0]
       old_x = char[1]
       dir = char[2]
@@ -512,7 +524,7 @@ class Pacman
         valid = false if pos == down && dir == "up"
         valid = false if pos == right && dir == "left"
         valid = false if pos == left && dir == "right"
-        if taken != @wall && taken != "__" && valid
+        if taken != @wall && taken != @door && valid
           dist = distanceTo(pos, loc)
           distances << (dist[0].abs + dist[1].abs)
         else
@@ -559,19 +571,19 @@ class Pacman
       @running = true
       @stop = 0
       @offset = @timer
-      @board[@y][@x] = @space
+      # @board[@y][@x] = @space
       @next_dir = 0
       @dir = 0
-      @x = 14
-      @y = 26
-      @board[@blinky[0]][@blinky[1]] = @blinky[3]
-      @blinky = [14, 14, "left", @space, "idle"]
-      @board[@pinky[0]][@pinky[1]] = @pinky[3]
-      @pinky = [17, 14, "left", @space, "idle"]
-      @board[@inky[0]][@inky[1]] = @inky[3]
-      @inky = [17, 13, "left", @space, "idle"]
-      @board[@clyde[0]][@clyde[1]] = @clyde[3]
-      @clyde = [17, 15, "left", @space, "idle"]
+      @x = @defaults[:x]
+      @y = @defaults[:y]
+      # @board[@blinky[0]][@blinky[1]] = @blinky[3]
+      @blinky = @defaults[:blinky]
+      # @board[@pinky[0]][@pinky[1]] = @pinky[3]
+      @pinky = @defaults[:pinky]
+      # @board[@inky[0]][@inky[1]] = @inky[3]
+      @inky = @defaults[:inky]
+      # @board[@clyde[0]][@clyde[1]] = @clyde[3]
+      @clyde = @defaults[:clyde]
       build
       draw
       getReady("Get Ready!")
