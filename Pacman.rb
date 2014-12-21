@@ -16,7 +16,7 @@ class Pacman
         below: @space,
         face: "∆ ",
         status: "idle",
-        speed: 9
+        speed: 35
       },
       pinky: {
         y: 17,
@@ -26,7 +26,7 @@ class Pacman
         below: @space,
         face: "© ",
         status: "idle",
-        speed: 9
+        speed: 35
       },
       inky: {
         y: 17,
@@ -36,7 +36,7 @@ class Pacman
         below: @space,
         face: "® ",
         status: "idle",
-        speed: 9
+        speed: 35
       },
       clyde: {
         y: 17,
@@ -46,7 +46,7 @@ class Pacman
         below: @space,
         face: "Ω ",
         status: "idle",
-        speed: 9
+        speed: 35
       },
       pellet: ". ",
       space: @space,
@@ -66,7 +66,7 @@ class Pacman
       door: "__",
       x: 14,
       y: 26,
-      speed: 11,
+      speed: 35,
       width: 28,
       height: 36
     }
@@ -225,11 +225,11 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      control(@blinky, seconds) if @timer % ((20 - @blinky[:speed]).to_f/50) <= 0.02
-      control(@pinky, seconds) if @timer % ((20 - @pinky[:speed]).to_f/50) <= 0.02
-      control(@inky, seconds) if @timer % ((20 - @inky[:speed]).to_f/50) <= 0.02
-      control(@clyde, seconds) if @timer % ((20 - @clyde[:speed]).to_f/50) <= 0.02
-      movePacman if @timer % ((20 - @speed).to_f/50) <= 0.02
+      movePacman if @timer % ((50 - (@speed + 1)).to_f/50) <= 0.02
+      control(@blinky, seconds) if @timer % ((50 - (@blinky[:speed] + 1)).to_f/50) <= 0.02
+      control(@pinky, seconds) if @timer % ((50 - (@pinky[:speed] + 1)).to_f/50) <= 0.02
+      control(@inky, seconds) if @timer % ((50 - (@inky[:speed] + 1)).to_f/50) <= 0.02
+      control(@clyde, seconds) if @timer % ((50 - (@clyde[:speed] + 1)).to_f/50) <= 0.02
       sleep(0.01)
       @timer += 0.02
       draw
@@ -316,32 +316,34 @@ class Pacman
   end
 
   def control(me, seconds)
-    case me
-    when @blinky
-      defaults = @defaults[:blinky]
-    when @pinky
-      defaults = @defaults[:pinky]
-    when @inky
-      defaults = @defaults[:inky]
-    when @clyde
-      defaults = @defaults[:clyde]
-    end
-    myY = defaults[:y]
-    myX = defaults[:x]
-    dir = defaults[:direction]
-    below = defaults[:below]
-    face = defaults[:face]
-    mode = defaults[:status]
-    speed = defaults[:speed]
+    myY = me[:y]
+    myX = me[:x]
+    dir = me[:direction]
+    below = me[:below]
+    face = me[:face]
+    mode = me[:status]
+    speed = me[:speed]
 
-    if mode == "frightened"
-      if @energized == 0
+    defaults = case me
+    when @blinky
+      @defaults[:blinky]
+    when @pinky
+      @defaults[:pinky]
+    when @inky
+      @defaults[:inky]
+    when @clyde
+      @defaults[:clyde]
+    end
+
+    if face == @scared
+      if @energized <= 0
         mode = "idle"
         face = defaults[:face]
       else
-        face = @defaults[:scared]
+        face = @scared
       end
-    else
+    end
+    if mode != "frightened" && mode != "dead"
       if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
         reverse(me) if mode == "chase"
         mode = "scatter"
@@ -578,12 +580,13 @@ class Pacman
       @offset = @timer
       @next_dir = 0
       @dir = 0
+      @energized = 0
+      @blinky = @defaults[:blinky].clone
+      @pinky = @defaults[:pinky].clone
+      @inky = @defaults[:inky].clone
+      @clyde = @defaults[:clyde].clone
       @x = @defaults[:x]
       @y = @defaults[:y]
-      @blinky = @defaults[:blinky]
-      @pinky = @defaults[:pinky]
-      @inky = @defaults[:inky]
-      @clyde = @defaults[:clyde]
       build
       draw
       getReady("Get Ready!")
