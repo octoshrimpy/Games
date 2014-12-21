@@ -226,10 +226,10 @@ class Pacman
     if @running == true
       seconds = @timer - @offset
       movePacman if @timer % ((50 - (@speed + 1)).to_f/50) <= 0.02
-      control(@blinky, seconds) if @timer % ((50 - (@blinky[:speed] + 1)).to_f/50) <= 0.02
-      control(@pinky, seconds) if @timer % ((50 - (@pinky[:speed] + 1)).to_f/50) <= 0.02
-      control(@inky, seconds) if @timer % ((50 - (@inky[:speed] + 1)).to_f/50) <= 0.02
-      control(@clyde, seconds) if @timer % ((50 - (@clyde[:speed] + 1)).to_f/50) <= 0.02
+      [@blinky, @pinky, @inky, @clyde].each do |ghost|
+        equation = 50 - (ghost[:speed] - 1).to_f
+        control(ghost, seconds) if @timer % (equation/50) <= 0.02 if equation > 0
+      end
       sleep(0.01)
       @timer += 0.02
       draw
@@ -280,9 +280,6 @@ class Pacman
         ghost[:status] = "frightened"
       end
       @energy -= [[@y, @x]]
-    elsif ghost_locations.include?([@y, @x]) && location != @scared
-      @running = false
-      died
     end
     if @even == true
       @even = false
@@ -335,26 +332,26 @@ class Pacman
       @defaults[:clyde]
     end
 
-    if face == @scared
+    if mode == "frightened"
       if @energized <= 0
-        mode = "idle"
         face = defaults[:face]
+        me[:status] = "idle"
       else
         face = @scared
       end
     end
-    if mode != "frightened" && mode != "dead"
+    if !(mode == "frightened" || mode == "dead")
       if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
         reverse(me) if mode == "chase"
-        mode = "scatter"
+        me[:status] = "scatter"
       else
         reverse(me) if mode == "scatter"
-        mode = "chase"
+        me[:status] = "chase"
       end
     end
     if me == @pinky
       if seconds <= 2
-        mode = "idle"
+        speed = 0
       end
       if seconds >= 1 && seconds <= 2
         @board[@pinky[:y]][@pinky[:x]] = @space
@@ -366,7 +363,7 @@ class Pacman
     end
     if me == @inky
       if seconds <= 8
-        mode = "idle"
+        speed = 0
       end
       if seconds >= 7 && seconds <= 8
         @board[@inky[:y]][@inky[:x]] = @space
@@ -378,7 +375,7 @@ class Pacman
     end
     if me == @clyde
       if seconds <= 21
-        mode = "idle"
+        speed = 0
       end
       if seconds >= 20 && seconds <= 21
         @board[@clyde[:y]][@clyde[:x]] = @space
@@ -389,64 +386,77 @@ class Pacman
       end
     end
 
-    case mode
-    when "scatter"
-      pathFind(@blinky, @blinky[:target]) if me == @blinky
-      pathFind(@pinky, @pinky[:target]) if me == @pinky
-      pathFind(@inky, @inky[:target]) if me == @inky
-      pathFind(@clyde, @clyde[:target]) if me == @clyde
-      @error = "scatter"
-    when "chase"
-      @error = "chase"
-      pathFind(@blinky, [@y, @x]) if me == @blinky
-      if me == @pinky
-        case @dir
-        when "left"
-          pathFind(@pinky, [@y, (@x - 4) % @boardx])
-        when "right"
-          pathFind(@pinky, [@y, (@x + 4) % @boardx])
-        when "up"
-          pathFind(@pinky, [(@y - 4) % @boardy, @x])
-        when "down"
-          pathFind(@pinky, [(@y + 4) % @boardy, @x])
-        else
-          pathFind(@pinky, [@y, @x])
+    case me[:status]
+      when "scatter"
+        face = defaults[:face]
+        speed = defaults[:speed]
+        mode = pathFind(@blinky, @blinky[:target]) if me == @blinky
+        mode = pathFind(@pinky, @pinky[:target]) if me == @pinky
+        mode = pathFind(@inky, @inky[:target]) if me == @inky
+        mode = pathFind(@clyde, @clyde[:target]) if me == @clyde
+      when "chase"
+        speed = defaults[:speed]
+        face = defaults[:face]
+        if me == @blinky
+          mode = pathFind(@blinky, [@y, @x])
+          speed = 37
         end
-      end
-      if me == @inky
-        vector = distanceTo([@blinky[:y], @blinky[:x]], [@y, @x], 2)
-        pathFind(@inky, [@blinky[:y]+vector[0], @blinky[:x]+vector[1]])
-      end
-      if me == @clyde
-        dist = distanceTo([@clyde[:y], @clyde[:x]], [@y, @x])
-        if (dist[0].abs + dist[1].abs) >= 8
-          pathFind(@clyde, [@y, @x])
-        else
-          pathFind(@clyde, @clyde[:target])
+        if me == @pinky
+          mode = case @dir
+          when "left"
+            pathFind(@pinky, [@y, (@x - 4) % @boardx])
+          when "right"
+            pathFind(@pinky, [@y, (@x + 4) % @boardx])
+          when "up"
+            pathFind(@pinky, [(@y - 4) % @boardy, @x])
+          when "down"
+            pathFind(@pinky, [(@y + 4) % @boardy, @x])
+          else
+            pathFind(@pinky, [@y, @x])
+          end
         end
-      end
-    when "frightened"
-      @error = "frightened"
-      pathFind(me, [rand(@boardy), rand(@boardx)])
-      face = @scared
-    when "dead"
-      face = @dead_ghost
-      pathFind(me, [17, 14])
+        if me == @inky
+          vector = distanceTo([@blinky[:y], @blinky[:x]], [@y, @x], 2)
+          mode = pathFind(@inky, [@blinky[:y]+vector[0], @blinky[:x]+vector[1]])
+        end
+        if me == @clyde
+          dist = distanceTo([@clyde[:y], @clyde[:x]], [@y, @x])
+          if (dist[0].abs + dist[1].abs) >= 8
+            mode = pathFind(@clyde, [@y, @x])
+          else
+            mode = pathFind(@clyde, @clyde[:target])
+          end
+        end
+      when "frightened"
+        mode = pathFind(me, [rand(@boardy), rand(@boardx)])
+        face = @scared
+        speed = 20
+      when "dead"
+        face = @dead_ghost
+        mode = pathFind(me, [17, 14])
+        speed = 45
+    @error = "dead" if mode == "idle"
+      when "idle"
     end
 
+
     case me
-    when @blinky
-      @blinky[:face] = face
-      @blinky[:status] = mode
-    when @pinky
-      @pinky[:face] = face
-      @pinky[:status] = mode
-    when @inky
-      @inky[:face] = face
-      @inky[:status] = mode
-    when @clyde
-      @clyde[:face] = face
-      @clyde[:status] = mode
+      when @blinky
+        @blinky[:face] = face
+        @blinky[:status] = mode
+        @blinky[:speed] = speed
+      when @pinky
+        @pinky[:face] = face
+        @pinky[:status] = mode
+        @pinky[:speed] = speed
+      when @inky
+        @inky[:face] = face
+        @inky[:status] = mode
+        @inky[:speed] = speed
+      when @clyde
+        @clyde[:face] = face
+        @clyde[:status] = mode
+        @clyde[:speed] = speed
     end
   end
 
@@ -522,12 +532,15 @@ class Pacman
       when 3
         "right"
       end
-
-      if mode == "frightened"
-        mode = "dead" if @board[new_y][new_x] == @pacman
-      else
-        @running = false if @board[new_y][new_x] == @pacman
+      mode = "idle" if [old_y, old_x] == [14, 14] && mode == "dead"
+      if [old_y, old_x] == [@y, @x] || [new_y, new_x] == [@y, @x]
+        if mode == "frightened" || mode == "dead"
+          mode = "dead"
+        else
+          @running = false
+        end
       end
+
       tile = case [new_y, new_x]
       when [@blinky[:y], @blinky[:x]]
         @blinky[:below]
@@ -537,7 +550,8 @@ class Pacman
         @clyde[:below]
       when [@inky[:y], @inky[:x]]
         @inky[:below]
-      else @board[new_y][new_x]
+      else
+        @board[new_y][new_x]
       end
       case char
       when @blinky
@@ -565,6 +579,7 @@ class Pacman
         @clyde[:below] = tile
         @clyde[:status] = mode
       end
+      return mode
     end
   end
 
@@ -653,12 +668,15 @@ class Pacman
       end
     end
     @error = "You win! Moving to the next round..." if count == 0
+    puts "Lives: #{@lives}"
     puts "Time: #{@timer.round}"
     puts "Score: #{@score}"
     puts "Pellets remaining: #{count}"
     puts "Message: #{@error}"
+    puts "Blinky: #{@blinky[:status]}, Pinky: #{@pinky[:status]}, Inky: #{@inky[:status]}, Clyde: #{@clyde[:status]}"
     puts "Energy: #{@energized}"
     system "stty raw -echo"
+    gets if count == 0
   end
 
 end
