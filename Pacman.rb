@@ -312,6 +312,16 @@ class Pacman
       when 3
         @inky
       end
+      enemy[:status] = "dead"
+      enemy[:face] = @ghost_dead
+      if enemy[:below] == @pellet
+        enemy[:below] = @space
+        score('pellet')
+      end
+      if enemy[:below] == @defaults[:candy]
+        enemy[:below] = @space
+        score('candy')
+      end
       consec_check
     end
 
