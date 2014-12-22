@@ -6,6 +6,7 @@ class Pacman
     @hold = []
     @targeting = []
     @space = "  "
+
     @defaults = {
       wall: "[]",
       blinky: {
@@ -254,7 +255,7 @@ class Pacman
       @energized += 60
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
-        ghost[:status] = "frightened"
+        ghost[:status] = "frightened" if ghost[:status] != "dead"
       end
       @energy -= [[@y, @x]]
     when 'candy'
@@ -523,7 +524,7 @@ class Pacman
     end
   end
 
-  def pathFind(char, loc) # Array of target location
+  def pathFind(char, loc)
     if @running == true
 
       old_y = char[:y]
