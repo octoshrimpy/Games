@@ -312,17 +312,19 @@ class Pacman
       when 3
         @inky
       end
-      enemy[:status] = "dead"
-      enemy[:face] = @ghost_dead
-      if enemy[:below] == @pellet
-        enemy[:below] = @space
-        score('pellet')
+      if enemy[:status] == "frightened"
+        enemy[:status] = "dead"
+        enemy[:face] = @ghost_dead
+        if enemy[:below] == @pellet
+          enemy[:below] = @space
+          score('pellet')
+        end
+        if enemy[:below] == @defaults[:candy]
+          enemy[:below] = @space
+          score('candy')
+        end
+        consec_check
       end
-      if enemy[:below] == @defaults[:candy]
-        enemy[:below] = @space
-        score('candy')
-      end
-      consec_check
     end
 
     if @even == true
@@ -723,8 +725,8 @@ class Pacman
   end
 
   def consec_check
-    @consecutive += 1
     @score += (2**@consecutive) * 200
+    @consecutive += 1
     @capture_all += 1 if @consecutive == 4
     @score += 12000 if @capture_all == 4
   end
