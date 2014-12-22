@@ -16,7 +16,7 @@ class Pacman
         below: @space,
         face: "∆ ",
         status: "idle",
-        speed: 35
+        speed: 75
       },
       pinky: {
         y: 17,
@@ -26,7 +26,7 @@ class Pacman
         below: @space,
         face: "© ",
         status: "idle",
-        speed: 35
+        speed: 75
       },
       inky: {
         y: 17,
@@ -36,7 +36,7 @@ class Pacman
         below: @space,
         face: "® ",
         status: "idle",
-        speed: 35
+        speed: 75
       },
       clyde: {
         y: 17,
@@ -46,7 +46,7 @@ class Pacman
         below: @space,
         face: "Ω ",
         status: "idle",
-        speed: 35
+        speed: 75
       },
       pellet: ". ",
       space: @space,
@@ -66,17 +66,17 @@ class Pacman
       door: "__",
       x: 14,
       y: 26,
-      speed: 35,
+      speed: 80,
       width: 28,
       height: 36
     }
 
     @boardy = @defaults[:height]
     @boardx = @defaults[:width]
-    @running = true
     @wall = @defaults[:wall]
     @pellet = @defaults[:pellet]
     @door = @defaults[:door]
+    @board = Array.new(37) {Array.new(28) {@pellet}}
     @energy = []
     [6, 26].each do |blocks|
       [1, 26].each do |block|
@@ -84,25 +84,30 @@ class Pacman
       end
     end
     @energy_face = @defaults[:energy]
-    @scared = @defaults[:scared]
+
+    @running = true
     @lives = 2
     @score = 0
     @stop = 0
     @timer = 0
     @offset = 0
     @next_dir = 0
-    @board = Array.new(37) {Array.new(28) {@pellet}}
     @even = true
     @energized = 0
+    @count = 240
+    @fizzle_treat = 0
 
     @pacman = @defaults[:pacman_still]
     @dir = 0
     @x = @defaults[:x]
     @y = @defaults[:y]
+    @treat = 0
+    @consecutive = 0
+    @capture_all = 0
     @speed = @defaults[:speed]
 
     @dead_ghost = @defaults[:ghost_dead]
-
+    @scared = @defaults[:scared]
     @blinky = @defaults[:blinky].clone
     @inky = @defaults[:inky].clone
     @pinky = @defaults[:pinky].clone
@@ -225,10 +230,10 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      movePacman if @timer % ((50 - (@speed + 1)).to_f/50) <= 0.02
+      movePacman if @timer % ((100 - (@speed + 1)).to_f/100) <= 0.02
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
-        equation = 50 - (ghost[:speed] - 1).to_f
-        control(ghost, seconds) if @timer % (equation/50) <= 0.02 if equation > 0
+        equation = 100 - (ghost[:speed] - 1).to_f
+        control(ghost, seconds) if @timer % (equation/100) <= 0.02 if equation > 0
       end
       sleep(0.01)
       @timer += 0.02
@@ -267,20 +272,38 @@ class Pacman
     else
       @stop -= 1
     end
+
     location = @board[@y][@x]
     ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     if location == @pellet
-      @score += 1
+      @score += 10
+    elsif location == @defaults[:candy]
+      @score += 200
     elsif @energy_face.include?(location)
+      @consecutive = 0
       @stop += 1
-      @score += 5
+      @score += 50
       @energized += 60
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
         ghost[:status] = "frightened"
       end
       @energy -= [[@y, @x]]
+    elsif ghost_locations.include?([@y, @x])
+      case ghost_locations.index([@y, @x])
+      when 0
+        #Blinky die
+        # Me =
+      when 1
+        # Pinky
+      when 2
+        # Ckyde
+      when 3
+        # Inky
+      end
+      # me Status = dead, me face change
     end
+
     if @even == true
       @even = false
       @pacman = case @dir
@@ -335,7 +358,7 @@ class Pacman
     if mode == "frightened"
       if @energized <= 0
         face = defaults[:face]
-        me[:status] = "idle"
+        me[:status] = mode = "idle"
       else
         face = @scared
       end
@@ -435,10 +458,12 @@ class Pacman
         face = @dead_ghost
         mode = pathFind(me, [17, 14])
         speed = 45
-    @error = "dead" if mode == "idle"
       when "idle"
+        speed = 20
+        face = "x "
     end
 
+    speed /= 2 if (myX <= 5 || myX >= 22) && myY == 17
 
     case me
       when @blinky
@@ -477,11 +502,13 @@ class Pacman
 
   def pathFind(char, loc) # Array of target location
     if @running == true
+
       old_y = char[:y]
       old_x = char[:x]
       dir = char[:direction]
       mode = char[:status]
       @board[old_y][old_x] = char[:below]
+
       case dir
       when "left"
         new_x = ((old_x - 1) % @boardx)
@@ -499,6 +526,7 @@ class Pacman
         new_x = old_x
         new_y = old_y
       end
+
       up = [((new_y - 1) % @boardy), new_x]
       left = [new_y, ((new_x - 1) % @boardx)]
       down = [((new_y + 1) % @boardy), new_x]
@@ -522,6 +550,7 @@ class Pacman
           distances << 10000
         end
       end
+
       new_dir = case distances.index(distances.min)
       when 0
         "up"
@@ -532,11 +561,19 @@ class Pacman
       when 3
         "right"
       end
-      mode = "idle" if [old_y, old_x] == [14, 14] && mode == "dead"
+
+      if [old_y, old_x] == [14, 14] && mode == "dead"
+        mode = "idle"
+        char[:speed] = 0
+        new_y = old_y
+        new_x = old_x
+      end
+
       if [old_y, old_x] == [@y, @x] || [new_y, new_x] == [@y, @x]
-        if mode == "frightened" || mode == "dead"
+        if mode == "frightened"
           mode = "dead"
-        else
+          consec_check
+        elsif !(mode == "dead")
           @running = false
         end
       end
@@ -550,9 +587,12 @@ class Pacman
         @clyde[:below]
       when [@inky[:y], @inky[:x]]
         @inky[:below]
+      when [@y, @x]
+        @space
       else
         @board[new_y][new_x]
       end
+
       case char
       when @blinky
         @blinky[:y] = new_y
@@ -579,6 +619,7 @@ class Pacman
         @clyde[:below] = tile
         @clyde[:status] = mode
       end
+
       return mode
     end
   end
@@ -642,6 +683,27 @@ class Pacman
     @board[loc[0]][loc[1]] = "XX"
   end
 
+  def treat(count)
+    if count <= 170 && @treat == 0
+      @board[20][14] = @defaults[:candy]
+      @fizzle_treat = (rand(1000).to_f/1000) + 9 + @timer
+      @treat = 1
+    end
+    if count <= 70 && @treat == 1
+      @board[20][14] = @defaults[:candy]
+      @fizzle_treat = (rand(1000).to_f/1000) + 9 + @timer
+      @treat = 2
+    end
+    @board[20][14] = @space if @timer > @fizzle_treat && @board[20][14] == @defaults[:candy]
+  end
+
+  def consec_check
+    @consecutive += 1
+    @score += (2**@consecutive) * 200
+    @capture_all += 1 if @consecutive == 4
+    @score += 12000 if @capture_all == 4
+  end
+
   def draw
     @board[@y][@x] = @pacman
     @board[@blinky[:y]][@blinky[:x]] = @blinky[:face]
@@ -661,24 +723,26 @@ class Pacman
       puts @board[i].join(" ")
       i += 1
     end
-    count = 0
+    @count = 0
     @board.each do |y|
       y.each do |x|
-        count += 1 if x == ". "
+        @count += 1 if x == @pellet
       end
     end
-    @error = "You win! Moving to the next round..." if count == 0
+    [@blinky, @inky, @pinky, @clyde].each { |ghost| @count += 1 if ghost[:below] == @pellet }
+    treat(@count)
+    @error = "You win! Moving to the next round..." if @count == 0
     puts "Lives: #{@lives}"
     puts "Time: #{@timer.round}"
     puts "Score: #{@score}"
-    puts "Pellets remaining: #{count}"
+    puts "Pellets remaining: #{@count}"
+    puts "Consecutive kills: #{@consecutive}"
     puts "Message: #{@error}"
     puts "Blinky: #{@blinky[:status]}, Pinky: #{@pinky[:status]}, Inky: #{@inky[:status]}, Clyde: #{@clyde[:status]}"
     puts "Energy: #{@energized}"
     system "stty raw -echo"
-    gets if count == 0
+    gets if @count == 0
   end
-
 end
 
 game = Pacman.new
