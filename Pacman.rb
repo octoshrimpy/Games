@@ -659,6 +659,9 @@ class Pacman
       @next_dir = 0
       @dir = 0
       @energized = 0
+      [@blinky, @inky, @pinky, @clyde].each do |ghost|
+        @board[ghost[:y]][ghost[:x]] = ghost[:below]
+      end
       @blinky = @defaults[:blinky].clone
       @pinky = @defaults[:pinky].clone
       @inky = @defaults[:inky].clone
