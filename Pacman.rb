@@ -243,6 +243,26 @@ class Pacman
     end
   end
 
+  def score(str)
+    case str
+    when 'pellet'
+      @score += 10
+    when 'energy'
+      @consecutive = 0
+      @stop += 1
+      @score += 50
+      @energized += 60
+      [@blinky, @inky, @pinky, @clyde].each do |ghost|
+        reverse(ghost)
+        ghost[:status] = "frightened"
+      end
+      @energy -= [[@y, @x]]
+    when 'candy'
+      @score += 200
+    end
+
+  end
+
   def movePacman
     @board[@y][@x] = @space
     @energized -= 1 if @energized > 0
@@ -276,32 +296,23 @@ class Pacman
     location = @board[@y][@x]
     ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     if location == @pellet
-      @score += 10
+      score('pellet')
     elsif location == @defaults[:candy]
-      @score += 200
+      score('candy')
     elsif @energy_face.include?(location)
-      @consecutive = 0
-      @stop += 1
-      @score += 50
-      @energized += 60
-      [@blinky, @inky, @pinky, @clyde].each do |ghost|
-        reverse(ghost)
-        ghost[:status] = "frightened"
-      end
-      @energy -= [[@y, @x]]
+      score('energy')
     elsif ghost_locations.include?([@y, @x])
-      case ghost_locations.index([@y, @x])
+      enemy = case ghost_locations.index([@y, @x])
       when 0
-        #Blinky die
-        # Me =
+        @blinky
       when 1
-        # Pinky
+        @pinky
       when 2
-        # Ckyde
+        @clyde
       when 3
-        # Inky
+        @inky
       end
-      # me Status = dead, me face change
+      consec_check
     end
 
     if @even == true
@@ -572,6 +583,7 @@ class Pacman
       if [old_y, old_x] == [@y, @x] || [new_y, new_x] == [@y, @x]
         if mode == "frightened"
           mode = "dead"
+          char[:face] = @ghost_dead
           consec_check
         elsif !(mode == "dead")
           @running = false
@@ -705,11 +717,11 @@ class Pacman
   end
 
   def draw
-    @board[@y][@x] = @pacman
     @board[@blinky[:y]][@blinky[:x]] = @blinky[:face]
     @board[@pinky[:y]][@pinky[:x]] = @pinky[:face]
     @board[@inky[:y]][@inky[:x]] = @inky[:face]
     @board[@clyde[:y]][@clyde[:x]] = @clyde[:face]
+    @board[@y][@x] = @pacman
     @energy.each { |draw| @board[draw[0]][draw[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
