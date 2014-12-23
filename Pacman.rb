@@ -255,7 +255,7 @@ class Pacman
       @energized += 60
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
-        ghost[:status] = "frightened" if ghost[:status] != "dead"
+        ghost[:status] = "frightened" if gho
       end
       @energy -= [[@y, @x]]
     when 'candy'
@@ -270,23 +270,23 @@ class Pacman
     if @stop == 0
       case @next_dir
       when 1
-        @dir = @next_dir if @board[@y][((@x + 1) % @boardx)] != @wall
+        @dir = @next_dir if @board[@y][((@x + 1) % @boardx)] != @wall && @board[@y][((@x + 1) % @boardx)] != @door
       when 2
-        @dir = @next_dir if @board[((@y + 1) % @boardy)][@x] != @wall
+        @dir = @next_dir if @board[((@y + 1) % @boardy)][@x] != @wall && @board[((@y + 1) % @boardy)][@x] != @door
       when 3
-        @dir = @next_dir if @board[@y][((@x - 1) % @boardx)] != @wall
+        @dir = @next_dir if @board[@y][((@x - 1) % @boardx)] != @wall && @board[@y][((@x - 1) % @boardx)] != @door
       when 4
-        @dir = @next_dir if @board[((@y - 1) % @boardy)][@x] != @wall
+        @dir = @next_dir if @board[((@y - 1) % @boardy)][@x] != @wall && @board[((@y - 1) % @boardy)][@x] != @door
       end
       case @dir
       when 1
-        @board[@y][((@x + 1) % @boardx)] != @wall ? @x = (@x + 1) % @boardx : @dir = @next_dir
+        @board[@y][((@x + 1) % @boardx)] != @wall && @board[@y][((@x + 1) % @boardx)] != @door ? @x = (@x + 1) % @boardx : @dir = @next_dir
       when 2
-        @board[((@y + 1) % @boardy)][@x] != @wall ? @y = (@y + 1) % @boardy : @dir = @next_dir
+        @board[((@y + 1) % @boardy)][@x] != @wall && @board[((@y + 1) % @boardy)][@x] != @door ? @y = (@y + 1) % @boardy : @dir = @next_dir
       when 3
-        @board[@y][((@x - 1) % @boardx)] != @wall ? @x = (@x - 1) % @boardx : @dir = @next_dir
+        @board[@y][((@x - 1) % @boardx)] != @wall && @board[@y][((@x - 1) % @boardx)] != @door ? @x = (@x - 1) % @boardx : @dir = @next_dir
       when 4
-        @board[((@y - 1) % @boardy)][@x] != @wall ? @y = (@y - 1) % @boardy : @dir = @next_dir
+        @board[((@y - 1) % @boardy)][@x] != @wall && @board[((@y - 1) % @boardy)][@x] != @door ? @y = (@y - 1) % @boardy : @dir = @next_dir
       when 0
         @dir = 0
       end
