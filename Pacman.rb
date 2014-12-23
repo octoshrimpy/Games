@@ -260,13 +260,13 @@ class Pacman
     if who == @pacman
       speed = case @level
       when 1
-        80
+        @energized == 0 ? 80 : 85
       when (2..4)
-        90
+        @energized == 0 ? 90 : 95
       when (5..20)
         100
       else
-        90
+        10
       end
     elsif who == @blinky
       case @level
@@ -338,7 +338,7 @@ class Pacman
         speed = 95
         speed = 50 if [who[:y], who[:x]].include?(tunnel)
       end
-      speed = 500 if [who[:y], who[:x]].include?(box)
+      speed = 100 if [who[:y], who[:x]].include?(box)
     end
     if mode == "frightened"
       speed = case @level
@@ -350,7 +350,7 @@ class Pacman
         60
       end
     end
-    speed = 100 if mode == "dead"
+    speed = 95 if mode == "dead"
     return speed
   end
 
