@@ -15,7 +15,7 @@ class Pacman
         target: [1, 25],
         direction: "left",
         below: @space,
-        face: "∆ ",
+        face: "Ω ",
         status: "idle",
         speed: 75
       },
@@ -25,7 +25,7 @@ class Pacman
         target: [1, 2],
         direction: "left",
         below: @space,
-        face: "© ",
+        face: "¥ ",
         status: "idle",
         speed: 75
       },
@@ -35,7 +35,7 @@ class Pacman
         target: [35, 27],
         direction: "left",
         below: @space,
-        face: "® ",
+        face: "∑ ",
         status: "idle",
         speed: 75
       },
@@ -45,7 +45,7 @@ class Pacman
         target: [35, 0],
         direction: "left",
         below: @space,
-        face: "Ω ",
+        face: "∆ ",
         status: "idle",
         speed: 75
       },
