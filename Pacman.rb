@@ -6,6 +6,8 @@ class Pacman
     @hold = []
     @targeting = []
     @space = "  "
+    @level = 1
+    @dots = 240
 
     @defaults = {
       wall: "[]",
@@ -231,9 +233,10 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      movePacman if @timer % ((100 - (@speed + 1)).to_f/100) <= 0.02
+      movePacman if @timer % ((100 - (speedControl + 1)).to_f/100) <= 0.02
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
-        equation = 100 - (ghost[:speed] - 1).to_f
+        speed = ghost[:speed]
+        equation = 100 - (speed - 1).to_f
         control(ghost, seconds) if @timer % (equation/100) <= 0.02 if equation > 0
       end
       sleep(0.01)
@@ -242,6 +245,113 @@ class Pacman
     else
       died
     end
+  end
+
+  def speedControl(who=@pacman, mode="none")
+    speed = 0
+    tunnel = []
+    ((0..5).to_a + (22..27).to_a).each { |x| tunnel << [17, x]}
+    box = []
+    (10..17).each do |cols|
+      (15..19).each do |rows|
+        box << [cols, rows]
+      end
+    end
+    if who == @pacman
+      speed = case @level
+      when 1
+        80
+      when (2..4)
+        90
+      when (5..20)
+        100
+      else
+        90
+      end
+    elsif who == @blinky
+      case @level
+      when 1
+        speed = 75
+        if who == @blinky
+          speed = 80 if @count < 20
+          speed = 85 if @cof       end
+        speed = 40 if [who[:y], who[:x]].include?(tunnel)
+      when 2
+        speed = 85
+        if who == @blinky
+          speed = 80 if @count < 30
+          speed = 85 if @count < 15
+        end
+        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+      when 3, 4
+        speed = 85
+        if who == @blinky
+          speed = 80 if @count < 40
+          speed = 85 if @count < 20
+        end
+        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+      when 5
+        speed = 95
+        if who == @blinky
+          speed = 80 if @count < 40
+          speed = 85 if @count < 20
+        end
+        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+      when (6..8)
+        speed = 95
+        if who == @blinky
+          speed = 80 if @count < 50
+          speed = 85 if @count < 25
+        end
+        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+      when (9..11)
+        speed = 95
+        if who == @blinky
+          speed = 80 if @count < 60
+          speed = 85 if @count < 30
+        end
+        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+      when (12..14)
+        speed = 95
+        if who == @blinky
+          speed = 80 if @count < 80
+          speed = 85 if @count < 40
+        end
+        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+      when (15..18)
+        speed = 95
+        if who == @blinky
+          speed = 80 if @count < 100
+          speed = 85 if @count < 50
+        end
+        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+      end
+    else
+      case @level
+      when 1
+        speed = 75
+        speed = 40 if [who[:y], who[:x]].include?(tunnel)
+      when (2..4)
+        speed = 85
+        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+      else
+        speed = 95
+        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+      end
+      speed = 500 if [who[:y], who[:x]].include?(box)
+    end
+    if mode == "frightened"
+      speed = case @level
+      when 1
+        50
+      when (2..4)
+        55
+      else
+        60
+      end
+    end
+    speed = 100 if mode == "dead"
+    return speed
   end
 
   def score(str)
@@ -397,9 +507,6 @@ class Pacman
       end
     end
     if me == @pinky
-      if seconds <= 2
-        speed = 0
-      end
       if seconds >= 1 && seconds <= 2
         @board[@pinky[:y]][@pinky[:x]] = @space
         @pinky[:y] = 14
@@ -409,9 +516,6 @@ class Pacman
       end
     end
     if me == @inky
-      if seconds <= 8
-        speed = 0
-      end
       if seconds >= 7 && seconds <= 8
         @board[@inky[:y]][@inky[:x]] = @space
         @inky[:y] = 14
@@ -421,9 +525,6 @@ class Pacman
       end
     end
     if me == @clyde
-      if seconds <= 21
-        speed = 0
-      end
       if seconds >= 20 && seconds <= 21
         @board[@clyde[:y]][@clyde[:x]] = @space
         @clyde[:y] = 14
@@ -436,13 +537,11 @@ class Pacman
     case me[:status]
       when "scatter"
         face = defaults[:face]
-        speed = defaults[:speed]
         mode = pathFind(@blinky, @blinky[:target]) if me == @blinky
         mode = pathFind(@pinky, @pinky[:target]) if me == @pinky
         mode = pathFind(@inky, @inky[:target]) if me == @inky
         mode = pathFind(@clyde, @clyde[:target]) if me == @clyde
       when "chase"
-        speed = defaults[:speed]
         face = defaults[:face]
         if me == @blinky
           mode = pathFind(@blinky, [@y, @x])
@@ -477,17 +576,14 @@ class Pacman
       when "frightened"
         mode = pathFind(me, [rand(@boardy), rand(@boardx)])
         face = @scared
-        speed = 20
       when "dead"
         face = @dead_ghost
         mode = pathFind(me, [17, 14])
-        speed = 45
       when "idle"
-        speed = 20
         face = "x "
     end
 
-    speed /= 2 if (myX <= 5 || myX >= 22) && myY == 17
+    speed = speedControl(me, mode)#/2 if (myX <= 5 || myX >= 22) && myY == 17
 
     case me
       when @blinky
