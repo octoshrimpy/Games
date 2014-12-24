@@ -248,7 +248,6 @@ class Pacman
         else
           deleteMessage
         end
-        @error = @countdown
       end
       draw
     else
@@ -795,16 +794,30 @@ class Pacman
 
   def getReady(msg, pause=true)
     deleteMessage
+    ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     retrieve = []
     error = msg.to_s.split("")
     start = error.length/2
     error.each_with_index do |letter, pos|
       retrieve << @board[20][(14 - start) + pos]
       if msg == "Get Ready!"
-      @board[20][(14 - start) + pos] = letter + " "
-    else
-      @board[17][(14 - start) + pos] = letter + " "
-    end
+        if ghost_locations.include?([20, (14 - start) + pos])
+          ghost = case [20, (14 - start) + pos]
+          when [@blinky[:y], @blinky[:x]]
+            @blinky
+          when [@pinky[:y],@pinky[:x]]
+            @pinky
+          when [@inky[:y], @inky[:x]]
+            @inky
+          when [@clyde[:y], @clyde[:x]]
+            @clyde
+          end
+          ghost[:below] = letter + " "
+        end
+        @board[20][(14 - start) + pos] = letter + " "
+      else
+        @board[17][(14 - start) + pos] = letter + " "
+      end
     end
     draw
     if pause == true
@@ -817,7 +830,7 @@ class Pacman
 
   def deleteMessage
     (9..18).each do |pos|
-      @board[20][pos] = @space
+      @board[20][pos] = @space if @board[20][pos] != @defaults[:candy]
     end
     (11..16).each do |pos|
       @board[17][pos] = @space
@@ -862,6 +875,29 @@ class Pacman
     score(12000) if @capture_all == 4
   end
 
+  def nextRound
+    @level += 1
+    @board = Array.new(37) {Array.new(28) {@pellet}}
+    @running = true
+    @stop = 0
+    @offset = @timer
+    @next_dir = 0
+    @dir = 0
+    @energized = 0
+    [@blinky, @inky, @pinky, @clyde].each do |ghost|
+      @board[ghost[:y]][ghost[:x]] = ghost[:below]
+    end
+    @blinky = @defaults[:blinky].clone
+    @pinky = @defaults[:pinky].clone
+    @inky = @defaults[:inky].clone
+    @clyde = @defaults[:clyde].clone
+    @x = @defaults[:x]
+    @y = @defaults[:y]
+    build
+    draw
+    getReady("Get Ready!")
+  end
+
   def draw
     @board[@blinky[:y]][@blinky[:x]] = @blinky[:face]
     @board[@pinky[:y]][@pinky[:x]] = @pinky[:face]
@@ -893,11 +929,12 @@ class Pacman
     nextRound if @count == 0
     puts "Lives: #{@lives}"
     puts "Time: #{@timer.round}"
+    puts "Level: #{@level}"
     puts "Score: #{@score}"
     puts "Message: #{@error}"
     puts "Energy: #{@energized}"
+    puts "Eaten: #{241 - @count}"
     system "stty raw -echo"
-    gets if @count == 0
   end
 end
 
