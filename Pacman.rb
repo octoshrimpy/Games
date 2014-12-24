@@ -69,7 +69,7 @@ class Pacman
       door: "__",
       x: 14,
       y: 26,
-      speed: 80,
+      speed: 100,
       width: 28,
       height: 36
     }
@@ -233,11 +233,11 @@ class Pacman
   def tick
     if @running == true
       seconds = @timer - @offset
-      movePacman if @timer % ((100 - (speedControl + 1)).to_f/100) <= 0.02
+      movePacman if @timer % ((100 - (speedControl - 1)).to_f/100) <= 0.02
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
-        speed = ghost[:speed]
-        equation = 100 - (speed - 1).to_f
-        control(ghost, seconds) if @timer % (equation/100) <= 0.02 if equation > 0
+        speed = speedControl(ghost, ghost[:status])
+        equation = (100 - (speed - 1).to_f)/100
+        control(ghost, seconds) if @timer % equation <= 0.02 if equation > 0
       end
       sleep(0.01)
       @timer += 0.02
@@ -279,50 +279,50 @@ class Pacman
       when 2
         speed = 85
         if who == @blinky
-          speed = 80 if @count < 30
-          speed = 85 if @count < 15
+          speed = 90 if @count < 30
+          speed = 95 if @count < 15
         end
         speed = 45 if [who[:y], who[:x]].include?(tunnel)
       when 3, 4
         speed = 85
         if who == @blinky
-          speed = 80 if @count < 40
-          speed = 85 if @count < 20
+          speed = 90 if @count < 40
+          speed = 95 if @count < 20
         end
         speed = 45 if [who[:y], who[:x]].include?(tunnel)
       when 5
         speed = 95
         if who == @blinky
-          speed = 80 if @count < 40
-          speed = 85 if @count < 20
+          speed = 100 if @count < 40
+          speed = 105 if @count < 20
         end
         speed = 45 if [who[:y], who[:x]].include?(tunnel)
       when (6..8)
         speed = 95
         if who == @blinky
-          speed = 80 if @count < 50
-          speed = 85 if @count < 25
+          speed = 100 if @count < 50
+          speed = 105 if @count < 25
         end
         speed = 50 if [who[:y], who[:x]].include?(tunnel)
       when (9..11)
         speed = 95
         if who == @blinky
-          speed = 80 if @count < 60
-          speed = 85 if @count < 30
+          speed = 100 if @count < 60
+          speed = 105 if @count < 30
         end
         speed = 50 if [who[:y], who[:x]].include?(tunnel)
       when (12..14)
         speed = 95
         if who == @blinky
-          speed = 80 if @count < 80
-          speed = 85 if @count < 40
+          speed = 100 if @count < 80
+          speed = 105 if @count < 40
         end
         speed = 50 if [who[:y], who[:x]].include?(tunnel)
       when (15..18)
         speed = 95
         if who == @blinky
-          speed = 80 if @count < 100
-          speed = 85 if @count < 50
+          speed = 100 if @count < 100
+          speed = 105 if @count < 50
         end
         speed = 50 if [who[:y], who[:x]].include?(tunnel)
       end
