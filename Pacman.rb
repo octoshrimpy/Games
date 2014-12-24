@@ -242,12 +242,13 @@ class Pacman
       end
       sleep(0.01)
       @timer += 0.02
-      if @timer % 1 == 0
+      if @timer.round(2) % 1 == 0
         if @countdown > 0
-          deleteMessage
-        else
           @countdown -= 1
+        else
+          deleteMessage
         end
+        @error = @countdown
       end
       draw
     else
@@ -417,6 +418,7 @@ class Pacman
     end
 
     location = @board[@y][@x]
+    location = @space if location == nil
     ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     if location == @pellet
       score('pellet')
@@ -667,7 +669,11 @@ class Pacman
       [up, left, down, right].each do |pos|
         taken = @board[pos[0]][pos[1]]
         old = [new_y, new_x]
-        bad_loc = [[14, 12], [14, 15], [26, 12], [26, 15]]
+        if mode != "dead"
+          bad_loc = [[14, 12], [14, 15], [26, 12], [26, 15]]
+        else
+          bad_loc = []
+        end
         valid = true
         if pos == up
           valid = false if dir == "down" || bad_loc.include?(old)
@@ -788,29 +794,33 @@ class Pacman
   end
 
   def getReady(msg, pause=true)
+    deleteMessage
     retrieve = []
     error = msg.to_s.split("")
     start = error.length/2
     error.each_with_index do |letter, pos|
       retrieve << @board[20][(14 - start) + pos]
       if msg == "Get Ready!"
-        @board[20][(14 - start) + pos] = letter + " "
-      else
-        @board[17][(14 - start) + pos] = letter + " "
-      end
+      @board[20][(14 - start) + pos] = letter + " "
+    else
+      @board[17][(14 - start) + pos] = letter + " "
+    end
     end
     draw
     if pause == true
       sleep(3)
       deleteMessage
     else
-      @countdown = @timer + 3
+      @countdown = 3
     end
   end
 
   def deleteMessage
     (9..18).each do |pos|
       @board[20][pos] = @space
+    end
+    (11..16).each do |pos|
+      @board[17][pos] = @space
     end
     draw
   end
@@ -868,6 +878,7 @@ class Pacman
         print " "
         print " " if i < 10
       end
+      @board[i][@board[i].index(nil)] = @space if @board[i].include?(nil)
       puts @board[i].join(" ")
       i += 1
     end
@@ -879,7 +890,7 @@ class Pacman
     end
     [@blinky, @inky, @pinky, @clyde].each { |ghost| @count += 1 if ghost[:below] == @pellet }
     treat(@count)
-    @error = "You win! Moving to the next round..." if @count == 0
+    nextRound if @count == 0
     puts "Lives: #{@lives}"
     puts "Time: #{@timer.round}"
     puts "Score: #{@score}"
