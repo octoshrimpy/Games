@@ -89,6 +89,7 @@ class Pacman
     @energy_face = @defaults[:energy]
 
     @running = true
+    @countdown = 0
     @lives = 2
     @score = 0
     @stop = 0
@@ -241,6 +242,13 @@ class Pacman
       end
       sleep(0.01)
       @timer += 0.02
+      if @timer % 1 == 0
+        if @countdown > 0
+          deleteMessage
+        else
+          @countdown -= 1
+        end
+      end
       draw
     else
       died
@@ -355,13 +363,14 @@ class Pacman
   end
 
   def score(str)
+    score = 0
     case str
     when 'pellet'
       @score += 10
     when 'energy'
       @consecutive = 0
       @stop += 1
-      @score += 50
+      score = 50
       @energized += 60
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
@@ -369,9 +378,12 @@ class Pacman
       end
       @energy -= [[@y, @x]]
     when 'candy'
-      @score += 200
+      score = 200
+    else
+      score = str
     end
-
+    @score += score
+    getReady(score, false) if score > 0
   end
 
   def movePacman
@@ -583,7 +595,7 @@ class Pacman
         face = "x "
     end
 
-    speed = speedControl(me, mode)#/2 if (myX <= 5 || myX >= 22) && myY == 17
+    speed = speedControl(me, mode)
 
     case me
       when @blinky
@@ -775,18 +787,30 @@ class Pacman
     end
   end
 
-  def getReady(msg)
+  def getReady(msg, pause=true)
     retrieve = []
     error = msg.to_s.split("")
     start = error.length/2
     error.each_with_index do |letter, pos|
       retrieve << @board[20][(14 - start) + pos]
-      @board[20][(14 - start) + pos] = letter + " "
+      if msg == "Get Ready!"
+        @board[20][(14 - start) + pos] = letter + " "
+      else
+        @board[17][(14 - start) + pos] = letter + " "
+      end
     end
     draw
-    sleep(3)
-    retrieve.each_with_index do |letter, pos|
-      @board[20][(14 - start) + pos] = letter
+    if pause == true
+      sleep(3)
+      deleteMessage
+    else
+      @countdown = @timer + 3
+    end
+  end
+
+  def deleteMessage
+    (9..18).each do |pos|
+      @board[20][pos] = @space
     end
     draw
   end
@@ -822,10 +846,10 @@ class Pacman
   end
 
   def consec_check
-    @score += (2**@consecutive) * 200
+    score((2**@consecutive) * 200)
     @consecutive += 1
     @capture_all += 1 if @consecutive == 4
-    @score += 12000 if @capture_all == 4
+    score(12000) if @capture_all == 4
   end
 
   def draw
@@ -859,10 +883,7 @@ class Pacman
     puts "Lives: #{@lives}"
     puts "Time: #{@timer.round}"
     puts "Score: #{@score}"
-    puts "Pellets remaining: #{@count}"
-    puts "Consecutive kills: #{@consecutive}"
     puts "Message: #{@error}"
-    puts "Blinky: #{@blinky[:status]}, Pinky: #{@pinky[:status]}, Inky: #{@inky[:status]}, Clyde: #{@clyde[:status]}"
     puts "Energy: #{@energized}"
     system "stty raw -echo"
     gets if @count == 0
