@@ -282,71 +282,72 @@ class Pacman
         speed = 75
         if who == @blinky
           speed = 80 if @count < 20
-          speed = 85 if @cof       end
-        speed = 40 if [who[:y], who[:x]].include?(tunnel)
+          speed = 85 if @count
+        end
+        speed = 10 if tunnel.include?([who[:y], who[:x]])
       when 2
         speed = 85
         if who == @blinky
           speed = 90 if @count < 30
           speed = 95 if @count < 15
         end
-        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+        speed = 45 if tunnel.include?([who[:y], who[:x]])
       when 3, 4
         speed = 85
         if who == @blinky
           speed = 90 if @count < 40
           speed = 95 if @count < 20
         end
-        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+        speed = 45 if tunnel.include?([who[:y], who[:x]])
       when 5
         speed = 95
         if who == @blinky
           speed = 100 if @count < 40
           speed = 105 if @count < 20
         end
-        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+        speed = 45 if tunnel.include?([who[:y], who[:x]])
       when (6..8)
         speed = 95
         if who == @blinky
           speed = 100 if @count < 50
           speed = 105 if @count < 25
         end
-        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+        speed = 50 if tunnel.include?([who[:y], who[:x]])
       when (9..11)
         speed = 95
         if who == @blinky
           speed = 100 if @count < 60
           speed = 105 if @count < 30
         end
-        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+        speed = 50 if tunnel.include?([who[:y], who[:x]])
       when (12..14)
         speed = 95
         if who == @blinky
           speed = 100 if @count < 80
           speed = 105 if @count < 40
         end
-        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+        speed = 50 if tunnel.include?([who[:y], who[:x]])
       when (15..18)
         speed = 95
         if who == @blinky
           speed = 100 if @count < 100
           speed = 105 if @count < 50
         end
-        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+        speed = 50 if tunnel.include?([who[:y], who[:x]])
       end
     else
       case @level
       when 1
         speed = 75
-        speed = 40 if [who[:y], who[:x]].include?(tunnel)
+        speed = 40 if tunnel.include?([who[:y], who[:x]])
       when (2..4)
         speed = 85
-        speed = 45 if [who[:y], who[:x]].include?(tunnel)
+        speed = 45 if tunnel.include?([who[:y], who[:x]])
       else
         speed = 95
-        speed = 50 if [who[:y], who[:x]].include?(tunnel)
+        speed = 50 if tunnel.include?([who[:y], who[:x]])
       end
-      speed = 100 if [who[:y], who[:x]].include?(box)
+      speed = 0 if box.include?([who[:y], who[:x]])
     end
     if mode == "frightened"
       speed = case @level
