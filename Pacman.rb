@@ -668,7 +668,7 @@ class Pacman
       [up, left, down, right].each do |pos|
         taken = @board[pos[0]][pos[1]]
         old = [new_y, new_x]
-        if mode != "dead"
+        if mode != "dead" && mode != "frightened"
           bad_loc = [[14, 12], [14, 15], [26, 12], [26, 15]]
         else
           bad_loc = []
