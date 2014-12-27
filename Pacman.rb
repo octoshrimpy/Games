@@ -2,12 +2,19 @@ require 'io/console'
 require 'io/wait'
 class Pacman
   def initialize
-    @error = ""
+    @time1 = Time.now
+    @time2 = Time.now
+
+    @last_move = Time.now
+    @error = 0
     @hold = []
     @targeting = []
     @space = "  "
     @level = 1
     @dots = 240
+
+    @frame_count = 0
+    @frame_rate = 0
 
     @defaults = {
       wall: "[]",
@@ -19,6 +26,7 @@ class Pacman
         below: @space,
         face: "Ω ",
         status: "idle",
+        last_move: Time.now,
         speed: 75
       },
       pinky: {
@@ -29,6 +37,7 @@ class Pacman
         below: @space,
         face: "¥ ",
         status: "idle",
+        last_move: Time.now,
         speed: 75
       },
       inky: {
@@ -39,6 +48,7 @@ class Pacman
         below: @space,
         face: "∑ ",
         status: "idle",
+        last_move: Time.now,
         speed: 75
       },
       clyde: {
@@ -49,6 +59,7 @@ class Pacman
         below: @space,
         face: "∆ ",
         status: "idle",
+        last_move: Time.now,
         speed: 75
       },
       pellet: ". ",
@@ -69,7 +80,7 @@ class Pacman
       door: "__",
       x: 14,
       y: 26,
-      speed: 100,
+      speed: 80,
       width: 28,
       height: 36
     }
@@ -93,7 +104,7 @@ class Pacman
     @lives = 2
     @score = 0
     @stop = 0
-    @timer = 0
+    @timer = 0.00
     @offset = 0
     @next_dir = 0
     @even = true
@@ -228,43 +239,63 @@ class Pacman
         end
       end
     end
-    draw
   end
 
   def tick
     if @running == true
+      change = false
+      delta = 0
+      if @time1 > @time2
+        @time2 = Time.now
+        delta = @time2 - @time1 if @time2 - @time1 < 3
+      else
+        @time1 = Time.now
+        delta = @time1 - @time2 if @time1 - @time2 < 3
+      end
+      if delta > @error
+        @error = delta
+      end
+      @frame_count += 1
       seconds = @timer - @offset
-      movePacman if @timer % ((100 - (speedControl - 1)).to_f/100) <= 0.02
+      if Time.now > @last_move + 1.to_f/rangeMapper(0, 100, 0, 20, @speed) * 2
+        @last_move = Time.now
+        movePacman
+        change = true
+      end
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
         speed = speedControl(ghost, ghost[:status])
-        equation = (100 - (speed - 1).to_f)/100
-        control(ghost, seconds) if @timer % equation <= 0.02 if equation > 0
+        @error = speed
+        if Time.now > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 20, speed) * 2
+          ghost[:last_move] = Time.now
+          control(ghost, seconds)
+          change = true
+        end
       end
-      sleep(0.01)
-      @timer += 0.02
-      if @timer.round(2) % 1 == 0
+      old_time = @timer
+      @timer += delta.round(5)
+      @timer = @timer.round(5)
+      if old_time.round != @timer.round
+        change = true
         if @countdown > 0
           @countdown -= 1
         else
           deleteMessage
         end
       end
-      draw
+      draw if change == true
     else
       died
     end
+  end
+
+  def rangeMapper(from_min, from_max, to_min, to_max, value)
+    ((to_max - to_min) * (value - from_min)) / (from_max - from_min) + to_min
   end
 
   def speedControl(who=@pacman, mode="none")
     speed = 0
     tunnel = []
     ((0..5).to_a + (22..27).to_a).each { |x| tunnel << [17, x]}
-    box = []
-    (10..17).each do |cols|
-      (15..19).each do |rows|
-        box << [cols, rows]
-      end
-    end
     if who == @pacman
       speed = case @level
       when 1
@@ -282,7 +313,7 @@ class Pacman
         speed = 75
         if who == @blinky
           speed = 80 if @count < 20
-          speed = 85 if @count
+          speed = 85 if @count < 10
         end
         speed = 10 if tunnel.include?([who[:y], who[:x]])
       when 2
@@ -347,7 +378,6 @@ class Pacman
         speed = 95
         speed = 50 if tunnel.include?([who[:y], who[:x]])
       end
-      speed = 0 if box.include?([who[:y], who[:x]])
     end
     if mode == "frightened"
       speed = case @level
@@ -484,13 +514,8 @@ class Pacman
   end
 
   def control(me, seconds)
-    myY = me[:y]
-    myX = me[:x]
-    dir = me[:direction]
-    below = me[:below]
     face = me[:face]
     mode = me[:status]
-    speed = me[:speed]
 
     defaults = case me
     when @blinky
@@ -597,25 +622,19 @@ class Pacman
         face = "x "
     end
 
-    speed = speedControl(me, mode)
-
     case me
       when @blinky
         @blinky[:face] = face
         @blinky[:status] = mode
-        @blinky[:speed] = speed
       when @pinky
         @pinky[:face] = face
         @pinky[:status] = mode
-        @pinky[:speed] = speed
       when @inky
         @inky[:face] = face
         @inky[:status] = mode
-        @inky[:speed] = speed
       when @clyde
         @clyde[:face] = face
         @clyde[:status] = mode
-        @clyde[:speed] = speed
     end
   end
 
@@ -702,7 +721,7 @@ class Pacman
 
       if [old_y, old_x] == [14, 14] && mode == "dead"
         mode = "idle"
-        char[:speed] = 0
+        # char[:speed] = 0
         new_y = old_y
         new_x = old_x
       end
@@ -786,9 +805,9 @@ class Pacman
       @x = @defaults[:x]
       @y = @defaults[:y]
       build
-      draw
       getReady("Get Ready!")
     else
+      puts "Frames: #{@frame_count}"
       exit
     end
   end
@@ -836,7 +855,6 @@ class Pacman
     (11..16).each do |pos|
       @board[17][pos] = @space
     end
-    draw
   end
 
   def movement(m)
@@ -895,7 +913,6 @@ class Pacman
     @x = @defaults[:x]
     @y = @defaults[:y]
     build
-    draw
     getReady("Get Ready!")
   end
 
@@ -905,7 +922,7 @@ class Pacman
     @board[@inky[:y]][@inky[:x]] = @inky[:face]
     @board[@clyde[:y]][@clyde[:x]] = @clyde[:face]
     @board[@y][@x] = @pacman
-    @energy.each { |draw| @board[draw[0]][draw[1]] = @energy_face }
+    @energy.each { |loc| @board[loc[0]][loc[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
     i = 0
