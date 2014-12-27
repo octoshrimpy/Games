@@ -2,10 +2,11 @@ require 'io/console'
 require 'io/wait'
 class Pacman
   def initialize
-    @time1 = Time.now
-    @time2 = Time.now
+    t = Time.now
+    @time1 = t
+    @time2 = t
 
-    @last_move = Time.now
+    @last_move = t
     @error = 0
     @hold = []
     @targeting = []
@@ -16,6 +17,11 @@ class Pacman
     @frame_count = 0
     @frame_rate = 0
 
+    @countdown = {
+      candy: t,
+      energy: t,
+      message: t
+    }
     @defaults = {
       wall: "[]",
       blinky: {
@@ -100,7 +106,6 @@ class Pacman
     @energy_face = @defaults[:energy]
 
     @running = true
-    @countdown = 0
     @lives = 2
     @score = 0
     @stop = 0
@@ -108,9 +113,8 @@ class Pacman
     @offset = 0
     @next_dir = 0
     @even = true
-    @energized = 0
+    @energized = false
     @count = 240
-    @fizzle_treat = 0
 
     @pacman = @defaults[:pacman_still]
     @dir = 0
@@ -243,45 +247,51 @@ class Pacman
 
   def tick
     if @running == true
+      t = Time.now
       change = false
       delta = 0
       if @time1 > @time2
-        @time2 = Time.now
+        @time2 = t
         delta = @time2 - @time1 if @time2 - @time1 < 3
       else
-        @time1 = Time.now
+        @time1 = t
         delta = @time1 - @time2 if @time1 - @time2 < 3
-      end
-      if delta > @error
-        @error = delta
       end
       @frame_count += 1
       seconds = @timer - @offset
-      if Time.now > @last_move + 1.to_f/rangeMapper(0, 100, 0, 20, @speed) * 2
-        @last_move = Time.now
+
+      if t > @last_move + 1.to_f/rangeMapper(0, 100, 0, 13, @speed)
+        @last_move = t
         movePacman
         change = true
       end
+
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
         speed = speedControl(ghost, ghost[:status])
-        @error = speed
-        if Time.now > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 20, speed) * 2
-          ghost[:last_move] = Time.now
+        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 13, speed)
+          ghost[:last_move] = t
           control(ghost, seconds)
           change = true
         end
       end
+
       old_time = @timer
       @timer += delta.round(5)
       @timer = @timer.round(5)
-      if old_time.round != @timer.round
-        change = true
-        if @countdown > 0
-          @countdown -= 1
-        else
-          deleteMessage
+      change = true if old_time.round != @timer.round
+      @countdown.each do |obj, val|
+        if val < t
+          case obj
+          when :message
+            deleteMessage
+          when :candy
+            @board[20][14] = @space if @board[20][14] == @defaults[:candy]
+          when :energy
+            @energized = false
+          end
         end
       end
+
       draw if change == true
     else
       died
@@ -299,9 +309,9 @@ class Pacman
     if who == @pacman
       speed = case @level
       when 1
-        @energized == 0 ? 80 : 85
+        @energized == false ? 80 : 85
       when (2..4)
-        @energized == 0 ? 90 : 95
+        @energized == false ? 90 : 95
       when (5..20)
         100
       else
@@ -315,7 +325,7 @@ class Pacman
           speed = 80 if @count < 20
           speed = 85 if @count < 10
         end
-        speed = 10 if tunnel.include?([who[:y], who[:x]])
+        speed = 45 if tunnel.include?([who[:y], who[:x]])
       when 2
         speed = 85
         if who == @blinky
@@ -402,7 +412,25 @@ class Pacman
       @consecutive = 0
       @stop += 1
       score = 50
-      @energized += 60
+      @energized = true
+      time = case @level
+      when 1
+        6
+      when 2, 6, 10
+        5
+      when 3
+        4
+      when 4, 14
+        3
+      when 5, 7, 8, 11
+        2
+      when 9, 12, 13, 15, 16, 18
+        1
+      else
+        0
+      end
+      @error = []
+      @countdown[:energy] = Time.now + time
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
         ghost[:status] = "frightened" if ghost[:status] != "dead"
@@ -419,7 +447,6 @@ class Pacman
 
   def movePacman
     @board[@y][@x] = @space
-    @energized -= 1 if @energized > 0
     if @stop == 0
       case @next_dir
       when 1
@@ -529,7 +556,7 @@ class Pacman
     end
 
     if mode == "frightened"
-      if @energized <= 0
+      if @energized == false
         face = defaults[:face]
         me[:status] = mode = "idle"
       else
@@ -794,7 +821,8 @@ class Pacman
       @offset = @timer
       @next_dir = 0
       @dir = 0
-      @energized = 0
+      @energized = false
+      @countdown.each { |obj, val| @countdown[obj] = 0 }
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         @board[ghost[:y]][ghost[:x]] = ghost[:below]
       end
@@ -844,7 +872,7 @@ class Pacman
       sleep(3)
       deleteMessage
     else
-      @countdown = 3
+      @countdown[:message] = Time.now + 3
     end
   end
 
@@ -876,15 +904,14 @@ class Pacman
   def treat(count)
     if count <= 170 && @treat == 0
       @board[20][14] = @defaults[:candy]
-      @fizzle_treat = (rand(1000).to_f/1000) + 9 + @timer
+      @countdown[:candy] = Time.at((rand(1000).to_f/1000) + 9 + Time.now.to_i)
       @treat = 1
     end
     if count <= 70 && @treat == 1
       @board[20][14] = @defaults[:candy]
-      @fizzle_treat = (rand(1000).to_f/1000) + 9 + @timer
+      @countdown[:candy] = Time.at((rand(1000).to_f/1000) + 9 + Time.now.to_i)
       @treat = 2
     end
-    @board[20][14] = @space if @timer > @fizzle_treat && @board[20][14] == @defaults[:candy]
   end
 
   def consec_check
@@ -902,7 +929,8 @@ class Pacman
     @offset = @timer
     @next_dir = 0
     @dir = 0
-    @energized = 0
+    @energized = false
+    @countdown.each { |obj, val| @countdown[obj] = 0 }
     [@blinky, @inky, @pinky, @clyde].each do |ghost|
       @board[ghost[:y]][ghost[:x]] = ghost[:below]
     end
