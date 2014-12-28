@@ -822,7 +822,7 @@ class Pacman
       @next_dir = 0
       @dir = 0
       @energized = false
-      @countdown.each { |obj, val| @countdown[obj] = 0 }
+      @countdown.each { |obj, val| @countdown[obj] = Time.now - 15 }
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         @board[ghost[:y]][ghost[:x]] = ghost[:below]
       end
@@ -930,7 +930,13 @@ class Pacman
     @next_dir = 0
     @dir = 0
     @energized = false
-    @countdown.each { |obj, val| @countdown[obj] = 0 }
+    @energy = []
+    [6, 26].each do |blocks|
+      [1, 26].each do |block|
+        @energy << [blocks, block]
+      end
+    end
+    @countdown.each { |obj, val| @countdown[obj] = Time.now - 15 }
     [@blinky, @inky, @pinky, @clyde].each do |ghost|
       @board[ghost[:y]][ghost[:x]] = ghost[:below]
     end
