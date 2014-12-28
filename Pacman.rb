@@ -6,7 +6,6 @@ class Pacman
     @time1 = t
     @time2 = t
 
-    @last_move = t
     @error = 0
     @hold = []
     @targeting = []
@@ -68,25 +67,32 @@ class Pacman
         last_move: Time.now,
         speed: 75
       },
+      pacman: {
+        still: "o ",
+        open_left: "> ",
+        open_right: " <",
+        open_up: "v ",
+        open_down: "^ ",
+        closed_vert: "| ",
+        closed_right: " -",
+        closed_left: "- ",
+        face: "o ",
+        x: 14,
+        y: 26,
+        speed: 80,
+        last_move: t,
+        next_dir: 0,
+        dir: 0,
+        energized: false
+      },
       pellet: ". ",
       space: @space,
       energy: "ø ",
       energy_swollen: "Ø ",
       candy: "å ",
-      pacman_still: "o ",
-      pacman_left_open: "> ",
-      pacman_left_closed: "- ",
-      pacman_right_open: " <",
-      pacman_right_closed: " -",
-      pacman_vert_closed: "| ",
-      pacman_up_open: "v ",
-      pacman_down_open: "^ ",
       scared: "† ",
       ghost_dead: "ªª",
       door: "__",
-      x: 14,
-      y: 26,
-      speed: 80,
       width: 28,
       height: 36
     }
@@ -105,25 +111,17 @@ class Pacman
     end
     @energy_face = @defaults[:energy]
 
+    @lives = 5
     @running = true
-    @lives = 2
+    @even = true
     @score = 0
     @stop = 0
     @timer = 0.00
     @offset = 0
-    @next_dir = 0
-    @even = true
-    @energized = false
-    @count = 240
-
-    @pacman = @defaults[:pacman_still]
-    @dir = 0
-    @x = @defaults[:x]
-    @y = @defaults[:y]
+    @count = 1
     @treat = 0
     @consecutive = 0
     @capture_all = 0
-    @speed = @defaults[:speed]
 
     @dead_ghost = @defaults[:ghost_dead]
     @scared = @defaults[:scared]
@@ -131,6 +129,7 @@ class Pacman
     @inky = @defaults[:inky].clone
     @pinky = @defaults[:pinky].clone
     @clyde = @defaults[:clyde].clone
+    @pacman = @defaults[:pacman].clone
   end
 
   def build
@@ -261,8 +260,8 @@ class Pacman
       @frame_count += 1
       seconds = @timer - @offset
 
-      if t > @last_move + 1.to_f/rangeMapper(0, 100, 0, 13, @speed)
-        @last_move = t
+      if t > @pacman[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 13, @pacman[:speed])
+        @pacman[:last_move] = t
         movePacman
         change = true
       end
@@ -288,7 +287,7 @@ class Pacman
           when :candy
             @board[20][14] = @space if @board[20][14] == @defaults[:candy]
           when :energy
-            @energized = false
+            @pacman[:energized] = false
           end
         end
       end
@@ -310,9 +309,9 @@ class Pacman
     if who == @pacman
       speed = case @level
       when 1
-        @energized == false ? 80 : 85
+        @pacman[:energized] == false ? 80 : 85
       when (2..4)
-        @energized == false ? 90 : 95
+        @pacman[:energized] == false ? 90 : 95
       when (5..20)
         100
       else
@@ -413,7 +412,7 @@ class Pacman
       @consecutive = 0
       @stop += 1
       score = 50
-      @energized = true
+      @pacman[:energized] = true
       time = case @level
       when 1
         6
@@ -430,15 +429,14 @@ class Pacman
       else
         0
       end
-      @error = []
       @countdown[:energy] = Time.now + time
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         reverse(ghost)
         ghost[:status] = "frightened" if ghost[:status] != "dead"
       end
-      @energy -= [[@y, @x]]
+      @energy -= [[@pacman[:y], @pacman[:x]]]
     when 'candy'
-      score = 200
+      score = 200 #Change based on level
     else
       score = str
     end
@@ -447,27 +445,27 @@ class Pacman
   end
 
   def movePacman
-    @board[@y][@x] = @space
+    @board[@pacman[:y]][@pacman[:x]] = @space
     if @stop == 0
       case @next_dir
       when 1
-        @dir = @next_dir if @board[@y][((@x + 1) % @boardx)] != @wall && @board[@y][((@x + 1) % @boardx)] != @door
+        @dir = @next_dir if @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door
       when 2
-        @dir = @next_dir if @board[((@y + 1) % @boardy)][@x] != @wall && @board[((@y + 1) % @boardy)][@x] != @door
+        @dir = @next_dir if @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door
       when 3
-        @dir = @next_dir if @board[@y][((@x - 1) % @boardx)] != @wall && @board[@y][((@x - 1) % @boardx)] != @door
+        @dir = @next_dir if @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door
       when 4
-        @dir = @next_dir if @board[((@y - 1) % @boardy)][@x] != @wall && @board[((@y - 1) % @boardy)][@x] != @door
+        @dir = @next_dir if @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door
       end
       case @dir
       when 1
-        @board[@y][((@x + 1) % @boardx)] != @wall && @board[@y][((@x + 1) % @boardx)] != @door ? @x = (@x + 1) % @boardx : @dir = @next_dir
+        @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] + 1) % @boardx : @dir = @next_dir
       when 2
-        @board[((@y + 1) % @boardy)][@x] != @wall && @board[((@y + 1) % @boardy)][@x] != @door ? @y = (@y + 1) % @boardy : @dir = @next_dir
+        @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] + 1) % @boardy : @dir = @next_dir
       when 3
-        @board[@y][((@x - 1) % @boardx)] != @wall && @board[@y][((@x - 1) % @boardx)] != @door ? @x = (@x - 1) % @boardx : @dir = @next_dir
+        @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] - 1) % @boardx : @dir = @next_dir
       when 4
-        @board[((@y - 1) % @boardy)][@x] != @wall && @board[((@y - 1) % @boardy)][@x] != @door ? @y = (@y - 1) % @boardy : @dir = @next_dir
+        @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] - 1) % @boardy : @dir = @next_dir
       when 0
         @dir = 0
       end
@@ -475,7 +473,7 @@ class Pacman
       @stop -= 1
     end
 
-    location = @board[@y][@x]
+    location = @board[@pacman[:y]][@pacman[:x]]
     location = @space if location == nil
     ghost_locations = [[@blinky[:y], @blinky[:x]], [@pinky[:y], @pinky[:x]], [@clyde[:y], @clyde[:x]], [@inky[:y], @inky[:x]]]
     if location == @pellet
@@ -484,8 +482,8 @@ class Pacman
       score('candy')
     elsif @energy_face.include?(location)
       score('energy')
-    elsif ghost_locations.include?([@y, @x])
-      enemy = case ghost_locations.index([@y, @x])
+    elsif ghost_locations.include?([@pacman[:y], @pacman[:x]])
+      enemy = case ghost_locations.index([@pacman[:y], @pacman[:x]])
       when 0
         @blinky
       when 1
@@ -512,31 +510,31 @@ class Pacman
 
     if @even == true
       @even = false
-      @pacman = case @dir
+      @pacman[:face] = case @dir
       when 0
-        @defaults[:pacman_still]
+        @pacman[:still]
       when 3
-        @defaults[:pacman_left_closed]
+        @pacman[:closed_left]
       when 1
-        @defaults[:pacman_right_closed]
+        @pacman[:closed_right]
       when 2, 4
-        @defaults[:pacman_vert_closed]
+        @pacman[:closed_vert]
       end
       @energy_face = @defaults[:energy_swollen]
     else
       @even = true
       @energy_face = @defaults[:energy]
-      @pacman = case @dir
+      @pacman[:face] = case @dir
       when 0
-        @defaults[:pacman_still]
+        @pacman[:still]
       when 1
-        @defaults[:pacman_right_open]
+        @pacman[:open_right]
       when 2
-        @defaults[:pacman_down_open]
+        @pacman[:open_down]
       when 3
-        @defaults[:pacman_left_open]
+        @pacman[:open_left]
       when 4
-        @defaults[:pacman_up_open]
+        @pacman[:open_up]
       end
     end
   end
@@ -557,7 +555,7 @@ class Pacman
     end
 
     if mode == "frightened"
-      if @energized == false
+      if @pacman[:energized] == false
         face = defaults[:face]
         me[:status] = mode = "idle"
       else
@@ -565,7 +563,7 @@ class Pacman
       end
     end
     if !(mode == "frightened" || mode == "dead")
-      if seconds < 7 || (seconds > 21 && seconds < 28) || (seconds > 48 && seconds < 55)
+      if seconds < 7 || (seconds > 27 && seconds < 34) || (seconds > 54 && seconds < 61) || (seconds > 48 && seconds < 55)
         reverse(me) if mode == "chase"
         me[:status] = "scatter"
       else
@@ -611,31 +609,31 @@ class Pacman
       when "chase"
         face = defaults[:face]
         if me == @blinky
-          mode = pathFind(@blinky, [@y, @x])
+          mode = pathFind(@blinky, [@pacman[:y], @pacman[:x]])
           speed = 37
         end
         if me == @pinky
           mode = case @dir
           when "left"
-            pathFind(@pinky, [@y, (@x - 4) % @boardx])
+            pathFind(@pinky, [@pacman[:y], (@pacman[:x] - 4) % @boardx])
           when "right"
-            pathFind(@pinky, [@y, (@x + 4) % @boardx])
+            pathFind(@pinky, [@pacman[:y], (@pacman[:x] + 4) % @boardx])
           when "up"
-            pathFind(@pinky, [(@y - 4) % @boardy, @x])
+            pathFind(@pinky, [(@pacman[:y] - 4) % @boardy, @pacman[:x]])
           when "down"
-            pathFind(@pinky, [(@y + 4) % @boardy, @x])
+            pathFind(@pinky, [(@pacman[:y] + 4) % @boardy, @pacman[:x]])
           else
-            pathFind(@pinky, [@y, @x])
+            pathFind(@pinky, [@pacman[:y], @pacman[:x]])
           end
         end
         if me == @inky
-          vector = distanceTo([@blinky[:y], @blinky[:x]], [@y, @x], 2)
+          vector = distanceTo([@blinky[:y], @blinky[:x]], [@pacman[:y], @pacman[:x]], 2)
           mode = pathFind(@inky, [@blinky[:y]+vector[0], @blinky[:x]+vector[1]])
         end
         if me == @clyde
-          dist = distanceTo([@clyde[:y], @clyde[:x]], [@y, @x])
+          dist = distanceTo([@clyde[:y], @clyde[:x]], [@pacman[:y], @pacman[:x]])
           if (dist[0].abs + dist[1].abs) >= 8
-            mode = pathFind(@clyde, [@y, @x])
+            mode = pathFind(@clyde, [@pacman[:y], @pacman[:x]])
           else
             mode = pathFind(@clyde, @clyde[:target])
           end
@@ -749,12 +747,11 @@ class Pacman
 
       if [old_y, old_x] == [14, 14] && mode == "dead"
         mode = "idle"
-        # char[:speed] = 0
         new_y = old_y
         new_x = old_x
       end
 
-      if [old_y, old_x] == [@y, @x] || [new_y, new_x] == [@y, @x]
+      if [old_y, old_x] == [@pacman[:y], @pacman[:x]] || [new_y, new_x] == [@pacman[:y], @pacman[:x]]
         if mode == "frightened"
           mode = "dead"
           char[:face] = @ghost_dead
@@ -773,7 +770,7 @@ class Pacman
         @clyde[:below]
       when [@inky[:y], @inky[:x]]
         @inky[:below]
-      when [@y, @x]
+      when [@pacman[:y], @pacman[:x]]
         @space
       else
         @board[new_y][new_x]
@@ -820,9 +817,6 @@ class Pacman
       @running = true
       @stop = 0
       @offset = @timer
-      @next_dir = 0
-      @dir = 0
-      @energized = false
       @countdown.each { |obj, val| @countdown[obj] = Time.now - 15 }
       [@blinky, @inky, @pinky, @clyde].each do |ghost|
         @board[ghost[:y]][ghost[:x]] = ghost[:below]
@@ -831,8 +825,7 @@ class Pacman
       @pinky = @defaults[:pinky].clone
       @inky = @defaults[:inky].clone
       @clyde = @defaults[:clyde].clone
-      @x = @defaults[:x]
-      @y = @defaults[:y]
+      @pacman = @defaults[:pacman].clone
       build
       getReady("Get Ready!")
     else
@@ -928,9 +921,6 @@ class Pacman
     @running = true
     @stop = 0
     @offset = @timer
-    @next_dir = 0
-    @dir = 0
-    @energized = false
     @energy = []
     [6, 26].each do |blocks|
       [1, 26].each do |block|
@@ -945,8 +935,7 @@ class Pacman
     @pinky = @defaults[:pinky].clone
     @inky = @defaults[:inky].clone
     @clyde = @defaults[:clyde].clone
-    @x = @defaults[:x]
-    @y = @defaults[:y]
+    @pacman = @defaults[:pacman].clone
     build
     getReady("Get Ready!")
   end
@@ -956,7 +945,7 @@ class Pacman
     @board[@pinky[:y]][@pinky[:x]] = @pinky[:face]
     @board[@inky[:y]][@inky[:x]] = @inky[:face]
     @board[@clyde[:y]][@clyde[:x]] = @clyde[:face]
-    @board[@y][@x] = @pacman
+    @board[@pacman[:y]][@pacman[:x]] = @pacman[:face]
     @energy.each { |loc| @board[loc[0]][loc[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
@@ -985,8 +974,7 @@ class Pacman
     puts "Level: #{@level}"
     puts "Score: #{@score}"
     puts "Message: #{@error}"
-    puts "Energy: #{@energized}"
-    puts "Eaten: #{241 - @count}"
+    puts "Eaten: #{240 - @count}"
     system "stty raw -echo"
   end
 end
