@@ -231,7 +231,7 @@ class Pacman
             @board[blocks][block] = @space
           end
         end
-        @board[27][13] = @space
+        @board[26][13] = @space
         (12..22).each do |blocks|
           @board[blocks].each_with_index do |x, block|
             @board[blocks][block] = @space if @board[blocks][block] == @pellet && !([6, 21].include?(block))
