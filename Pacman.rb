@@ -788,6 +788,13 @@ class Pacman
 
       if [old_y, old_x] == [@pacman[:y], @pacman[:x]] || [new_y, new_x] == [@pacman[:y], @pacman[:x]]
         if mode == "frightened"
+          ghosts = [@blinky, @inky, @inky, @clyde]
+          ghosts.each do |ghost|
+            if [ghost[:y], ghost[:x]] == [char[:y], char[:x]]
+              ghost[:status] = "dead"
+              ghost[:face] = @ghost_dead
+            end
+          end
           mode = "dead"
           char[:face] = @ghost_dead
           consec_check
@@ -878,8 +885,10 @@ class Pacman
     error.each_with_index do |letter, pos|
       retrieve << @board[20][(14 - start) + pos]
       if msg == "Get Ready!"
-        if ghost_locations.include?([20, (14 - start) + pos])
-          ghost = case [20, (14 - start) + pos]
+        @board[20][(14 - start) + pos] = letter + " "
+      else
+        if ghost_locations.include?([17, (14 - start) + pos])
+          ghost = case [17, (14 - start) + pos]
           when [@blinky[:y], @blinky[:x]]
             @blinky
           when [@pinky[:y],@pinky[:x]]
@@ -891,8 +900,6 @@ class Pacman
           end
           ghost[:below] = letter + " "
         end
-        @board[20][(14 - start) + pos] = letter + " "
-      else
         @board[17][(14 - start) + pos] = letter + " "
       end
     end
@@ -952,7 +959,6 @@ class Pacman
 
   def nextRound
     @level += 1
-    @board = Array.new(37) {Array.new(28) {@pellet}}
     @running = true
     @stop = 0
     @offset = @timer
@@ -971,6 +977,7 @@ class Pacman
     @inky = @defaults[:inky].clone
     @clyde = @defaults[:clyde].clone
     @pacman = @defaults[:pacman].clone
+    @board = Array.new(37) {Array.new(28) {@pellet}}
     build
     getReady("Get Ready!")
   end
