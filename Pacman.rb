@@ -441,7 +441,24 @@ class Pacman
       end
       @energy -= [[@pacman[:y], @pacman[:x]]]
     when 'candy'
-      score = 200 #Change based on level
+      score = case @level
+      when 1
+        100
+      when 2
+        300
+      when 3, 4
+        500
+      when 5, 6
+        700
+      when 7, 8
+        1000
+      when 9, 10
+        2000
+      when 11, 12
+        3000
+      else
+        5000
+      end
     else
       score = str
     end
