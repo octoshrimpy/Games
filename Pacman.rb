@@ -33,8 +33,7 @@ class Pacman
         face: "Ω ",
         status: "idle",
         last_move: Time.now,
-        wait: 0,
-        speed: 75
+        wait: 0
       },
       pinky: {
         y: 17,
@@ -46,8 +45,7 @@ class Pacman
         face: "¥ ",
         status: "idle",
         last_move: Time.now,
-        wait: 0,
-        speed: 75
+        wait: 0
       },
       inky: {
         y: 17,
@@ -59,8 +57,7 @@ class Pacman
         face: "∑ ",
         status: "idle",
         last_move: Time.now,
-        wait: 0,
-        speed: 75
+        wait: 0
       },
       clyde: {
         y: 17,
@@ -72,8 +69,7 @@ class Pacman
         face: "∆ ",
         status: "idle",
         last_move: Time.now,
-        wait: 0,
-        speed: 75
+        wait: 0
       },
       pacman: {
         still: "o ",
@@ -87,7 +83,6 @@ class Pacman
         face: "o ",
         x: 14,
         y: 26,
-        speed: 80,
         last_move: t,
         next_dir: 0,
         dir: 0,
@@ -270,7 +265,7 @@ class Pacman
       @frame_count += 1
       seconds = @timer - @offset
 
-      if t > @pacman[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 13, @pacman[:speed])
+      if t > @pacman[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 11, speedControl)
         @pacman[:last_move] = t
         movePacman
         change = true
@@ -278,7 +273,7 @@ class Pacman
 
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
         speed = speedControl(ghost, ghost[:status])
-        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 13, speed)
+        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 11, speed)
           ghost[:last_move] = t
           control(ghost, seconds)
           change = true
@@ -521,9 +516,8 @@ class Pacman
         consec_check
       end
     end
-
+    @even = (((@timer.round(1)*10)/2)%2).floor == 0 ? true : false
     if @even == true
-      @even = false
       @pacman[:face] = case @dir
       when 0
         @pacman[:still]
@@ -536,7 +530,6 @@ class Pacman
       end
       @energy_face = @defaults[:energy_swollen]
     else
-      @even = true
       @energy_face = @defaults[:energy]
       @pacman[:face] = case @dir
       when 0
@@ -771,7 +764,7 @@ class Pacman
 
       if [old_y, old_x] == char[:origin] && mode == "dead"
         mode = "idle"
-        char[:wait] = 50
+        char[:wait] = 10
         new_y = old_y
         new_x = old_x
       end
