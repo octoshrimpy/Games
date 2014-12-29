@@ -577,10 +577,13 @@ class Pacman
     when @blinky
       @defaults[:blinky]
     when @pinky
+      @pinky[:wait] = 3 if seconds < 2
       @defaults[:pinky]
     when @inky
+      @inky[:wait] = 3 if seconds < 8
       @defaults[:inky]
     when @clyde
+      @clyde[:wait] = 3 if seconds < 21
       @defaults[:clyde]
     end
 
@@ -599,33 +602,6 @@ class Pacman
       else
         reverse(me) if mode == "scatter"
         me[:status] = "chase"
-      end
-    end
-    if me == @pinky
-      if seconds >= 1 && seconds <= 2
-        @board[@pinky[:y]][@pinky[:x]] = @space
-        @pinky[:y] = 14
-        @pinky[:x] = 14
-        @pinky[:direction] = "left"
-        @pinky[:below] = @space
-      end
-    end
-    if me == @inky
-      if seconds >= 7 && seconds <= 8
-        @board[@inky[:y]][@inky[:x]] = @space
-        @inky[:y] = 14
-        @inky[:x] = 14
-        @inky[:direction] = "left"
-        @inky[:below] = @space
-      end
-    end
-    if me == @clyde
-      if seconds >= 20 && seconds <= 21
-        @board[@clyde[:y]][@clyde[:x]] = @space
-        @clyde[:y] = 14
-        @clyde[:x] = 14
-        @clyde[:direction] = "left"
-        @clyde[:below] = @space
       end
     end
 
@@ -783,7 +759,10 @@ class Pacman
       end
 
       if char[:wait] > 0
-        new_x = new_y = 14 if char[:wait] == 1
+        if char[:wait] == 1
+          new_x = new_y = 14
+          new_dir = "left"
+        end
         char[:wait] -= 1
       end
 
@@ -960,6 +939,7 @@ class Pacman
 
   def nextRound
     @level += 1
+    @treat = 0
     @running = true
     @stop = 0
     @offset = @timer
