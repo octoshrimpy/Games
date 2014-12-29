@@ -27,44 +27,52 @@ class Pacman
         y: 14,
         x: 14,
         target: [1, 25],
+        origin: [17, 14],
         direction: "left",
         below: @space,
         face: "Ω ",
         status: "idle",
         last_move: Time.now,
+        wait: 0,
         speed: 75
       },
       pinky: {
         y: 17,
         x: 14,
         target: [1, 2],
+        origin: [17, 14],
         direction: "left",
         below: @space,
         face: "¥ ",
         status: "idle",
         last_move: Time.now,
+        wait: 0,
         speed: 75
       },
       inky: {
         y: 17,
         x: 13,
         target: [35, 27],
+        origin: [17, 13],
         direction: "left",
         below: @space,
         face: "∑ ",
         status: "idle",
         last_move: Time.now,
+        wait: 0,
         speed: 75
       },
       clyde: {
         y: 17,
         x: 15,
         target: [35, 0],
+        origin: [17, 15],
         direction: "left",
         below: @space,
         face: "∆ ",
         status: "idle",
         last_move: Time.now,
+        wait: 0,
         speed: 75
       },
       pacman: {
@@ -91,6 +99,7 @@ class Pacman
       energy_swollen: "Ø ",
       candy: "å ",
       scared: "† ",
+      blink: "! ",
       ghost_dead: "ªª",
       door: "__",
       width: 28,
@@ -101,6 +110,7 @@ class Pacman
     @boardx = @defaults[:width]
     @wall = @defaults[:wall]
     @pellet = @defaults[:pellet]
+    @extra_life_given = false
     @door = @defaults[:door]
     @board = Array.new(37) {Array.new(28) {@pellet}}
     @energy = []
@@ -441,6 +451,10 @@ class Pacman
       score = str
     end
     @score += score
+    if @score >= 10000 && @extra_life_given == false
+      @extra_life_given = true
+      @lives += 1
+    end
     getReady(score, false) if score > 0
   end
 
@@ -535,6 +549,16 @@ class Pacman
         @pacman[:open_left]
       when 4
         @pacman[:open_up]
+      end
+    end
+
+    [@blinky, @inky, @pinky, @clyde].each do |ghost|
+      if ghost[:status] == "frightened"
+        # time_left = case level
+        # end
+        ghost[:face] = @even == true ? @defaults[:scared] : @defaults[:blink]
+        # if (time_left) > (@countdown[:energized])
+        # end
       end
     end
   end
@@ -643,7 +667,7 @@ class Pacman
         face = @scared
       when "dead"
         face = @dead_ghost
-        mode = pathFind(me, [17, 14])
+        mode = pathFind(me, me[:origin])
       when "idle"
         face = "x "
     end
@@ -726,7 +750,7 @@ class Pacman
         valid = false if pos == down && dir == "up"
         valid = false if pos == right && dir == "left"
         valid = false if pos == left && dir == "right"
-        if taken != @wall && taken != @door && valid
+        if taken != @wall && valid && (taken != @door || mode == "dead")
           dist = distanceTo(pos, loc)
           distances << (dist[0].abs + dist[1].abs)
         else
@@ -745,10 +769,16 @@ class Pacman
         "right"
       end
 
-      if [old_y, old_x] == [14, 14] && mode == "dead"
+      if [old_y, old_x] == char[:origin] && mode == "dead"
         mode = "idle"
+        char[:wait] = 50
         new_y = old_y
         new_x = old_x
+      end
+
+      if char[:wait] > 0
+        new_x = new_y = 14 if char[:wait] == 1
+        char[:wait] -= 1
       end
 
       if [old_y, old_x] == [@pacman[:y], @pacman[:x]] || [new_y, new_x] == [@pacman[:y], @pacman[:x]]
@@ -949,6 +979,7 @@ class Pacman
     @energy.each { |loc| @board[loc[0]][loc[1]] = @energy_face }
     system "stty -raw echo"
     system "clear" or system "cls"
+    puts "Score: #{@score}"
     i = 0
     while i < @board.length
       if i > 2 && i < 34
@@ -969,11 +1000,11 @@ class Pacman
     [@blinky, @inky, @pinky, @clyde].each { |ghost| @count += 1 if ghost[:below] == @pellet }
     treat(@count)
     nextRound if @count == 0
-    puts "Lives: #{@lives}"
+    @lives.times { print ">  " }
+    puts ""
+    puts "Message: #{@error}"
     puts "Time: #{@timer.round}"
     puts "Level: #{@level}"
-    puts "Score: #{@score}"
-    puts "Message: #{@error}"
     puts "Eaten: #{240 - @count}"
     system "stty raw -echo"
   end
