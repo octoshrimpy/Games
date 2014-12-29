@@ -84,7 +84,7 @@ class Pacman
         x: 14,
         y: 26,
         last_move: t,
-        next_dir: 0,
+        next_dir: 3,
         dir: 0,
         energized: false
       },
@@ -272,8 +272,7 @@ class Pacman
       end
 
       [@blinky, @pinky, @inky, @clyde].each do |ghost|
-        speed = speedControl(ghost, ghost[:status])
-        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 11, speed)
+        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 11, speedControl(ghost, ghost[:status]))
           ghost[:last_move] = t
           control(ghost, seconds)
           change = true
@@ -473,27 +472,27 @@ class Pacman
   def movePacman
     @board[@pacman[:y]][@pacman[:x]] = @space
     if @stop == 0
-      case @next_dir
+      case @pacman[:next_dir]
       when 1
-        @dir = @next_dir if @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door
+        @pacman[:dir] = @pacman[:next_dir] if @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door
       when 2
-        @dir = @next_dir if @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door
+        @pacman[:dir] = @pacman[:next_dir] if @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door
       when 3
-        @dir = @next_dir if @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door
+        @pacman[:dir] = @pacman[:next_dir] if @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door
       when 4
-        @dir = @next_dir if @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door
+        @pacman[:dir] = @pacman[:next_dir] if @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door
       end
-      case @dir
+      case @pacman[:dir]
       when 1
-        @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] + 1) % @boardx : @dir = @next_dir
+        @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] + 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] + 1) % @boardx : @pacman[:dir] = @pacman[:next_dir]
       when 2
-        @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] + 1) % @boardy : @dir = @next_dir
+        @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] + 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] + 1) % @boardy : @pacman[:dir] = @pacman[:next_dir]
       when 3
-        @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] - 1) % @boardx : @dir = @next_dir
+        @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @wall && @board[@pacman[:y]][((@pacman[:x] - 1) % @boardx)] != @door ? @pacman[:x] = (@pacman[:x] - 1) % @boardx : @pacman[:dir] = @pacman[:next_dir]
       when 4
-        @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] - 1) % @boardy : @dir = @next_dir
+        @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @wall && @board[((@pacman[:y] - 1) % @boardy)][@pacman[:x]] != @door ? @pacman[:y] = (@pacman[:y] - 1) % @boardy : @pacman[:dir] = @pacman[:next_dir]
       when 0
-        @dir = 0
+        @pacman[:dir] = 0
       end
     else
       @stop -= 1
@@ -530,12 +529,14 @@ class Pacman
           enemy[:below] = @space
           score('candy')
         end
+
         consec_check
       end
     end
+
     @even = (((@timer.round(1)*10)/2)%2).floor == 0 ? true : false
     if @even == true
-      @pacman[:face] = case @dir
+      @pacman[:face] = case @pacman[:dir]
       when 0
         @pacman[:still]
       when 3
@@ -548,7 +549,7 @@ class Pacman
       @energy_face = @defaults[:energy_swollen]
     else
       @energy_face = @defaults[:energy]
-      @pacman[:face] = case @dir
+      @pacman[:face] = case @pacman[:dir]
       when 0
         @pacman[:still]
       when 1
@@ -642,7 +643,7 @@ class Pacman
           speed = 37
         end
         if me == @pinky
-          mode = case @dir
+          mode = case @pacman[:dir]
           when "left"
             pathFind(@pinky, [@pacman[:y], (@pacman[:x] - 4) % @boardx])
           when "right"
@@ -923,10 +924,10 @@ class Pacman
 
   def movement(m)
     m = m[0]
-    @next_dir = 1 if m == "d"
-    @next_dir = 2 if m == "s"
-    @next_dir = 3 if m == "a"
-    @next_dir = 4 if m == "w"
+    @pacman[:next_dir] = 1 if m == "d"
+    @pacman[:next_dir] = 2 if m == "s"
+    @pacman[:next_dir] = 3 if m == "a"
+    @pacman[:next_dir] = 4 if m == "w"
     if m == "x"
       @running = false
       exit
