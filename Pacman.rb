@@ -561,14 +561,9 @@ class Pacman
         @pacman[:open_up]
       end
     end
-
     [@blinky, @inky, @pinky, @clyde].each do |ghost|
-      if ghost[:status] == "frightened"
-        # time_left = case level
-        # end
+      if 2 > (@countdown[:energy] - Time.now).to_i && ghost[:status] == "frightened"
         ghost[:face] = @even == true ? @defaults[:scared] : @defaults[:blink]
-        # if (time_left) > (@countdown[:energized])
-        # end
       end
     end
   end
