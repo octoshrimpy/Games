@@ -151,7 +151,7 @@ class Pacman
     end
     @energy_face = @defaults[:energy]
 
-    @lives = 3
+    @lives = 2
     @running = true
     @even = true
     @score = 0
@@ -293,7 +293,7 @@ class Pacman
       end
 
       [@pacman, @blinky, @pinky, @inky, @clyde].each do |ghost|
-        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 11, speedControl(ghost))
+        if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 9, speedControl(ghost))
           ghost[:last_move] = t
           ghost == @pacman ? movePacman : moveGhost(ghost, seconds)
           change = true
