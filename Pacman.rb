@@ -5,6 +5,7 @@
 # movement
 # draw
 # died
+# scoreCheck
 
 ##-- Game Play
 # movePacman
