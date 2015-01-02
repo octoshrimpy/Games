@@ -35,8 +35,8 @@ require 'io/wait'
 class Pacman
 # ------------------------- Structure --------------------
   def initialize
-    File.new "./pacman.txt", "w+" if !(File.exists?("./pacman.txt"))
-    @highscore = File.read("./pacman.txt").to_i
+    File.new "./Saves/pacman.txt", "w+" if !(File.exists?("./Saves/pacman.txt"))
+    @highscore = File.read("./Saves/pacman.txt").to_i
 
     t = Time.now
     @time1 = t
@@ -386,7 +386,7 @@ class Pacman
     if @score > @highscore
       new_score = @score
       puts "You have beaten the high score!"
-      File.open("./pacman.txt", 'w+') { |f| f.puts("#{new_score}") }
+      File.open("./Saves/pacman.txt", 'w+') { |f| f.puts("#{new_score}") }
     end
     exit
   end

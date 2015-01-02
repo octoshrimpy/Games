@@ -68,9 +68,10 @@ class Tetris
   end
 
   def step
+    # 20 steps / second
     @level = (@score / 100) + 1
     @level = 10 if @level > 10
-    bps = (11 - @level) * 2
+    bps = (11 - @level)
     bps = 1 if @fast
 
     if @count >= bps
@@ -262,7 +263,7 @@ class Tetris
     system "stty -raw echo"
     system "clear" or system "cls"
     print "  "
-    21.times do print "-" end
+    21.times { print "-" }
     puts ""
     i = 2
     while i < @board.length - 1
@@ -272,13 +273,17 @@ class Tetris
       i += 1
     end
     print "  "
-    21.times do print "-" end
+    21.times { print "-" }
     puts ""
     p @score
     system "stty raw -echo"
   end
 end
 
+File.new "./Saves/tetris.txt", "w+" if !(File.exists?("./Saves/tetris.txt"))
+old = File.read("./Saves/tetris.txt").to_i
+puts "The old high score is: #{old}"
+sleep 3
 game = Tetris.new
 game.makePiece
 
@@ -297,3 +302,15 @@ loop do
     break
   end
 end
+
+if game.instance_variable_get(:@lon) > old
+  new_score = game.instance_variable_get(:@lon)
+  puts "You have beaten the high score!"
+  File.open("./Saves/tetris.txt", 'w+') { |f| f.puts("#{new_score}") }
+else
+  puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
+end
+puts "#{new_score} is the high score"
+File.open("./Saves/tetris.txt", 'w+') { |f| f.puts("#{new_score}") }
+
+exit
