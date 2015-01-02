@@ -34,11 +34,13 @@ require 'io/wait'
 class Pacman
 # ------------------------- Structure --------------------
   def initialize
+    File.new "./pacman.txt", "w+" if !(File.exists?("./pacman.txt"))
+    @highscore = File.read("./pacman.txt").to_i
+
     t = Time.now
     @time1 = t
     @time2 = t
 
-    @error = 0
     @space = "  "
     @level = 1
     @dots = 240
@@ -311,7 +313,7 @@ class Pacman
     @pacman[:next_dir] = 4 if m == "w"
     if m == "x"
       @running = false
-      exit
+      scoreCheck
     end
   end
 
@@ -325,6 +327,7 @@ class Pacman
     system "stty -raw echo"
     system "clear" or system "cls"
     print "FPS: #{@fps}     "
+    puts "Highscore: #{@highscore}"
     puts "Score: #{@score}"
     i = 0
     while i < @board.length
@@ -348,7 +351,6 @@ class Pacman
     nextRound if @count == 0
     @lives.times { print ">  " }
     puts ""
-    puts "Message: #{@error}"
     puts "Time: #{@timer.round}"
     puts "Level: #{@level}"
     puts "Eaten: #{240 - @count}"
@@ -374,8 +376,18 @@ class Pacman
       createMessage("Get Ready!")
     else
       puts "Frames: #{@frame_count}"
-      exit
+      scoreCheck
     end
+  end
+
+  def scoreCheck
+    system "stty -raw echo"
+    if @score > @highscore
+      new_score = @score
+      puts "You have beaten the high score!"
+      File.open("./pacman.txt", 'w+') { |f| f.puts("#{new_score}") }
+    end
+    exit
   end
 # ------------------------- Game Play --------------------
   def movePacman
