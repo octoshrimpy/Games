@@ -95,6 +95,11 @@ class Snake
   end
 end
 
+
+File.new "./Saves/s_sh.txt", "w+" if !(File.exists?("./Saves/s_sh.txt"))
+old = File.read("./Saves/s_sh.txt").to_i
+puts "The old high score is: #{old}"
+sleep 3
 game = Snake.new
 game.makefood
 game.show
@@ -120,16 +125,14 @@ end
 prompt = 0
 system "stty -raw echo"
 
-#if File.exists?("./Saves/s_sh.txt") (File.open("./Saves/s_sh.txt", 'w+')
-f = File.read("./Saves/s_sh.txt").to_i
-puts "The old high score is: #{f}"
-f = 0 if f == nil
-if f < game.instance_variable_get(:@lon)
-  File.write("./Saves/s_sh.txt",game.instance_variable_get(:@lon))
-  puts "You have beaten the high score! Your score is: #{game.instance_variable_get(:@lon)}"
+if game.instance_variable_get(:@lon) > old
+  new_score = game.instance_variable_get(:@lon)
+  puts "You have beaten the high score!"
+  File.open("./pacman.txt", 'w+') { |f| f.puts("#{new_score}") }
 else
   puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
 end
+puts "#{new_score} is the high score"
+File.open("./Saves/s_sh.txt", 'w+') { |f| f.puts("#{new_score}") }
 
-system "stty -raw echo"
 exit
