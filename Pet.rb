@@ -4,13 +4,14 @@
   x: 30,
   y: 19,
   born: Time.now,
-  type: "egg"
+  direction: "left",
+  type: "blob"
 }
-@empty = ". "
-@line = "x "
+@empty = "  "
+@line = "• "
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 @tick = 0
-@tick_time = 0.8
+@tick_time = 1
 
 def boardClear
   @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
@@ -20,32 +21,82 @@ def drawAt(y, x, mark)
   @board[y][x] = mark
 end
 
-def egg
+def drawEgg
   px = @pet[:x]
   py = @pet[:y]
   num = @tick % 2
   if num == 0
     # Shape
-    [8].each { |y| [0, 1].each { |x| drawAt(py-y, px-x, @line) }}
-    [7].each { |y| [2, -1].each { |x| drawAt(py-y, px-x, @line) }}
-    (2..5).each { |y| [-3, 4].each { |x| drawAt(py-y, px-x, @line) }}
-    [1, 6].each { |y| [-2, 3].each { |x| drawAt(py-y, px-x, @line) }}
-    [0].each { |y| (-1..2).each { |x| drawAt(py-y, px-x, @line) }}
+    [8].each { |y| [0, 1].each { |x| drawAt(py-y, x-px, @line) }}
+    [7].each { |y| [2, -1].each { |x| drawAt(py-y, x-px, @line) }}
+    (2..5).each { |y| [-3, 4].each { |x| drawAt(py-y, x-px, @line) }}
+    [1, 6].each { |y| [-2, 3].each { |x| drawAt(py-y, x-px, @line) }}
+    [0].each { |y| (-1..2).each { |x| drawAt(py-y, x-px, @line) }}
     # Stripe
-    [1, 5, 6].each { |y| [-1].each { |x| drawAt(py-y, px-x, @line) }}
-    (1..5).each { |y| [0].each { |x| drawAt(py-y, px-x, @line) }}
-    (2..4).each { |y| [1].each { |x| drawAt(py-y, px-x, @line) }}
+    [1, 5, 6].each { |y| [-1].each { |x| drawAt(py-y, x-px, @line) }}
+    (1..5).each { |y| [0].each { |x| drawAt(py-y, x-px, @line) }}
+    (2..4).each { |y| [1].each { |x| drawAt(py-y, x-px, @line) }}
   else
     # Shape
-    [6].each { |y| [0, 1].each { |x| drawAt(py-y, px-x, @line) }}
-    [5].each { |y| [-1, 2].each { |x| drawAt(py-y, px-x, @line) }}
-    [4].each { |y| [-2, 3].each { |x| drawAt(py-y, px-x, @line) }}
-    (1..3).each { |y| [-3, 4].each { |x| drawAt(py-y, px-x, @line) }}
-    [0].each { |y| (-2..3).each { |x| drawAt(py-y, px-x, @line) }}
+    [6].each { |y| [0, 1].each { |x| drawAt(py-y, x-px, @line) }}
+    [5].each { |y| [-1, 2].each { |x| drawAt(py-y, x-px, @line) }}
+    [4].each { |y| [-2, 3].each { |x| drawAt(py-y, x-px, @line) }}
+    (1..3).each { |y| [-3, 4].each { |x| drawAt(py-y, x-px, @line) }}
+    [0].each { |y| (-2..3).each { |x| drawAt(py-y, x-px, @line) }}
     # Stripe
-    [3, 4].each { |y| [-1].each { |x| drawAt(py-y, px-x, @line) }}
-    (1..4).each { |y| [0].each { |x| drawAt(py-y, px-x, @line) }}
-    (1..3).each { |y| [1].each { |x| drawAt(py-y, px-x, @line) }}
+    [3, 4].each { |y| [-1].each { |x| drawAt(py-y, x-px, @line) }}
+    (1..4).each { |y| [0].each { |x| drawAt(py-y, x-px, @line) }}
+    (1..3).each { |y| [1].each { |x| drawAt(py-y, x-px, @line) }}
+  end
+end
+
+def drawBlob
+  px = @pet[:x]
+  py = @pet[:y]
+  num = @tick % 2
+  case @pet[:direction]
+  when "still"
+    if num == 0
+      # Shape
+      [5].each { |y| (-1..1).each { |x| drawAt(py-y, x-px, @line) }}
+      [4].each { |y| [-2, 2].each { |x| drawAt(py-y, x-px, @line) }}
+      [3].each { |y| [-3, 3].each { |x| drawAt(py-y, x-px, @line) }}
+      [1, 2].each { |y| [-4, 4].each { |x| drawAt(py-y, x-px, @line) }}
+      [0].each { |y| (-4..4).each { |x| drawAt(py-y, x-px, @line) }}
+      # Eyes
+      [2, 3].each { |y| [-1, 1].each { |x| drawAt(py-y, x-px, @line) }}
+    else
+      # Shape
+      [6].each { |y| (-1..1).each { |x| drawAt(py-y, x-px, @line) }}
+      [5].each { |y| [-2, 2].each { |x| drawAt(py-y, x-px, @line) }}
+      [4].each { |y| [-3, 3].each { |x| drawAt(py-y, x-px, @line) }}
+      [1, 2, 3].each { |y| [-4, 4].each { |x| drawAt(py-y, x-px, @line) }}
+      [0].each { |y| (-3..3).each { |x| drawAt(py-y, x-px, @line) }}
+      # Eyes
+      [4, 3].each { |y| [-1, 1].each { |x| drawAt(py-y, x-px, @line) }}
+    end
+  when "left"
+    if num == 0
+      # Shape
+      [5].each { |y| (-2..1).each { |x| drawAt(py-y, x-px, @line) }}
+      [4].each { |y| [-3, 2].each { |x| drawAt(py-y, x-px, @line) }}
+      [3].each { |y| [-4, 3].each { |x| drawAt(py-y, x-px, @line) }}
+      [1, 2].each { |y| [-4, 4].each { |x| drawAt(py-y, x-px, @line) }}
+      [0].each { |y| (-3..4).each { |x| drawAt(py-y, x-px, @line) }}
+      # Eyes
+      [2, 3].each { |y| [-2].each { |x| drawAt(py-y, x-px, @line) }}
+    else
+      # Shape
+      [5].each { |y| (-2..1).each { |x| drawAt(py-y, x-px, @line) }}
+      [4].each { |y| [-3, 2].each { |x| drawAt(py-y, x-px, @line) }}
+      [3].each { |y| [-4, 3].each { |x| drawAt(py-y, x-px, @line) }}
+      [2].each { |y| [-4, 4].each { |x| drawAt(py-y, x-px, @line) }}
+      [1].each { |y| [-4, 5].each { |x| drawAt(py-y, x-px, @line) }}
+      [0].each { |y| (-3..5).each { |x| drawAt(py-y, x-px, @line) }}
+      # Eyes
+      [2, 3].each { |y| [-2].each { |x| drawAt(py-y, x-px, @line) }}
+    end
+  when "right"
   end
 end
 
@@ -53,7 +104,9 @@ def tick
   boardClear
   case @pet[:type]
   when "egg"
-    egg
+    drawEgg
+  when "blob"
+    drawBlob
   end
   draw
   @tick += 1
@@ -75,6 +128,7 @@ def draw
     puts @board[i].join
     i += 1
   end
+  puts @tick
 end
 
 loop do
