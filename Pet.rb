@@ -5,8 +5,15 @@
   y: 19,
   born: Time.now,
   direction: "left",
+  target: 4,
+  fullness: 100,
+  health: 100
+  hygiene: 100,
+  obedience: 100,
+  strength: 100,
   type: "blob"
 }
+# `say =v Bells "d"`
 @empty = "  "
 @line = "• "
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
