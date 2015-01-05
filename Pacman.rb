@@ -281,7 +281,6 @@ class Pacman
   def tick
     if @running == true
       change = false
-      old_time = @timer
       t = Time.now
       change = timerControl(t)
       seconds = @timer - @offset
@@ -705,6 +704,8 @@ class Pacman
 
   def timerControl(t)
     delta = 0
+    old_time = @timer
+
     if @time1 > @time2
       @time2 = t
       delta = @time2 - @time1 if @time2 - @time1 < 3
