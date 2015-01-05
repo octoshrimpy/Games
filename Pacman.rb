@@ -283,14 +283,8 @@ class Pacman
       change = false
       old_time = @timer
       t = Time.now
-      timerControl(t)
+      change = timerControl(t)
       seconds = @timer - @offset
-
-      if old_time.round != @timer.round
-        @fps = @frame_rate
-        @frame_rate = 0
-        change = true
-      end
 
       [@pacman, @blinky, @pinky, @inky, @clyde].each do |ghost|
         if t > ghost[:last_move] + 1.to_f/rangeMapper(0, 100, 0, 9, speedControl(ghost))
@@ -735,6 +729,13 @@ class Pacman
         end
       end
     end
+
+    if old_time.round != @timer.round
+      @fps = @frame_rate
+      @frame_rate = 0
+      change = true
+    end
+    change ||= false
   end
 # -------------------------- Changes ---------------------
   def score(str)
