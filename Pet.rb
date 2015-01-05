@@ -1,6 +1,12 @@
-t = Time.now
 @boardx = 60
 @boardy = 20
+@empty = "  "
+@line = "• "
+@board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
+
+t = Time.now
+@tick_time = 0.5
+@tick = 0
 @time1 = t
 @time2 = t
 @frame_count = 0
@@ -13,7 +19,9 @@ t = Time.now
   y: 19,
   born: Time.now,
   direction: "right",
-  target: 4,
+  last_move: t,
+  next_move: t + 20,
+  target: 54,
   fullness: 100,
   health: 100,
   hygiene: 100,
@@ -22,12 +30,8 @@ t = Time.now
   strength: 100,
   type: "blob"
 }
+# Blob width: (-4..5)
 # `say =v Bells "d"`
-@empty = "  "
-@line = "• "
-@board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
-@tick = 0
-@tick_time = 1
 
 def boardClear
   @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
@@ -35,9 +39,8 @@ end
 
 def drawCoords(coords, flip=false)
   coords.each do |coord|
-    @error = flip
-    drawAt(@pet[:y]-coord[0], coord[1]-@pet[:x], @line) if flip == false
-    drawAt(@pet[:y]-coord[0], -coord[1]-@pet[:x], @line) if flip == true
+    drawAt(@pet[:y]-coord[0], @pet[:x]+coord[1], @line) if flip == false
+    drawAt(@pet[:y]-coord[0], @pet[:x]-coord[1], @line) if flip == true
   end
 end
 
@@ -131,9 +134,16 @@ def drawBlob
 end
 
 def tick
-  movement if @pet[:type] != "egg"
+  change = false
+  t = Time.now
+  change = timerControl(t)
+
+  if t > @pet[:last_move] + @tick_time
+    movement if @pet[:type] != "egg"
+    change = true
+  end
+
   draw if change == true
-  sleep @tick_time
 end
 
 def timerControl(t)
@@ -152,6 +162,14 @@ def timerControl(t)
   @timer += delta.round(5)
   @timer = @timer.round(5)
 
+  if t > @pet[:next_move]
+    @pet[:next_move] = t + 10 + rand(50)
+    @pet[:target] = case @pet[:type]
+    when "blob"
+      rand(@boardx - 8) + 4
+    end
+  end
+
   if old_time.round != @timer.round
     @fps = @frame_rate
     @frame_rate = 0
@@ -161,17 +179,31 @@ def timerControl(t)
 end
 
 def movement
-end
-
-def draw
-  system "clear" or "cls"
   boardClear
+  if @pet[:type] != "egg"
+    if @pet[:target] < @pet[:x]
+      @pet[:x] -= 1 if @tick % 2 == 1
+      @pet[:direction] = "left"
+    elsif @pet[:target] > @pet[:x]
+      @pet[:x] += 1 if @tick % 2 == 1
+      @pet[:direction] = "right"
+    else
+      @pet[:direction] = "still"
+    end
+  end
   case @pet[:type]
   when "egg"
     drawEgg
   when "blob"
     drawBlob
   end
+  @error = "#{Time.now} - #{@pet[:next_move]}\n#{@pet[:x]} - #{@pet[:target]}"
+  @tick += 1
+  @pet[:last_move] = Time.now
+end
+
+def draw
+  system "clear" or "cls"
   i = 0
   print "  "
   @boardx.times do |x|
