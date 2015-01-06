@@ -1063,3 +1063,5 @@ end
 loop do
   game.tick
 end
+
+system "stty -raw echo"
