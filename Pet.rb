@@ -5,7 +5,7 @@
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 
 t = Time.now
-@tick_time = 0.5
+@tick_time = 0.8
 @tick = 0
 @time1 = t
 @time2 = t
