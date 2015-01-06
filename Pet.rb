@@ -1,4 +1,4 @@
-@boardx = 60
+@boardx = 50
 @boardy = 20
 @empty = "  "
 @line = "• "
@@ -21,7 +21,7 @@ t = Time.now
   direction: "right",
   last_move: t,
   next_move: t + 20,
-  target: 54,
+  target: 34,
   fullness: 100,
   health: 100,
   hygiene: 100,
@@ -163,7 +163,7 @@ def timerControl(t)
   @timer = @timer.round(5)
 
   if t > @pet[:next_move]
-    @pet[:next_move] = t + 10 + rand(50)
+    @pet[:next_move] = t + 10 + rand(30)
     @pet[:target] = case @pet[:type]
     when "blob"
       rand(@boardx - 8) + 4
@@ -197,7 +197,7 @@ def movement
   when "blob"
     drawBlob
   end
-  @error = "#{Time.now} - #{@pet[:next_move]}\n#{@pet[:x]} - #{@pet[:target]}"
+  @error = "#{@pet[:next_move] - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
   @tick += 1
   @pet[:last_move] = Time.now
 end
