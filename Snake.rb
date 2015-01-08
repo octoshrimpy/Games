@@ -124,11 +124,10 @@ end
 
 prompt = 0
 system "stty -raw echo"
-
+new_score = old
 if game.instance_variable_get(:@lon) > old
   new_score = game.instance_variable_get(:@lon)
   puts "You have beaten the high score!"
-  File.open("./Saves/s_sh.txt", 'w+') { |f| f.puts("#{new_score}") }
 else
   puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
 end
