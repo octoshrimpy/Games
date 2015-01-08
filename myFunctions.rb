@@ -1,4 +1,4 @@
-@empty = ". "
+@empty = "  "
 @mark = "• "
 input = "
 123, -46, 0, -1, 1, 52, 1113245
@@ -10,13 +10,20 @@ input = "
 "
 
 art = "
-   •••
-  •   •
- • • • •
-•  • •  •
-•       •
-•       •
- •••••••
+..........
+...0000
+..0....0
+.0......0
+.0.0..0.0
+0........0
+0..000...0
+0........0
+0........0
+00......00
+.0..00..0
+.0..00..0
+..0.00.0
+...0..0
 "
 
 def incrementAll(string, increment)
@@ -49,6 +56,7 @@ def pixelartToFunction(pixel_art, live="x", dead=" ")
       placements[line_num] << char_pos if char == live
     end
   end
+  placements -= [[]]
   min = placements.sort_by { |y_values| y_values.first }.first.first
   max = placements.sort_by { |y_values| y_values.last }.last.last
   width = max - min
@@ -84,7 +92,7 @@ def pixelartToFunction(pixel_art, live="x", dead=" ")
   end
 end
 
-pixelartToFunction(art, "•", " ")
+pixelartToFunction(art, "0", ".")
 
 
 # 123, -46, 0, -1, 1, 52, 1113245
