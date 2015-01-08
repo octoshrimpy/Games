@@ -1,7 +1,7 @@
 @boardx = 50
 @boardy = 20
 @empty = "  "
-@line = "• "
+@line = "▒▒"
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 
 t = Time.now
@@ -28,7 +28,7 @@ t = Time.now
   obedience: 100,
   positivity: 100,
   strength: 100,
-  type: "blob"
+  type: "egg"
 }
 # Blob width: (-4..5)
 # `say =v Bells "d"`
@@ -139,7 +139,7 @@ def tick
   change = timerControl(t)
 
   if t > @pet[:last_move] + @tick_time
-    movement if @pet[:type] != "egg"
+    movement
     change = true
   end
 
