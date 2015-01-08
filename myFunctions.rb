@@ -1,4 +1,5 @@
-string = "
+@hold = []
+input = "
 123, -46, 0, -1, 1, 52, 1113245
 [8].each { |y| [0, 1].each { |x| coords << [y, x] }}
 [7].each { |y| [2, -1].each { |x| coords << [y, x] }}
@@ -6,23 +7,30 @@ string = "
 [1, 6].each { |y| [-2, 3].each { |x| coords << [y, x] }}
 [0].each { |y| (-1..2).each { |x| coords << [y, x] }}
 "
-@hold = []
-puts string
-puts "\n\n"
-string.split("").each do |char|
-  if (char =~ /\A[-+]?\d+\z/) == 0 || char == "-"
-    @hold << char
-  else
-    if @hold.length > 0
-      num = @hold.join.to_i
-      num += 1
-      @hold = []
-      print num
+increment = 1
+
+def incrementAll(input, increment)
+  puts string
+  puts ""
+  string.split("").each do |char|
+    if (char =~ /\A[-+]?\d+\z/) == 0 || char == "-"
+      @hold << char
+    else
+      if @hold.length > 0
+        num = @hold.join.to_i
+        num += 1
+        @hold = []
+        print num
+      end
+      num = char
     end
-    num = char
+    print num.to_s
   end
-  print num.to_s
 end
+
+def pixelArt2Function(pixel_art)
+end
+
 
 # 123, -46, 0, -1, 1, 52, 1113245
 # [8].each { |y| [0, 1].each { |x| coords << [y, x] }}
