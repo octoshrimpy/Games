@@ -11,6 +11,13 @@ input = "
 "
 
 art = "
+.......0.
+..0...0..
+.0..0..0.
+..0.00...
+...00.0..
+..0000.0.
+..000000.
 "
 
 def incrementAll(string, increment)
@@ -52,14 +59,23 @@ def pixelartToFunction(pixel_art, live="x", dead=" ")
   @boardx = max + 1
   @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
   draw = []
+    puts "#{placements}"
   placements.each_with_index do |coords, index|
     x_values = []
-    coords.each do |x|
+    coords.each_with_index do |x, pos|
+      placements[index][pos] -= center
       x_values << x - center
       draw << [index + 1, x]
     end
     puts "[#{index}].each { |y| [#{x_values.join(", ")}].each { |x| coords << [y, x] }}"
+    # x_values = []
+    # coords.each do |x|
+    #   x_values << x - center
+    #   draw << [index + 1, x]
+    # end
+    # puts "[#{index}].each { |y| [#{x_values.join(", ")}].each { |x| coords << [y, x] }}"
   end
+    puts "#{placements}"
 
   draw.each do |coord|
     @board[-coord[0]][coord[1]] = @mark
