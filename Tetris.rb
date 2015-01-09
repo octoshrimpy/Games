@@ -303,12 +303,13 @@ loop do
   end
 end
 
-if game.instance_variable_get(:@lon) > old
-  new_score = game.instance_variable_get(:@lon)
+system "stty -raw echo"
+new_score = old
+if game.instance_variable_get(:@score) > old
+  new_score = game.instance_variable_get(:@score)
   puts "You have beaten the high score!"
-  File.open("./Saves/tetris.txt", 'w+') { |f| f.puts("#{new_score}") }
 else
-  puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
+  puts "No records broken. Your final score is: #{game.instance_variable_get(:@score)}"
 end
 puts "#{new_score} is the high score"
 File.open("./Saves/tetris.txt", 'w+') { |f| f.puts("#{new_score}") }
