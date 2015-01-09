@@ -224,8 +224,8 @@ def draw
   end
   puts ""
   while i < @board.length
-    # print "#{i} " if i < 10
-    # print "#{i}" if i >= 10
+    print "#{i} " if i < 10
+    print "#{i}" if i >= 10
     puts @board[i].join
     i += 1
   end
