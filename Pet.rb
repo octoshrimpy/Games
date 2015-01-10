@@ -1,5 +1,5 @@
-@boardx = 50
-@boardy = 20
+@boardx = 95
+@boardy = 30
 @empty = " "
 @line = "▒"
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
@@ -15,7 +15,7 @@ t = Time.now
 @error = 0
 @even = 0
 
-@gross = [5]
+@gross = []
 
 @pet = {
   x: 15,
@@ -24,15 +24,45 @@ t = Time.now
   direction: "right",
   last_move: t,
   next_move: t + 30,
+  next_drop: t + 5,# + (30 * 60),
+  stat_drop: t + 2,
   target: 4,
-  fullness: 100,
-  health: 100,
-  hygiene: 100,
-  obedience: 100,
-  positivity: 100,
-  strength: 100,
+  fullness: 20,
+  weight: 5,
+  health: 80,
+  hygiene: 10,
+  obedience: 20,
+  happiness: 20,
+  strength: 10,
   type: "blob"
 }
+# TODO
+# http://webspace.ringling.edu/~clopez/bu230/gigapet/essay.html
+# Evolve + stages
+# Features
+#   Feed
+#   Play
+#   Train
+#   Clean
+#   Medicine
+#   Light
+#   Stats
+# Weight ++ if over fed
+# Training
+# Sleep Morning/Night Health ++ if light is off. -- if on
+# Death
+
+# Stages:
+# Egg ~5-10min
+# Blob ~1-2 hours *Lots of attention
+# Baby ~1-3 days
+# Child ~week
+# Adult ~2 weeks
+# Senior
+
+
+
+
 # Blob width: (-4..5)
 # `say =v Bells "d"`
 
@@ -165,6 +195,8 @@ def tick
   change = false
   t = Time.now
   change = timerControl(t)
+  statChecker
+  droppingChecker
 
   if t > @pet[:last_move] + @tick_time
     movement
@@ -172,6 +204,38 @@ def tick
   end
 
   draw if change == true
+end
+
+def statChecker
+  t = Time.now
+  if t > @pet[:stat_drop]
+    @pet[:obedience] -= 1
+    @pet[:fullness] -= 1
+    @pet[:hygiene] -= (1 * @gross.length) + 1
+    @pet[:happiness] -= 1
+    @pet[:strength] -= 1
+    @pet[:stat_drop] = t + (5 * 6)#Depends on type
+    veryHealthy = true
+    [@pet[:hygiene], @pet[:happiness], @pet[:strength], @pet[:fullness]].each do |stat|
+      if stat < 50
+        @pet[:health] -= 1
+        veryHealthy = false
+      end
+    end
+    @pet[:health] += 1 if veryHealthy
+    if @pet[:health] < 0
+      puts "Your pet died!"
+      exit
+    end
+  end
+end
+
+def droppingChecker
+  t = Time.now
+  if t > @pet[:next_drop]
+    @gross << @pet[:x]
+    @pet[:next_drop] = t + (100 - @pet[:fullness])# + rand(5 * 60 * 60)
+  end
 end
 
 def timerControl(t)
@@ -223,7 +287,15 @@ def movement
   end
   drawDung
   placePet
-  @error = "#{@pet[:next_move] - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
+  # @error = "#{@pet[:next_move] - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
+  @error = "
+  fullness: #{@pet[:fullness]}
+  health: #{@pet[:health]}
+  hygiene: #{@pet[:hygiene]}
+  obedience: #{@pet[:obedience]}
+  happiness: #{@pet[:happiness]}
+  strength: #{@pet[:strength]}
+  "
   @tick += 1
   @pet[:last_move] = Time.now
 end
@@ -240,18 +312,47 @@ end
 def draw
   system "clear" or "cls"
   i = 0
-  print "  "
-  @boardx.times do |x|
-    print "#{x.to_s.split("").last}"
+  inc = @boardx / 4
+  5.times do
+    print " "
+    @boardx.times do |x|
+      if x % inc == 0
+        print "|"
+      else
+        print " "
+      end
+    end
+    puts ""
+  end
+  (@boardx + 2).times do |x|
+    print "."
   end
   puts ""
   while i < @board.length
-    print "#{i} " if i < 10
-    print "#{i}" if i >= 10
+    print ":"
     print @board[i].join
-    puts "."
+    print ":"
+    # print "#{i} " if i < 10
+    # print "#{i}" if i >= 10
+    puts ""
     i += 1
   end
+  (@boardx + 2).times do |x|
+    print "˚"
+  end
+  puts ""
+  5.times do
+    print " "
+    @boardx.times do |x|
+      if x % inc == 0
+        print "|"
+      else
+        print " "
+      end
+    end
+    puts ""
+  end
+  puts ""
   puts @tick
   puts @error
 end
