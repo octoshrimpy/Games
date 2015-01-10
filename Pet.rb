@@ -25,10 +25,11 @@ t = Time.now
   direction: "right",
   last_beep: t,
   beep: true,
+  evolve: t + 60,
   last_move: t,
-  next_move: t + 30,
-  next_drop: t + 5,# + (30 * 60),
-  stat_drop: t + 2,
+  next_move: t + 90,
+  next_drop: t + (30 * 60),
+  stat_drop: t + 2,#FIXME 120
   target: 4,
   weight: 5,
   fullness: 20,
@@ -69,7 +70,7 @@ t = Time.now
 # Blob width: (-4..5)
 
 def boardClear
-  @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
+  @board = Array.new(@boardy) { Array.new(@boardx) {@empty} }
 end
 
 def drawCoords(coords, origin, flip=false)
@@ -84,8 +85,8 @@ end
 def drawSpace(coords, flip=false)
   coords.each_with_index do |x_values, y_value|
     (x_values.first..x_values.last).each do |x|
-      @board[@boardy - 1 - y_value][@pet[:x] + x] = @empty if flip == false
-      @board[@boardy - 1 - y_value][@pet[:x] - x] = @empty if flip == true
+      drawAt(@boardy - 1 - y_value, @pet[:x] + x, @empty) if flip == false
+      drawAt(@boardy - 1 - y_value, @pet[:x] - x, @empty) if flip == true
     end
   end
 end
@@ -199,13 +200,13 @@ def tick
   change = timerControl(t)
   statChecker
   droppingChecker
-  beepChecker
 
   if t > @pet[:last_move] + @tick_time
     movement
     change = true
   end
 
+  beepChecker
   draw if change == true
 end
 
@@ -213,8 +214,9 @@ def beepChecker
   t = Time.now
   in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
   if t > @pet[:last_beep] && @pet[:beep] = true && in_need
-    @pet[:last_beep] = t + 300 if t > @pet[:last_beep] + (3 * @tick_time)
-    `say -v Bells "d"`
+    @pet[:last_beep] = t + 600 if t > @pet[:last_beep] + (1.5 * @tick_time)
+    # `say -v Bells "d"`
+    print "\a"
   end
 end
 
@@ -226,7 +228,7 @@ def statChecker
     @pet[:hygiene] -= (1 * @gross.length) + 1
     @pet[:happiness] -= 1
     @pet[:strength] -= 1
-    @pet[:stat_drop] = t + (5 * 6)#Depends on type
+    @pet[:stat_drop] = t + (5 * 60)#FIXME Depends on type
     veryHealthy = true
     [@pet[:hygiene], @pet[:happiness], @pet[:strength], @pet[:fullness]].each do |stat|
       if stat < 50
@@ -246,7 +248,7 @@ def droppingChecker
   t = Time.now
   if t > @pet[:next_drop]
     @gross << @pet[:x]
-    @pet[:next_drop] = t + (100 - @pet[:fullness])# + rand(5 * 60 * 60)
+    @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(5 * 60 * 60)
   end
 end
 
