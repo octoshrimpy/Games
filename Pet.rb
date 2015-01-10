@@ -2,6 +2,7 @@
 @boardy = 30
 @empty = " "
 @line = "▒"
+@select = 0
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 
 t = Time.now
@@ -309,50 +310,75 @@ def placePet
   end
 end
 
-def draw
-  system "clear" or "cls"
-  i = 0
+def gui(pos) # @select = 0, 1-8
   inc = @boardx / 4
-  5.times do
+  select_pos = inc / 2
+  5.times do |iteration|
     print " "
     @boardx.times do |x|
       if x % inc == 0
         print "|"
       else
-        print " "
+        if x % inc == select_pos
+          if pos == 1
+            where = case x
+            when (0..inc)# && @select == 1
+              1
+            when (inc..inc*2) #&& @select == 2
+              2
+            when (inc*2..inc*3)# && @select == 3
+              3
+            when (inc*3..inc*4)# && @select == 4
+              4
+            end
+          else
+            where = case x
+            when (0..inc)# && @select == 1
+              5
+            when (inc..inc*2) #&& @select == 2
+              6
+            when (inc*2..inc*3)# && @select == 3
+              7
+            when (inc*3..inc*4)# && @select == 4
+              8
+            end
+          end
+          if @select == where
+            if iteration == 0
+              print "v"
+            elsif iteration == 4
+              print "^"
+            else
+              print " "
+            end
+          else
+            print " "
+          end
+        else
+          print " "
+        end
       end
     end
     puts ""
   end
-  (@boardx + 2).times do |x|
-    print "."
-  end
+end
+
+def draw
+  system "clear" or "cls"
+  i = 0
+  gui(1)
+  (@boardx + 2).times { |x| print "." }
   puts ""
   while i < @board.length
     print ":"
     print @board[i].join
     print ":"
-    # print "#{i} " if i < 10
-    # print "#{i}" if i >= 10
     puts ""
     i += 1
   end
-  (@boardx + 2).times do |x|
-    print "˚"
-  end
+  (@boardx + 2).times { |x| print "˚" }
   puts ""
-  5.times do
-    print " "
-    @boardx.times do |x|
-      if x % inc == 0
-        print "|"
-      else
-        print " "
-      end
-    end
-    puts ""
-  end
-  puts ""
+  gui(2)
   puts @tick
   puts @error
 end
