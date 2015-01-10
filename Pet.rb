@@ -23,13 +23,15 @@ t = Time.now
   y: 19,
   born: Time.now,
   direction: "right",
+  last_beep: t,
+  beep: true,
   last_move: t,
   next_move: t + 30,
   next_drop: t + 5,# + (30 * 60),
   stat_drop: t + 2,
   target: 4,
-  fullness: 20,
   weight: 5,
+  fullness: 20,
   health: 80,
   hygiene: 10,
   obedience: 20,
@@ -65,7 +67,6 @@ t = Time.now
 
 
 # Blob width: (-4..5)
-# `say =v Bells "d"`
 
 def boardClear
   @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
@@ -198,6 +199,7 @@ def tick
   change = timerControl(t)
   statChecker
   droppingChecker
+  beepChecker
 
   if t > @pet[:last_move] + @tick_time
     movement
@@ -205,6 +207,15 @@ def tick
   end
 
   draw if change == true
+end
+
+def beepChecker
+  t = Time.now
+  in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
+  if t > @pet[:last_beep] && @pet[:beep] = true && in_need
+    @pet[:last_beep] = t + 300 if t > @pet[:last_beep] + (3 * @tick_time)
+    `say -v Bells "d"`
+  end
 end
 
 def statChecker
