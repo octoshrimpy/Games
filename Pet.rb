@@ -310,7 +310,7 @@ def placePet
   end
 end
 
-def gui(pos) # @select = 0, 1-8
+def gui(pos)
   inc = @boardx / 4
   select_pos = inc / 2
   5.times do |iteration|
@@ -322,24 +322,24 @@ def gui(pos) # @select = 0, 1-8
         if x % inc == select_pos
           if pos == 1
             where = case x
-            when (0..inc)# && @select == 1
+            when (0..inc)
               1
-            when (inc..inc*2) #&& @select == 2
+            when (inc..inc*2)
               2
-            when (inc*2..inc*3)# && @select == 3
+            when (inc*2..inc*3)
               3
-            when (inc*3..inc*4)# && @select == 4
+            when (inc*3..inc*4)
               4
             end
           else
             where = case x
-            when (0..inc)# && @select == 1
+            when (0..inc)
               5
-            when (inc..inc*2) #&& @select == 2
+            when (inc..inc*2)
               6
-            when (inc*2..inc*3)# && @select == 3
+            when (inc*2..inc*3)
               7
-            when (inc*3..inc*4)# && @select == 4
+            when (inc*3..inc*4)
               8
             end
           end
