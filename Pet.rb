@@ -228,7 +228,6 @@ end
 
 def inputChecker(input)
   input = input[0]
-  change = true
   case input
   when "x"
     exit
@@ -236,10 +235,8 @@ def inputChecker(input)
     @select -= 1
   when "d"
     @select += 1
-  else
-    change = false
   end
-  @last_interact = Time.now if change == true
+  @last_interact = Time.now
 
   @select = 0 if @select > 8
   @select = 8 if @select < 0
