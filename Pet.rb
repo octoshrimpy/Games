@@ -28,10 +28,10 @@ t = Time.now
 @menu = "default"
 @options = {
   default: ["Food", "Play", "Train", "Clean", "Medicine", "Lights", "Stats", ""],
-  food: [],
-  train: [],
-  play: [],
-  stats: []
+  food: ["Meat", "Pizza", "Cookie", "Cake", "", "", "", ""],
+  train: ["", "", "", "", "", "", "", ""],
+  play: ["", "", "", "", "", "", "", ""],
+  stats: ["", "", "", "", "", "", "", ""]
 }
 
 @pet = {
@@ -235,11 +235,40 @@ def inputChecker(input)
     @select -= 1
   when "d"
     @select += 1
+  when "w"
+    @menu = "default"
+    @select = 0
+  when "s"
+    @menu = case @menu
+    when "default"
+      @options[:default][@select - 1].downcase
+    end
+    @select = 1
   end
   @last_interact = Time.now
 
-  @select = 0 if @select > 8
-  @select = 8 if @select < 0
+  case @menu
+  when "default"
+    length = (@options[:default] - [""]).length
+    @select = 0 if @select > length
+    @select = length if @select < 0
+  when "food"
+    length = (@options[:food] - [""]).length
+    @select = 1 if @select > length
+    @select = length if @select < 1
+  when "train"
+    length = (@options[:train] - [""]).length
+    @select = 1 if @select > length
+    @select = length if @select < 1
+  when "play"
+    length = (@options[:play] - [""]).length
+    @select = 1 if @select > length
+    @select = length if @select < 1
+  when "stats"
+    length = (@options[:stats] - [""]).length
+    @select = 1 if @select > length
+    @select = length if @select < 1
+  end
 end
 
 def beepChecker
@@ -335,14 +364,6 @@ def movement
   drawDung
   placePet
   # @error = "#{@pet[:next_move0]000 - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
-  @error = "
-  fullness: #{@pet[:fullness]}
-  health: #{@pet[:health]}
-  hygiene: #{@pet[:hygiene]}
-  obedience: #{@pet[:obedience]}
-  happiness: #{@pet[:happiness]}
-  strength: #{@pet[:strength]}
-  "
   @tick += 1
   @pet[:last_move] = Time.now
 end
@@ -364,6 +385,14 @@ def gui(pos)
       string = case @menu
       when "default"
         @options[:default]
+      when "food"
+        @options[:food]
+      when "train"
+        @options[:train]
+      when "play"
+        @options[:play]
+      when "stats"
+        @options[:stats]
       end
       print " "
       menu_items = string.first(4) if pos == 1
@@ -446,6 +475,14 @@ def draw
   gui(2)
   puts @tick
   puts @error
+  puts "
+    fullness: #{@pet[:fullness]}
+    health: #{@pet[:health]}
+    hygiene: #{@pet[:hygiene]}
+    obedience: #{@pet[:obedience]}
+    happiness: #{@pet[:happiness]}
+    strength: #{@pet[:strength]}
+  "
   system "stty raw -echo"
 end
 
