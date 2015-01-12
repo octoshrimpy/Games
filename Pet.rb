@@ -1,13 +1,19 @@
+require 'io/console'
+require 'io/wait'
+# Recommended Font settings:
+# Horizontal: 4th tick
+# Vertical: 0.6
+
 @boardx = 95
 @boardy = 30
 @empty = " "
 @line = "▒"
-@select = 0
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 
 t = Time.now
 @tick_time = 0.8
 @tick = 0
+@last_interact = t
 @time1 = t
 @time2 = t
 @frame_count = 0
@@ -17,6 +23,16 @@ t = Time.now
 @even = 0
 
 @gross = []
+
+@select = 7
+@menu = "default"
+@options = {
+  default: ["Food", "Play", "Train", "Clean", "Medicine", "Lights", "Stats", ""],
+  food: [],
+  train: [],
+  play: [],
+  stats: []
+}
 
 @pet = {
   x: 15,
@@ -210,6 +226,25 @@ def tick
   draw if change == true
 end
 
+def inputChecker(input)
+  input = input[0]
+  change = true
+  case input
+  when "x"
+    exit
+  when "a"
+    @select -= 1
+  when "d"
+    @select += 1
+  else
+    change = false
+  end
+  @last_interact = Time.now if change == true
+
+  @select = 0 if @select > 8
+  @select = 8 if @select < 0
+end
+
 def beepChecker
   t = Time.now
   in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
@@ -256,6 +291,7 @@ def timerControl(t)
   delta = 0
   old_time = @timer
   @even = @tick % 2
+  @select = 0 if @last_interact + 30 < t
 
   if @time1 > @time2
     @time2 = t
@@ -301,7 +337,7 @@ def movement
   end
   drawDung
   placePet
-  # @error = "#{@pet[:next_move] - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
+  # @error = "#{@pet[:next_move0]000 - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
   @error = "
   fullness: #{@pet[:fullness]}
   health: #{@pet[:health]}
@@ -324,59 +360,78 @@ def placePet
 end
 
 def gui(pos)
-  inc = @boardx / 4
+  inc = @boardx / 4 #95
   select_pos = inc / 2
   5.times do |iteration|
-    print " "
-    @boardx.times do |x|
-      if x % inc == 0
+    if iteration == 2
+      string = case @menu
+      when "default"
+        @options[:default]
+      end
+      print " "
+      menu_items = string.first(4) if pos == 1
+      menu_items = string.last(4) if pos == 2
+      menu_items.each do |word|
         print "|"
-      else
-        if x % inc == select_pos
-          if pos == 1
-            where = case x
-            when (0..inc)
-              1
-            when (inc..inc*2)
-              2
-            when (inc*2..inc*3)
-              3
-            when (inc*3..inc*4)
-              4
+        word += " " if word.length % 2 == 1
+        ((@boardx/8) - (word.length/2)).times { print " " }
+        print word
+        ((@boardx/8) - (word.length/2)).times { print " " }
+      end
+      puts "|"
+    else
+      print " "
+      @boardx.times do |x|
+        if x % inc == 0
+          print "|"
+        else
+          if x % inc == select_pos
+            if pos == 1
+              where = case x
+              when (0..inc)
+                1
+              when (inc..inc*2)
+                2
+              when (inc*2..inc*3)
+                3
+              when (inc*3..inc*4)
+                4
+              end
+            else
+              where = case x
+              when (0..inc)
+                5
+              when (inc..inc*2)
+                6
+              when (inc*2..inc*3)
+                7
+              when (inc*3..inc*4)
+                8
+              end
             end
-          else
-            where = case x
-            when (0..inc)
-              5
-            when (inc..inc*2)
-              6
-            when (inc*2..inc*3)
-              7
-            when (inc*3..inc*4)
-              8
-            end
-          end
-          if @select == where
-            if iteration == 0
-              print "v"
-            elsif iteration == 4
-              print "^"
+            if @select == where
+              if iteration == 0
+                print "v"
+              elsif iteration == 4
+                print "^"
+              else
+                print " "
+              end
             else
               print " "
             end
           else
             print " "
           end
-        else
-          print " "
         end
       end
+      puts ""
     end
-    puts ""
   end
 end
 
 def draw
+  system "stty -raw echo"
   system "clear" or "cls"
   i = 0
   gui(1)
@@ -394,8 +449,17 @@ def draw
   gui(2)
   puts @tick
   puts @error
+  system "stty raw -echo"
+end
+
+prompt = Thread.new do
+  loop do
+    inputChecker(s = STDIN.getch.downcase)
+  end
 end
 
 loop do
   tick
 end
+
+system "stty -raw echo"
