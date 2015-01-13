@@ -13,6 +13,7 @@ require 'io/wait'
 t = Time.now
 @tick_time = 0.8
 @tick = 0
+@force_update = false
 @last_interact = t
 @time1 = t
 @time2 = t
@@ -221,7 +222,8 @@ def tick
   end
 
   beepChecker
-  draw if change == true
+  draw if change == true || @force_update == true
+  @force_update = false
 end
 
 def inputChecker(input)
@@ -261,6 +263,8 @@ def inputChecker(input)
   end
   @select = @menu == "default" ? 0 : 1 if @select > length
   @select = length if (@select < 0 && @menu == "default") || (@select < 1 && @menu != "default")
+  print "\a"
+  @force_update = true
 end
 
 def beepChecker
