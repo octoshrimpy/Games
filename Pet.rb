@@ -51,12 +51,12 @@ t = Time.now
   stat_drop: t + 2,#FIXME 120
   target: 4,
   weight: 5,
-  fullness: 20,
+  fullness: 2,
   health: 80,
-  hygiene: 10,
-  obedience: 20,
-  happiness: 20,
-  strength: 10,
+  hygiene: 1,
+  obedience: 2,
+  happiness: 2,
+  strength: 0,
   type: "blob"
 }
 # Blob width: (-4..5)
@@ -269,16 +269,22 @@ def statChecker
   if t > @pet[:stat_drop]
     @pet[:obedience] -= 1
     @pet[:fullness] -= 1
-    @pet[:hygiene] -= (1 * @gross.length) + 1
+    @pet[:hygiene] -= (1 * @gross.length)
+    @pet[:hygiene] += 1 if @gross.length == 0
     @pet[:happiness] -= 1
     @pet[:strength] -= 1
-    @pet[:stat_drop] = t + (5 * 60)#FIXME Depends on type
+    @pet[:stat_drop] = t + (5 * 6)#FIXME Depends on type
     veryHealthy = true
     [@pet[:hygiene], @pet[:happiness], @pet[:strength], @pet[:fullness]].each do |stat|
       if stat < 50
         @pet[:health] -= 1
         veryHealthy = false
       end
+      if stat < 0
+        allowedValueChecker
+        @pet[:health] -= 1
+      end
+      stat = 100 if stat > 100
     end
     @pet[:health] += 1 if veryHealthy
     if @pet[:health] < 0
@@ -286,6 +292,21 @@ def statChecker
       exit
     end
   end
+end
+
+def allowedValueChecker
+  @pet[:fullness] = 0 if @pet[:fullness] < 0
+  @pet[:fullness] = 100 if @pet[:fullness] > 100
+  @pet[:health] = 0 if  @pet[:health] < 0
+  @pet[:health] = 100 if  @pet[:health] > 100
+  @pet[:hygiene] = 0 if @pet[:hygiene] < 0
+  @pet[:hygiene] = 100 if @pet[:hygiene] > 100
+  @pet[:obedience] = 0 if @pet[:obedience] < 0
+  @pet[:obedience] = 100 if @pet[:obedience] > 100
+  @pet[:happiness] = 0 if @pet[:happiness] < 0
+  @pet[:happiness] = 100 if @pet[:happiness] > 100
+  @pet[:strength] = 0 if @pet[:strength] < 0
+  @pet[:strength] = 100 if @pet[:strength] > 100
 end
 
 def droppingChecker
