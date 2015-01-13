@@ -4,7 +4,7 @@ require 'io/wait'
 # Horizontal: 4th tick
 # Vertical: 0.6
 
-@boardx = 95
+@boardx = 93
 @boardy = 30
 @empty = " "
 @line = "▒"
@@ -19,6 +19,7 @@ t = Time.now
 @time2 = t
 @frame_count = 0
 @frame_rate = 0
+@lights_on = true
 @timer = 0
 @error = 0
 @even = 0
@@ -32,7 +33,7 @@ t = Time.now
   food: ["Meat", "Pizza", "Cookie", "Cake", "", "", "", ""],
   train: ["Run", "Lift", "Spar", "Jump", "", "", "", ""],
   medicine: ["Vitamin", "Shot", "Emergency", "", "", "", "", ""],
-  play: ["", "", "", "", "", "", "", ""],
+  play: ["Ball", "", "", "", "", "", "", ""],
   stats: ["Health", "Hunger", "Hygiene", "Obedience", "Strength", "Weight", "", ""]
 }
 
@@ -58,28 +59,6 @@ t = Time.now
   strength: 10,
   type: "blob"
 }
-# TODO
-# http://webspace.ringling.edu/~clopez/bu230/gigapet/essay.html
-# Evolve + stages
-# Weight ++ if over fed
-# Animations for features
-#   Eating
-#     Meat
-#     Pizza
-#     Cookie
-#     Cake
-# Training
-# Sleep Morning/Night Health ++ if light is off. -- if on
-# Death
-
-# Stages:
-# Egg ~5-10min
-# Blob ~1-2 hours *Lots of attention
-# Baby ~1-3 days
-# Child ~week
-# Adult ~2 weeks
-# Senior
-
 # Blob width: (-4..5)
 
 def boardClear
@@ -234,14 +213,22 @@ def inputChecker(input)
   when "d"
     @select += 1
   when "w"
-    @menu = "default"
-    @select = 0
-  when "s"
-    @menu = case @menu
-    when "default"
-      @options[:default][@select - 1].downcase
+    if @menu != "default"
+      @select = @options[:default].index(@menu.capitalize) + 1
+      @menu = "default"
+    else
+      @select = 0
     end
-    @select = 1
+  when "s"
+    @menu = @options[:default][@select - 1].downcase if @menu == "default"
+    if @menu == "lights"
+      @lights_on = @lights_on == true ? false : true
+      @menu = "default"
+    end
+    if @menu == "clean"
+      @menu = "default"
+    end
+    @select = 1 if @menu != "default"
   end
   @last_interact = Time.now
 
@@ -258,6 +245,8 @@ def inputChecker(input)
     (@options[:play] - [""]).length
   when "stats"
     (@options[:stats] - [""]).length
+  else
+    (@options[:default] - [""]).length
   end
   @select = @menu == "default" ? 0 : 1 if @select > length
   @select = length if (@select < 0 && @menu == "default") || (@select < 1 && @menu != "default")
@@ -311,7 +300,10 @@ def timerControl(t)
   delta = 0
   old_time = @timer
   @even = @tick % 2
-  @select = 0 if @last_interact + 30 < t && @menu == "default"
+  if @last_interact + 30 < t
+    @menu = "default"
+    @select = 0
+  end
 
   if @time1 > @time2
     @time2 = t
@@ -457,6 +449,13 @@ def draw
   system "clear" or "cls"
   i = 0
   gui(1)
+  if @lights_on == false
+    @board.each_with_index do |col, y|
+      col.each_with_index do |row, x|
+        @board[y][x] = @line
+      end
+    end
+  end
   (@boardx + 2).times { |x| print "." }
   puts ""
   while i < @board.length
