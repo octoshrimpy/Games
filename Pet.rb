@@ -29,9 +29,10 @@ t = Time.now
 @options = {
   default: ["Food", "Play", "Train", "Clean", "Medicine", "Lights", "Stats", ""],
   food: ["Meat", "Pizza", "Cookie", "Cake", "", "", "", ""],
-  train: ["", "", "", "", "", "", "", ""],
+  train: ["Run", "Lift", "Spar", "Jump", "", "", "", ""],
+  medicine: ["Vitamin", "Shot", "Emergency", "", "", "", "", ""],
   play: ["", "", "", "", "", "", "", ""],
-  stats: ["", "", "", "", "", "", "", ""]
+  stats: ["Health", "Hunger", "Hygiene", "Obedience", "Strength", "", "", ""]
 }
 
 @pet = {
@@ -79,9 +80,6 @@ t = Time.now
 # Child ~week
 # Adult ~2 weeks
 # Senior
-
-
-
 
 # Blob width: (-4..5)
 
@@ -247,28 +245,22 @@ def inputChecker(input)
   end
   @last_interact = Time.now
 
-  case @menu
+  length = case @menu
   when "default"
-    length = (@options[:default] - [""]).length
-    @select = 0 if @select > length
-    @select = length if @select < 0
+    (@options[:default] - [""]).length
   when "food"
-    length = (@options[:food] - [""]).length
-    @select = 1 if @select > length
-    @select = length if @select < 1
+    (@options[:food] - [""]).length
   when "train"
-    length = (@options[:train] - [""]).length
-    @select = 1 if @select > length
-    @select = length if @select < 1
+    (@options[:train] - [""]).length
+  when "medicine"
+    (@options[:medicine] - [""]).length
   when "play"
-    length = (@options[:play] - [""]).length
-    @select = 1 if @select > length
-    @select = length if @select < 1
+    (@options[:play] - [""]).length
   when "stats"
-    length = (@options[:stats] - [""]).length
-    @select = 1 if @select > length
-    @select = length if @select < 1
+    (@options[:stats] - [""]).length
   end
+  @select = @menu == "default" ? 0 : 1 if @select > length
+  @select = length if (@select < 0 && @menu == "default") || (@select < 1 && @menu != "default")
 end
 
 def beepChecker
@@ -389,6 +381,8 @@ def gui(pos)
         @options[:food]
       when "train"
         @options[:train]
+      when "medicine"
+        @options[:medicine]
       when "play"
         @options[:play]
       when "stats"
