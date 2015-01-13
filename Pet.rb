@@ -33,7 +33,7 @@ t = Time.now
   train: ["Run", "Lift", "Spar", "Jump", "", "", "", ""],
   medicine: ["Vitamin", "Shot", "Emergency", "", "", "", "", ""],
   play: ["", "", "", "", "", "", "", ""],
-  stats: ["Health", "Hunger", "Hygiene", "Obedience", "Strength", "", "", ""]
+  stats: ["Health", "Hunger", "Hygiene", "Obedience", "Strength", "Weight", "", ""]
 }
 
 @pet = {
@@ -61,15 +61,13 @@ t = Time.now
 # TODO
 # http://webspace.ringling.edu/~clopez/bu230/gigapet/essay.html
 # Evolve + stages
-# Features
-#   Feed
-#   Play
-#   Train
-#   Clean
-#   Medicine
-#   Light
-#   Stats
 # Weight ++ if over fed
+# Animations for features
+#   Eating
+#     Meat
+#     Pizza
+#     Cookie
+#     Cake
 # Training
 # Sleep Morning/Night Health ++ if light is off. -- if on
 # Death
@@ -313,7 +311,7 @@ def timerControl(t)
   delta = 0
   old_time = @timer
   @even = @tick % 2
-  @select = 0 if @last_interact + 30 < t
+  @select = 0 if @last_interact + 30 < t && @menu == "default"
 
   if @time1 > @time2
     @time2 = t
