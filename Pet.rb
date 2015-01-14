@@ -33,7 +33,7 @@ t = Time.now
   food: ["Meat", "Pizza", "Cookie", "Cake", "", "", "", ""],
   train: ["Run", "Lift", "Spar", "Jump", "", "", "", ""],
   medicine: ["Vitamin", "Shot", "Emergency", "", "", "", "", ""],
-  play: ["Ball", "", "", "", "", "", "", ""],
+  play: ["Ball", "Catch", "", "", "", "", "", ""],
   stats: ["Health", "Hunger", "Hygiene", "Obedience", "Strength", "Weight", "", ""]
 }
 
@@ -47,7 +47,7 @@ t = Time.now
   evolve: t + 60,
   last_move: t,
   next_move: t + 90,
-  next_drop: t + (30 * 60),
+  next_drop: t + (3 * 6), #FIXME 30/60
   stat_drop: t + 2,#FIXME 120
   target: 4,
   weight: 5,
@@ -220,15 +220,7 @@ def inputChecker(input)
       @select = 0
     end
   when "s"
-    @menu = @options[:default][@select - 1].downcase if @menu == "default"
-    if @menu == "lights"
-      @lights_on = @lights_on == true ? false : true
-      @menu = "default"
-    end
-    if @menu == "clean"
-      @menu = "default"
-    end
-    @select = 1 if @menu != "default"
+    activity(@menu, @select)
   end
   @last_interact = Time.now
 
@@ -254,6 +246,168 @@ def inputChecker(input)
   @force_update = true
 end
 
+def activity(menu, selection)
+  case menu
+  when "default"
+    case selection
+    when 1 # Food
+      @menu = "food"
+    when 2 # Play
+      @menu = "play"
+    when 3 # Train
+      @menu = "train"
+    when 4 # Clean
+      animate("clean")
+    when 5 # Medicine
+      @menu = "medicine"
+    when 6 # Lights
+      @lights_on = @lights_on == true ? false : true
+    when 7 # Stats
+      @menu = "stats"
+    when 8 #
+    end
+  when "food"
+    case selection
+    when 1 # Meat
+      consume("meat")
+    when 2 # Pizza
+      consume("pizza")
+    when 3 # Cookie
+      consume("cookie")
+    when 4 # Cake
+      consume("cake")
+    when 5 #
+    when 6 #
+    when 7 #
+    when 8 #
+    end
+  when "train"
+    case selection
+    when 1 # Run
+    when 2 # Lift
+    when 3 # Spar
+    when 4 # Jump
+    when 5 #
+    when 6 #
+    when 7 #
+    when 8 #
+    end
+  when "medicine"
+    case selection
+    when 1 # Vitamin
+      consume("vitamin")
+    when 2 # Shot
+    when 3 # Emergency
+    when 4 #
+    when 5 #
+    when 6 #
+    when 7 #
+    when 8 #
+    end
+  when "play"
+    case selection
+    when 1 # Ball
+    when 2 # Catch
+    when 3 #
+    when 4 #
+    when 5 #
+    when 6 #
+    when 7 #
+    when 8 #
+    end
+  when "stats"
+    case selection
+    when 1 # Health
+    when 2 # Hunger
+    when 3 # Hygiene
+    when 4 # Obedieance
+    when 5 # Strength
+    when 6 # Weight
+    when 7 #
+    when 8 #
+    end
+  # when "stats"
+  #   case selection
+  #   when 0
+  #   when 1
+  #   when 2
+  #   when 3
+  #   when 4
+  #   when 5
+  #   when 6
+  #   when 7
+  #   when 8
+  #   end
+  end
+  if menu != "default"
+    @menu = "default"
+    @select = 0
+  end
+end
+
+# weight: 5,
+# fullness: 2,
+# health: 80,
+# hygiene: 1,
+# obedience: 2,
+# happiness: 2,
+# strength: 0,
+# Rename consume to different. Send all actions through it to upgrade stats
+
+def consume(food)
+  animate(food)
+  case food
+  when "meat"
+    case @pet[:type]
+    when "blob"
+      @pet[:fullness] += 5
+      @pet[:weight] += 2 if @pet[:fullness] > 100
+    end
+  when "pizza"
+    case @pet[:type]
+    when "blob"
+      @pet[:happiness] -= 3
+      @pet[:fullness] += 5
+      @pet[:weight] += 1
+      @pet[:weight] += 2 if @pet[:fullness] > 100
+      @pet[:obedience] -= 1
+    end
+  when "cookie"
+    case @pet[:type]
+    when "blob"
+      @pet[:happiness] += 5
+      @pet[:fullness] += 3
+      @pet[:weight] += 1
+      @pet[:weight] += 2 if @pet[:fullness] > 100
+      @pet[:obedience] += 1
+    end
+  when "cake"
+    case @pet[:type]
+    when "blob"
+      @pet[:fullness] += 5
+      @pet[:weight] += 5 if @pet[:fullness] > 100
+    end
+  when "vitamin"
+    case @pet[:type]
+    when "blob"
+      @pet[:health] += @pet[:health] < 80 ? 5 : -5
+      @pet[:fullness] -= 5
+      @pet[:happiness] -= 10
+    end
+  end
+  allowedValueChecker
+end
+
+def animate(picture)
+  # Over ride - Stop showing pet until animation ends
+  # Eating displays pet look-alike at center screen that eats
+  case picture
+  when "clean"
+    sleep 3
+    @gross = []
+  end
+end
+
 def beepChecker
   t = Time.now
   in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
@@ -269,7 +423,7 @@ def statChecker
   if t > @pet[:stat_drop]
     @pet[:obedience] -= 1
     @pet[:fullness] -= 1
-    @pet[:hygiene] -= (1 * @gross.length)
+    @pet[:hygiene] -= @gross.length
     @pet[:hygiene] += 1 if @gross.length == 0
     @pet[:happiness] -= 1
     @pet[:strength] -= 1
