@@ -22,11 +22,13 @@ t = Time.now
 @lights_on = true
 @timer = 0
 @error = 0
+@active = false
+@deactive = t
 @even = 0
 
 @gross = []
 
-@select = 7
+@select = 4
 @menu = "default"
 @options = {
   default: ["Food", "Play", "Train", "Clean", "Medicine", "Lights", "Stats", ""],
@@ -186,6 +188,25 @@ def drawDung
   end
 end
 
+def wiperCoords(height, multiplier)
+  coords = []
+  height.times do |y|
+    coords[y] = y <= height / 2 ?
+      y + 1 :
+      (height*2 - y*2)/2
+  end
+  wiper = []
+  coords.each_with_index do |length, y|
+    length.times do |x|
+      multiplier.times do |m|
+        wiper << [y+(height*m), x]
+      end
+    end
+  end
+  wiper.each { |wipe| @board[wipe[0]][wipe[1]] = @line }
+  return wiper
+end
+
 def tick
   change = false
   t = Time.now
@@ -193,10 +214,11 @@ def tick
   statChecker
   droppingChecker
 
-  if t > @pet[:last_move] + @tick_time
+  if t > @pet[:last_move] + @tick_time && @active == false
     movement
     change = true
   end
+  animate if @active != false
 
   beepChecker
   draw if change == true || @force_update == true
@@ -398,13 +420,35 @@ def consume(food)
   allowedValueChecker
 end
 
-def animate(picture)
-  # Over ride - Stop showing pet until animation ends
+def animate(picture = false)
   # Eating displays pet look-alike at center screen that eats
   case picture
   when "clean"
-    sleep 3
-    @gross = []
+    @active = "clean"
+    number_of_wipers = 5
+    @wiper = wiperCoords(@boardy/number_of_wipers, number_of_wipers)
+    boardClear
+    drawDung
+  else
+    case @active
+    when "clean"
+      new_wiper = []
+      @wiper.each do |y, x|
+        @board[y][x] = @empty if !@wiper.include?([y, x-1])
+        if x != @boardx
+          new_wiper << [y, x+1]
+          @board[y][x+1] = @line
+        else
+          @wiper -= [y, x]
+        end
+      end
+      draw
+      @wiper = new_wiper
+      if @wiper.length <= 0
+        @active = false
+        @gross = []
+      end
+    end
   end
 end
 
