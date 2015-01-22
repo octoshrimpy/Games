@@ -505,6 +505,9 @@ def animate(picture = false)
       new_food = []
       @food.each do |y, x|
         # Take away the top right pixels ------------------------------------- TODO
+        # Delay
+        # Remove particles
+        # Draw each food particle
       end
       @food = new_food
       draw
