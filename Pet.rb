@@ -332,7 +332,7 @@ def activity(menu, selection)
     when 5 # Medicine
       @menu = "medicine"
     when 6 # Lights
-      @lights_on = @lights_on == true ? false : true
+      @lights_on = @lights_on ? false : true
     when 7 # Stats
       @menu = "stats"
     when 8 #
@@ -397,18 +397,6 @@ def activity(menu, selection)
     when 7 #
     when 8 #
     end
-  # when "stats"
-  #   case selection
-  #   when 0
-  #   when 1
-  #   when 2
-  #   when 3
-  #   when 4
-  #   when 5
-  #   when 6
-  #   when 7
-  #   when 8
-  #   end
   end
   if menu != "default"
     @menu = "default"
@@ -483,6 +471,8 @@ def animate(picture = false)
     end
     @active = picture
   else
+    @menu = "default"
+    @select = 0
     case @active
     when "clean"
       new_wiper = []
@@ -516,6 +506,9 @@ def animate(picture = false)
       end
     end
   end
+end
+
+def play(action)
 end
 
 def beepChecker
