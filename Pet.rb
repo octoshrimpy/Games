@@ -40,7 +40,7 @@ t = Time.now
 }
 
 @pet = {
-  x: 15,
+  x: @boardx/2,
   y: 19,
   born: Time.now,
   direction: "right",
@@ -49,17 +49,17 @@ t = Time.now
   evolve: t + 60,
   last_move: t,
   next_move: t + 90,
-  next_drop: t + (3 * 6), #FIXME 30/60
-  stat_drop: t + 2,#FIXME 120
-  target: 4,
-  weight: 5,
-  fullness: 2,
+  next_drop: t + (30 * 60),
+  stat_drop: t + 120,
+  target: 80,
+  weight: 3,
+  fullness: 40,
   health: 80,
-  hygiene: 1,
-  obedience: 2,
-  happiness: 2,
+  hygiene: 50,
+  obedience: 80,
+  happiness: 80,
   strength: 0,
-  type: "blob"
+  type: "egg"
 }
 # Blob width: (-4..5)
 
@@ -328,7 +328,7 @@ def activity(menu, selection)
     when 3 # Train
       @menu = "train"
     when 4 # Clean
-      animate("clean")
+      animate("clean") if @lights_on
     when 5 # Medicine
       @menu = "medicine"
     when 6 # Lights
@@ -358,6 +358,7 @@ def activity(menu, selection)
     when 2 # Lift
     when 3 # Spar
     when 4 # Jump
+      # Menus can be shown, but actions cannot be done if @active == true
     when 5 #
     when 6 #
     when 7 #
@@ -414,7 +415,7 @@ end
 # Rename consume to different. Send all actions through it to upgrade stats
 
 def consume(food)
-  animate(food)
+  animate(food) if @pet[:type] != "egg"
   case food
   when "meat"
     case @pet[:type]
@@ -511,14 +512,23 @@ end
 def play(action)
 end
 
+def evolveController
+  @pet[:type] = "blob" if @pet[:type] == "egg"
+  beeper(3)
+end
+
 def beepChecker
   t = Time.now
   in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
   if t > @pet[:last_beep] && @pet[:beep] = true && in_need
     @pet[:last_beep] = t + 600 if t > @pet[:last_beep] + (1.5 * @tick_time)
     # `say -v Bells "d"`
-    print "\a"
+    beeper
   end
+end
+
+def beeper(times=1)
+  print "\a"
 end
 
 def statChecker
@@ -530,7 +540,7 @@ def statChecker
     @pet[:hygiene] += 1 if @gross.length == 0
     @pet[:happiness] -= 1
     @pet[:strength] -= 1
-    @pet[:stat_drop] = t + (5 * 6)#FIXME Depends on type
+    @pet[:stat_drop] = t + 30
     veryHealthy = true
     [@pet[:hygiene], @pet[:happiness], @pet[:strength], @pet[:fullness]].each do |stat|
       if stat < 50
@@ -602,6 +612,8 @@ def timerControl(t)
       rand(@boardx - 8) + 4
     end
   end
+
+  evolveController if t > @pet[:evolve]
 
   if old_time.round != @timer.round
     @fps = @frame_rate
