@@ -23,8 +23,8 @@ t = Time.now
 @timer = 0
 @error = 0
 @active = false
-@deactive = t
 @even = 0
+@food = []
 
 @gross = []
 
@@ -186,6 +186,55 @@ def drawDung
     end
     drawCoords(coords, dung_x)
   end
+end
+
+def foodCoords(food)
+  coords = []
+  case food
+  when "meat" #26
+    coords << [-4] #0
+    coords << [-3] #1
+    coords << [-2] #2
+    coords << [-3, -2, -1, 0] #3
+    coords << [-2, -1, 0, 1] #4
+    coords << [-2, -1, 0, 1, 2] #5
+    coords << [-1, 1, 2, 3] #6
+    coords << [0, 2, 3] #7
+    coords << [1, 2, 4] #8
+  when "pizza" #20
+    coords << [0] #0
+    coords << [-1, 0, 1] #1
+    coords << [-2, -1, 1] #2
+    coords << [-3, -2, 0, 1, 2] #3
+    coords << [-2, -1, 0, 2] #4
+    coords << [0, 1, 2] #5
+    coords << [3] #6
+  when "cookie" #25
+    coords << [0, 1] #0
+    coords << [-1, 1, 2] #1
+    coords << [-2, 0, 1, 3] #2
+    coords << [-2, -1, 0, 1, 2, 3] #3
+    coords << [-2, -1, 1, 3] #4
+    coords << [-1, 0, 1, 2] #5
+    coords << [0, 1] #6
+  when "cake" #22
+    coords << [-3, -2, -1, 0, 1, 2] #0
+    coords << [-3, -2, -1, 0, 1, 2] #1
+    coords << [-3, -1, 0, 1] #2
+    coords << [-3, 0] #3
+    coords << [-3, -1] #4
+    coords << [-3, -2] #5
+  when "vitamin" #22
+    coords << [1, 2] #0
+    coords << [0, 3] #1
+    coords << [0, 3] #2
+    coords << [0, 3] #3
+    coords << [0, 1, 2, 3] #4
+    coords << [0, 1, 2, 3] #5
+    coords << [0, 1, 2, 3] #6
+    coords << [1, 2] #7
+  end
+  return coords
 end
 
 def wiperCoords(height, multiplier)
@@ -422,31 +471,45 @@ end
 
 def animate(picture = false)
   # Eating displays pet look-alike at center screen that eats
-  case picture
-  when "clean"
-    @active = "clean"
-    number_of_wipers = 5
-    @wiper = wiperCoords(@boardy/number_of_wipers, number_of_wipers)
+  if picture
     boardClear
-    drawDung
+    case picture
+    when "clean"
+      number_of_wipers = 5
+      @food = wiperCoords(@boardy/number_of_wipers, number_of_wipers)
+      drawDung
+    else
+      @food = foodCoords(picture)
+    end
+    @active = picture
   else
     case @active
     when "clean"
       new_wiper = []
-      @wiper.each do |y, x|
-        @board[y][x] = @empty if !@wiper.include?([y, x-1])
+      @food.each do |y, x|
+        @board[y][x] = @empty if !@food.include?([y, x-1])
         if x != @boardx
           new_wiper << [y, x+1]
           @board[y][x+1] = @line
         else
-          @wiper -= [y, x]
+          @food -= [y, x]
         end
       end
+      @food = new_wiper
       draw
-      @wiper = new_wiper
-      if @wiper.length <= 0
+      if @food.length <= 0
         @active = false
         @gross = []
+      end
+    else
+      new_food = []
+      @food.each do |y, x|
+        # Take away the top right pixels ------------------------------------- TODO
+      end
+      @food = new_food
+      draw
+      if @food.length <= 0
+        @active = false
       end
     end
   end
