@@ -46,7 +46,6 @@ t = Time.now
   born: Time.now,
   direction: "right",
   last_beep: t,
-  beep: true,
   evolve: t + 60,
   last_move: t,
   next_move: t + 90,
@@ -64,7 +63,7 @@ t = Time.now
 }
 @max = {
   fullness: 850,
-  health: 100,
+  health: 500,
   hygiene: 500,
   obedience: 1000,
   happiness: 100,
@@ -268,8 +267,8 @@ def tick
   change = false
   t = Time.now
   change = timerControl(t)
-  statChecker
-  droppingChecker
+  statChecker if t > @pet[:stat_drop]
+  droppingChecker if t > @pet[:next_drop]
 
   if t > @pet[:last_move] + @tick_time && @active == false
     movement
@@ -277,7 +276,7 @@ def tick
   end
   animate if @active != false
 
-  beepChecker
+  beepChecker if t > @pet[:last_beep]
   draw if change == true || @force_update == true
   @force_update = false
 end
@@ -363,7 +362,7 @@ def activity(menu, selection)
   when "train"
     case selection
     when 1 # Run
-      @pet[:strength] += 10
+      @pet[:strength] += 150
     when 2 # Lift
     when 3 # Spar
     when 4 # Jump
@@ -525,63 +524,62 @@ def play(action)
 end
 
 def evolveController
-  if @pet[:type] == "egg"
-    @pet[:type] = "blob"
+  @pet[:type] = case @pet[:type]
+  when "egg"
     @pet[:evolve] = Time.now + (1.5 * 60 * 60 * 24)
+    "blob"
   end
   beeper(3)
 end
 
 def beepChecker
-  t = Time.now
-  in_need = (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:obedience] < 40 || @pet[:happiness] < 40 || @pet[:strength] < 40)
-  if t > @pet[:last_beep] && @pet[:beep] = true && in_need
-    @pet[:last_beep] = t + 600 if t > @pet[:last_beep] + (1.5 * @tick_time)
+  if (@pet[:health] < 50 || @pet[:hygiene] < 40 || @pet[:happiness] < 40)
+    @pet[:last_beep] = Time.now + (10 * 60)
     # `say -v Bells "d"`
-    beeper
+    beeper(5)
   end
 end
 
-def beeper(times=1)
-  print "\a"
+def beeper(beeps=1)
+  beeps.times do |beep|
+    print "\a"
+    sleep 0.1
+  end
 end
 
 def statChecker
-  t = Time.now
-  if t > @pet[:stat_drop]
-    @pet[:obedience] -= 1
-    @pet[:fullness] -= 1
-    @pet[:hygiene] -= @gross.length
-    @pet[:hygiene] += 1 if @gross.length == 0
-    @pet[:happiness] -= 1
-    @pet[:strength] -= 1
-    @pet[:stat_drop] = t + 30
-    veryHealthy = true
-    [[@pet[:hygiene], @max[:hygiene]], [@pet[:happiness], @max[:happiness]], [@pet[:strength], @max[:strength]], [@pet[:fullness], @max[:fullness]]].each do |stat|
-      if stat[0] < stat[1]/2
-        @pet[:health] -= 1
-        @pet[:weight] -= 0.1
-        veryHealthy = false
-      end
-      if stat[0] <= 0
-        @pet[:health] -= 1
-        @pet[:weight] -= 0.1
-      end
+  @pet[:obedience] -= 1
+  @pet[:fullness] -= 1
+  @pet[:hygiene] -= @gross.length
+  @pet[:hygiene] += 1 if @gross.length == 0
+  @pet[:happiness] -= 1
+  @pet[:strength] -= 1
+  @pet[:stat_drop] = t + 30
+  veryHealthy = true
+  [[@pet[:hygiene], @max[:hygiene]], [@pet[:happiness], @max[:happiness]], [@pet[:strength], @max[:strength]], [@pet[:fullness], @max[:fullness]]].each do |stat|
+    if stat[0] < stat[1]/2
+      @pet[:health] -= 1
+      @pet[:weight] -= 0.1
+      veryHealthy = false
     end
-    allowedValueChecker
-    @pet[:health] += 1 if veryHealthy
-    if @pet[:health] < 0
-      puts "Your pet died!"
-      exit
+    if stat[0] <= 0
+      @pet[:health] -= 1
+      @pet[:weight] -= 0.1
     end
+  end
+  allowedValueChecker
+  @pet[:health] += 1 if veryHealthy
+  if @pet[:health] < 0
+    puts "Your pet died!"
+    exit
   end
 end
 
 def allowedValueChecker
+  @pet[:weight] = @pet[:weight].round(1)
   @pet[:weight] = 0 if @pet[:weight] < 0
   @pet[:fullness] = 0 if @pet[:fullness] < 0
   @pet[:fullness] = @max[:fullness] if @pet[:fullness] > @max[:fullness]
-  @pet[:health] = 0 if  @pet[:health] < 0
   @pet[:health] = @max[:health] if @pet[:health] > @max[:health]
   @pet[:hygiene] = 0 if @pet[:hygiene] < 0
   @pet[:hygiene] = @max[:hygiene] if @pet[:hygiene] > @max[:hygiene]
@@ -594,11 +592,8 @@ def allowedValueChecker
 end
 
 def droppingChecker
-  t = Time.now
-  if t > @pet[:next_drop]
-    @gross << @pet[:x]
-    @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(6 * 60 * 60)
-  end
+  @gross << @pet[:x]
+  @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(6 * 60 * 60)
 end
 
 def timerControl(t)
@@ -656,7 +651,6 @@ def movement
   end
   drawDung
   placePet
-  # @error = "#{@pet[:next_move0]000 - Time.now}\n#{@pet[:x]} - #{@pet[:target]}"
   @tick += 1
   @pet[:last_move] = Time.now
 end
