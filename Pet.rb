@@ -8,7 +8,7 @@ require 'io/wait'
 @boardx = 93
 @boardy = 30
 @empty = " "
-@line = "▒"
+@line = "\e[47m \e[0m"
 @board = Array.new(@boardy) {Array.new(@boardx) {@empty}}
 
 t = Time.now
@@ -554,7 +554,7 @@ def statChecker
   @pet[:hygiene] += 1 if @gross.length == 0
   @pet[:happiness] -= 1
   @pet[:strength] -= 1
-  @pet[:stat_drop] = t + 30
+  @pet[:stat_drop] = Time.now + 30
   veryHealthy = true
   [[@pet[:hygiene], @max[:hygiene]], [@pet[:happiness], @max[:happiness]], [@pet[:strength], @max[:strength]], [@pet[:fullness], @max[:fullness]]].each do |stat|
     if stat[0] < stat[1]/2
