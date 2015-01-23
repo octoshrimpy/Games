@@ -52,16 +52,23 @@ t = Time.now
   next_drop: t + (30 * 60),
   stat_drop: t + 120,
   target: 80,
-  weight: 3,
-  fullness: 40,
+  weight: 3.0,
+  fullness: 600,
   health: 80,
-  hygiene: 50,
-  obedience: 80,
-  happiness: 80,
-  strength: 0,
+  hygiene: 400,
+  obedience: 500,
+  happiness: 60,
+  strength: 60,
   type: "egg"
 }
-# Blob width: (-4..5)
+@max = {
+  fullness: 850,
+  health: 100,
+  hygiene: 500,
+  obedience: 1000,
+  happiness: 100,
+  strength: 800
+}
 
 def boardClear
   @board = Array.new(@boardy) { Array.new(@boardx) {@empty} }
@@ -355,6 +362,7 @@ def activity(menu, selection)
   when "train"
     case selection
     when 1 # Run
+      @pet[:strength] += 10
     when 2 # Lift
     when 3 # Spar
     when 4 # Jump
@@ -420,32 +428,33 @@ def consume(food)
   when "meat"
     case @pet[:type]
     when "blob"
-      @pet[:fullness] += 5
-      @pet[:weight] += 2 if @pet[:fullness] > 100
+      @pet[:fullness] += 50
+      @pet[:weight] += 2 if @pet[:fullness] > @max[:fullness]
     end
   when "pizza"
     case @pet[:type]
     when "blob"
       @pet[:happiness] -= 3
-      @pet[:fullness] += 5
+      @pet[:fullness] += 35
       @pet[:weight] += 1
-      @pet[:weight] += 2 if @pet[:fullness] > 100
+      @pet[:weight] += 1 if @pet[:fullness] > @max[:fullness]
       @pet[:obedience] -= 1
     end
   when "cookie"
     case @pet[:type]
     when "blob"
       @pet[:happiness] += 5
-      @pet[:fullness] += 3
+      @pet[:fullness] += 25
       @pet[:weight] += 1
-      @pet[:weight] += 2 if @pet[:fullness] > 100
+      @pet[:weight] += 2 if @pet[:fullness] > @max[:fullness]
       @pet[:obedience] += 1
     end
   when "cake"
     case @pet[:type]
     when "blob"
-      @pet[:fullness] += 5
-      @pet[:weight] += 5 if @pet[:fullness] > 100
+      @pet[:fullness] += 50
+      @pet[:weight] += 5
+      @pet[:weight] += 5 if @pet[:fullness] > @max[:fullness]
     end
   when "vitamin"
     case @pet[:type]
@@ -542,17 +551,18 @@ def statChecker
     @pet[:strength] -= 1
     @pet[:stat_drop] = t + 30
     veryHealthy = true
-    [@pet[:hygiene], @pet[:happiness], @pet[:strength], @pet[:fullness]].each do |stat|
-      if stat < 50
+    [[@pet[:hygiene], @max[:hygiene]], [@pet[:happiness], @max[:happiness]], [@pet[:strength], @max[:strength]], [@pet[:fullness], @max[:fullness]]].each do |stat|
+      if stat[0] < stat[1]/2
         @pet[:health] -= 1
+        @pet[:weight] -= 0.1
         veryHealthy = false
       end
-      if stat < 0
-        allowedValueChecker
+      if stat[0] <= 0
         @pet[:health] -= 1
+        @pet[:weight] -= 0.1
       end
-      stat = 100 if stat > 100
     end
+    allowedValueChecker
     @pet[:health] += 1 if veryHealthy
     if @pet[:health] < 0
       puts "Your pet died!"
@@ -562,25 +572,26 @@ def statChecker
 end
 
 def allowedValueChecker
+  @pet[:weight] = 0 if @pet[:weight] > 0
   @pet[:fullness] = 0 if @pet[:fullness] < 0
-  @pet[:fullness] = 100 if @pet[:fullness] > 100
+  @pet[:fullness] = @max[:fullness] if @pet[:fullness] > @max[:fullness]
   @pet[:health] = 0 if  @pet[:health] < 0
-  @pet[:health] = 100 if  @pet[:health] > 100
+  @pet[:health] = @max[:health] if @pet[:health] > @max[:health]
   @pet[:hygiene] = 0 if @pet[:hygiene] < 0
-  @pet[:hygiene] = 100 if @pet[:hygiene] > 100
+  @pet[:hygiene] = @max[:hygiene] if @pet[:hygiene] > @max[:hygiene]
   @pet[:obedience] = 0 if @pet[:obedience] < 0
-  @pet[:obedience] = 100 if @pet[:obedience] > 100
+  @pet[:obedience] = @max[:obedience] if @pet[:obedience] > @max[:obedience]
   @pet[:happiness] = 0 if @pet[:happiness] < 0
-  @pet[:happiness] = 100 if @pet[:happiness] > 100
+  @pet[:happiness] = @max[:happiness] if @pet[:happiness] > @max[:happiness]
   @pet[:strength] = 0 if @pet[:strength] < 0
-  @pet[:strength] = 100 if @pet[:strength] > 100
+  @pet[:strength] = @max[:strength] if @pet[:strength] > @max[:strength]
 end
 
 def droppingChecker
   t = Time.now
   if t > @pet[:next_drop]
     @gross << @pet[:x]
-    @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(5 * 60 * 60)
+    @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(6 * 60 * 60)
   end
 end
 
@@ -761,12 +772,13 @@ def draw
   puts @tick
   puts @error
   puts "
-    fullness: #{@pet[:fullness]}
-    health: #{@pet[:health]}
-    hygiene: #{@pet[:hygiene]}
-    obedience: #{@pet[:obedience]}
-    happiness: #{@pet[:happiness]}
-    strength: #{@pet[:strength]}
+    fullness: #{@pet[:fullness]*100/@max[:fullness]}
+    health: #{@pet[:health]*100/@max[:health]}
+    hygiene: #{@pet[:hygiene]*100/@max[:hygiene]}
+    obedience: #{@pet[:obedience]*100/@max[:obedience]}
+    happiness: #{@pet[:happiness]*100/@max[:happiness]}
+    strength: #{@pet[:strength]*100/@max[:strength]}
+    weight: #{@pet[:weight]}lbs
   "
   system "stty raw -echo"
 end
