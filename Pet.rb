@@ -49,7 +49,7 @@ t = Time.now
   evolve: t + 60,
   last_move: t,
   next_move: t + 90,
-  next_drop: t + (30 * 60),
+  next_drop: t + (10 * 60),
   stat_drop: t + 120,
   target: 80,
   weight: 3.0,
