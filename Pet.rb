@@ -59,7 +59,7 @@ t = Time.now
   hygiene: 400,
   obedience: 500,
   happiness: 60,
-  strength: 60,
+  strength: 600,
   type: "egg"
 }
 @max = {
@@ -321,7 +321,7 @@ def inputChecker(input)
   end
   @select = @menu == "default" ? 0 : 1 if @select > length
   @select = length if (@select < 0 && @menu == "default") || (@select < 1 && @menu != "default")
-  print "\a"
+  beeper(1)
   @force_update = true
 end
 
@@ -411,6 +411,8 @@ def activity(menu, selection)
   if menu != "default"
     @menu = "default"
     @select = 0
+  else
+    @select = 1
   end
 end
 
