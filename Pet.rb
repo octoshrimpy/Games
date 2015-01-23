@@ -3,6 +3,7 @@ require 'io/wait'
 # Recommended Font settings:
 # Horizontal: 4th tick
 # Vertical: 0.6
+# Settings -> Sound -> Tink
 
 @boardx = 93
 @boardy = 30
@@ -522,7 +523,10 @@ def play(action)
 end
 
 def evolveController
-  @pet[:type] = "blob" if @pet[:type] == "egg"
+  if @pet[:type] == "egg"
+    @pet[:type] = "blob"
+    @pet[:evolve] = Time.now + (1.5 * 60 * 60 * 24)
+  end
   beeper(3)
 end
 
@@ -572,7 +576,7 @@ def statChecker
 end
 
 def allowedValueChecker
-  @pet[:weight] = 0 if @pet[:weight] > 0
+  @pet[:weight] = 0 if @pet[:weight] < 0
   @pet[:fullness] = 0 if @pet[:fullness] < 0
   @pet[:fullness] = @max[:fullness] if @pet[:fullness] > @max[:fullness]
   @pet[:health] = 0 if  @pet[:health] < 0
