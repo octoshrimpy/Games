@@ -265,18 +265,18 @@ end
 
 def tick
   change = false
-  t = Time.now
-  change = timerControl(t)
-  statChecker if t > @pet[:stat_drop]
-  droppingChecker if t > @pet[:next_drop]
+  @t = Time.now
+  change = timerControl(@t)
+  statChecker if @t > @pet[:stat_drop]
+  droppingChecker if @t > @pet[:next_drop]
 
-  if t > @pet[:last_move] + @tick_time && @active == false
+  if @t > @pet[:last_move] + @tick_time && @active == false
     movement
     change = true
   end
   animate if @active != false
 
-  beepChecker if t > @pet[:last_beep]
+  beepChecker if @t > @pet[:last_beep]
   draw if change == true || @force_update == true
   @force_update = false
 end
@@ -593,7 +593,7 @@ end
 
 def droppingChecker
   @gross << @pet[:x]
-  @pet[:next_drop] = t + (100 - @pet[:fullness]) + rand(6 * 60 * 60)
+  @pet[:next_drop] =@t+ (100 - @pet[:fullness]) + rand(6 * 60 * 60)
 end
 
 def timerControl(t)
@@ -617,15 +617,15 @@ def timerControl(t)
   @timer += delta.round(5)
   @timer = @timer.round(5)
 
-  if t > @pet[:next_move]
-    @pet[:next_move] = t + 10 + rand(30)
+  if @t > @pet[:next_move]
+    @pet[:next_move] = @t + 10 + rand(30)
     @pet[:target] = case @pet[:type]
     when "blob"
       rand(@boardx - 8) + 4
     end
   end
 
-  evolveController if t > @pet[:evolve]
+  evolveController if @t > @pet[:evolve]
 
   if old_time.round != @timer.round
     @fps = @frame_rate
