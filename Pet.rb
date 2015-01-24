@@ -54,7 +54,7 @@ t = Time.now
   target: 80,
   weight: 3.0,
   fullness: 600,
-  health: 80,
+  health: 400,
   hygiene: 400,
   obedience: 500,
   happiness: 60,
@@ -606,10 +606,10 @@ def timerControl
   end
 
   if @time1 > @time2
-    @time2 = t
+    @time2 = @t
     delta = @time2 - @time1 if @time2 - @time1 < 3
   else
-    @time1 = t
+    @time1 = @t
     delta = @time1 - @time2 if @time1 - @time2 < 3
   end
   @frame_count += 1
