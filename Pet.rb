@@ -266,7 +266,7 @@ end
 def tick
   change = false
   @t = Time.now
-  change = timerControl(@t)
+  change = timerControl
   statChecker if @t > @pet[:stat_drop]
   droppingChecker if @t > @pet[:next_drop]
 
@@ -596,11 +596,11 @@ def droppingChecker
   @pet[:next_drop] =@t+ (100 - @pet[:fullness]) + rand(6 * 60 * 60)
 end
 
-def timerControl(t)
+def timerControl
   delta = 0
   old_time = @timer
   @even = @tick % 2
-  if @last_interact + 30 < t
+  if @last_interact + 30 < @t
     @menu = "default"
     @select = 0
   end
