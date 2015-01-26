@@ -413,16 +413,8 @@ def activity(menu, selection)
   else
     @select = 1
   end
+  allowedValueChecker
 end
-
-# weight: 5,
-# fullness: 2,
-# health: 80,
-# hygiene: 1,
-# obedience: 2,
-# happiness: 2,
-# strength: 0,
-# Rename consume to different. Send all actions through it to upgrade stats
 
 def consume(food)
   animate(food) if @pet[:type] != "egg"
