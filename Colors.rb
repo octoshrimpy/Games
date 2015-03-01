@@ -9,6 +9,8 @@ end
 [3, 9].each { |pre| (0..7).each { |suf| color("▒", (pre.to_s + suf.to_s).to_i) };puts"" }
 [4, 10].each { |pre| (0..7).each { |suf| color(" ", (pre.to_s + suf.to_s).to_i) };puts"" }
 
+print "\e[31m#{str}\e[0m"
+
 # 1 bold
 # 4 underline
 # 7 invert
