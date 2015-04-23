@@ -20,6 +20,8 @@ class String
   def is_unbreakable?
     %w(
       ▒
+      >
+      <
     ).include?(self.uncolor.split.join)
   end
 end

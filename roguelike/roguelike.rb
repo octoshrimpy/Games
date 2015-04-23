@@ -15,11 +15,14 @@ Game.draw
 while(true)
   input = Input.read_single_key
   if $player.try_action(input)
+    time = Time.now.to_f
     $level = Game.update_level
+    $player.seen.uniq!
     system 'clear' or system 'cls'
     Game.draw
     $time += 1
-    sleep 0.05
+    puts "FPS: #{1 / (Time.now.to_f - time)}"
+    # sleep 0.05
   end
-  draw($dungeon[$player.depth]) if input == "D"
+  Game.draw($dungeon[$player.depth]) if input == "D"
 end

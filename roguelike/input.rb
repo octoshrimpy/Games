@@ -10,6 +10,7 @@ class Input
       input << STDIN.read_nonblock(2) rescue nil
     end
   ensure
+    STDIN.echo = true
     STDIN.cooked!
 
     return input
