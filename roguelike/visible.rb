@@ -13,10 +13,10 @@ class Visible
       @board[ypos + @radius] ||= []
       (-@radius..@radius).each do |xpos|
         if board[@coords[:y] - ypos].nil? || (@coords[:y] - ypos) < 0
-          @board[ypos + @radius][xpos + @radius] = "#"
+          @board[ypos + @radius][xpos + @radius] = "# "
         else
           @board[ypos + @radius][xpos + @radius] = board[@coords[:y] - ypos][@coords[:x] - xpos]
-          @board[ypos + @radius][xpos + @radius] ||= "#"
+          @board[ypos + @radius][xpos + @radius] ||= "# "
         end
       end
       @board[ypos + @radius].reverse!
@@ -25,21 +25,18 @@ class Visible
   end
 
   def find_visible
+    # Carve the square into a circle, check all the points
+    # This does the radii points first, to get the longest possible-
+    # This means drawing a line to every furthest point,
+    # which also includes all the points up until that line.
     @board.each_with_index do |x, xpos|
       x.each_with_index do |y, ypos|
-        # Carve the square into a circle, check all the points
-        # This does the radii points first, to get the longest possble...
         if distance_from_center(xpos, ypos).round == @radius
           @visible += in_linear_view(xpos, ypos)
-        elsif distance_from_center(xpos, ypos).round <= @radius
-          # Then it fills in the blanks
-          unless @visible.include?({x: xpos, y: ypos})
-            @visible += in_linear_view(xpos, ypos)
-          end
         end
-        # "(#{xpos}, #{ypos}) - #{@board[ypos][xpos]}"
       end
     end
+    # Then it fills in the blanks
     @board.each_with_index do |x, xpos|
       x.each_with_index do |y, ypos|
         if distance_from_center(xpos, ypos).round <= @radius
@@ -49,10 +46,12 @@ class Visible
         end
       end
     end
+    # "(#{xpos}, #{ypos}) - #{@board[ypos][xpos]}"
     @visible.uniq!
   end
 
   def in_linear_view(x, y) #0..@radius*2
+    # Check Quadrant, do not sort unless necessary.
     line_coords = get_line(@radius, @radius, x, y).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])
     end

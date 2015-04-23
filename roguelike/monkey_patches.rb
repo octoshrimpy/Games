@@ -16,4 +16,10 @@ class String
       ▒
     ).include?(self.uncolor.split.join)
   end
+
+  def is_unbreakable?
+    %w(
+      ▒
+    ).include?(self.uncolor.split.join)
+  end
 end

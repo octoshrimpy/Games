@@ -1,12 +1,14 @@
 require 'pry'
 class Player
-  attr_accessor :x, :y, :seen
+  attr_accessor :x, :y, :seen, :depth
 
   def initialize
     @x = 0
     @y = 0
+    @depth = 1
     @dungeon_level = 1 # 0 for town?
     @seen = []
+    # Vision radius
     # life
     # mp
     # str
@@ -18,18 +20,67 @@ class Player
     "\e[34m@ \e[0m"
   end
 
-  def try_move(direction)
+  def try_action(input)
     x_dest = 0
     y_dest = 0
-    case direction
-    when "LEFT" then x_dest = -1
-    when "RIGHT" then x_dest = 1
-    when "UP" then y_dest = -1
-    when "DOWN" then y_dest = 1
+    tick = false
+    case input
+    when "UP", "w"
+      tick = true
+      y_dest = -1
+    when "LEFT", "a"
+      tick = true
+      x_dest = -1
+    when "DOWN", "x"
+      tick = true
+      y_dest = 1
+    when "RIGHT", "d"
+      tick = true
+      x_dest = 1
+    when "q"
+      tick = true
+      y_dest = -1
+      x_dest = -1
+    when "e"
+      tick = true
+      y_dest = -1
+      x_dest = 1
+    when "c"
+      tick = true
+      y_dest = 1
+      x_dest = 1
+    when "z"
+      tick = true
+      y_dest = 1
+      x_dest = -1
+    when "s"
+      tick = true
+    when "P"
+      binding.pry
+      # Or pause?
+    when "SPACE"
+      tick = true
+      blow_walls
     end
-    unless $dungeon[self.y + y_dest][self.x + x_dest].is_solid?
+    unless $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].is_solid?
       self.x += x_dest
       self.y += y_dest
+    end
+    tick
+  end
+
+  def blow_walls
+    px = self.x
+    py = self.y
+    (-1..1).each do |x|
+      (-1..1).each do |y|
+        not_nil = !($dungeon[$player.depth][y + py].nil?)
+        solid_block = $dungeon[$player.depth][y + py][x + px].is_solid?
+        breakable = !($dungeon[$player.depth][y + py][x + px].is_unbreakable?)
+        if not_nil && solid_block && breakable
+          $dungeon[$player.depth][y + py][x + px] = "  "
+        end
+      end
     end
   end
 end
