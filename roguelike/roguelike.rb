@@ -1,7 +1,7 @@
 require 'io/console'
 require 'pry'
 require './visible.rb'
-require './arena.rb'
+# require './arena.rb'
 require './dungeon.rb'
 require './player.rb'
 require './game.rb'
@@ -15,14 +15,13 @@ Game.draw
 while(true)
   input = Input.read_single_key
   if $player.try_action(input)
-    time = Time.now.to_f
+    $time = Time.now.to_f
     $level = Game.update_level
-    $player.seen.uniq!
+    $player.seen[$player.depth].uniq!
     system 'clear' or system 'cls'
     Game.draw
-    $time += 1
-    puts "FPS: #{1 / (Time.now.to_f - time)}"
-    # sleep 0.05
+    $tick += 1
+    sleep 0.05
   end
   Game.draw($dungeon[$player.depth]) if input == "D"
 end

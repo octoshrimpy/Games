@@ -11,11 +11,6 @@ class Arena
   end
 
   def []=(x,y,v)
-    # I originally worked out the width and height at the end by scanning
-    # the map. I was also using a single map, rather than the 'map in a
-    # map' now used. I found that dungeon creation  was slow, but almost
-    # all of it was the final rendering stage, so switched over to the
-    # current approach.
     @arena[y][x]=v
     @left = [@left, x].min
     @right = [@right, x].max

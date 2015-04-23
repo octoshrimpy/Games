@@ -1,8 +1,7 @@
 class Input
   # Reads keypresses from the user including 2 and 3 escape character sequences.
   def self.read_char
-    STDIN.echo = false
-    STDIN.raw!
+    Game.input(false)
 
     input = STDIN.getc.chr
     if input == "\e" then
@@ -10,8 +9,6 @@ class Input
       input << STDIN.read_nonblock(2) rescue nil
     end
   ensure
-    STDIN.echo = true
-    STDIN.cooked!
 
     return input
   end
@@ -46,7 +43,7 @@ class Input
       "DELETE"
     when "\u0003"
       "CONTROL-C"
-      STDIN.echo = true
+      Game.input(true)
       exit 0
     when /^.$/
       c

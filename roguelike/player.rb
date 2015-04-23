@@ -25,6 +25,7 @@ class Player
     y_dest = 0
     tick = false
     case input
+      # Movement
     when "UP", "w"
       tick = true
       y_dest = -1
@@ -55,16 +56,31 @@ class Player
       x_dest = -1
     when "s"
       tick = true
+    when ">"
+      if $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].uncolor == ">"
+        Game.use_stairs("DOWN")
+        tick = true
+      end
+    when "<"
+      if $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].uncolor == "<"
+        Game.use_stairs("UP")
+        tick = true
+      end
+      # Game settings
     when "P"
+      Game.input(true)
       binding.pry
       # Or pause?
     when "SPACE"
       tick = true
       blow_walls
+      # Battle
     end
-    unless $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].is_solid?
-      self.x += x_dest
-      self.y += y_dest
+    if x_dest != 0 || y_dest != 0
+      unless $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].is_solid?
+        self.x += x_dest
+        self.y += y_dest
+      end
     end
     tick
   end
