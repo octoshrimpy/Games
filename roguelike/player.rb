@@ -1,6 +1,6 @@
 require 'pry'
 class Player
-  attr_accessor :x, :y, :seen, :depth
+  attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health, :max_mana, :strength, :speed
 
   def initialize
     @x = 0
@@ -8,16 +8,50 @@ class Player
     @depth = 1
     @dungeon_level = 1 # 0 for town?
     @seen = []
-    # Vision radius
-    # life
-    # mp
-    # str
-    # speed
-    # stats:
+
+    @vision_radius = 5
+    @health = 100
+    @max_health = 100
+    @mana = 100
+    @max_mana = 100
+    @strength = 10
+    @speed = 10
+  end
+
+  def verify_stats
+    self.health = 0 if self.health < 0
+    self.health = self.max_health if self.health > self.max_health
+    self.mana = 0 if self.mana < 0
+    self.mana = self.max_mana if self.mana > self.max_mana
+  end
+
+  def hurt(damage=1, src="You got hurt by an unknown source.")
+    # Reflect if getting dangerously low on stats
+    self.health -= damage
+    $log << src
+    verify_stats
+  end
+
+  def heal(regenerate=1, src="You got healed by an unknown source.")
+    self.health += regenerate
+    $log << src
+    verify_stats
+  end
+
+  def drain(deplete=1, src="You lost mana from an unknown source.")
+    self.mana -= deplete
+    $log << src
+    verify_stats
+  end
+
+  def restore(gain=1, src="You restored mana from an unknown source.")
+    self.mana += gain
+    $log << src
+    verify_stats
   end
 
   def show
-    "\e[34m@ \e[0m"
+    "\e[94m@ \e[0m"
   end
 
   def try_action(input)
@@ -75,6 +109,12 @@ class Player
       tick = true
       blow_walls
       # Battle
+    when "h"
+      hurt
+      tick = true
+    when "j"
+      drain
+      tick = true
     end
     if x_dest != 0 || y_dest != 0
       unless $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].is_solid?

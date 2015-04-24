@@ -58,7 +58,9 @@ class Dungeon
     height = -rand(max)..rand(max)
     height.each do |y|
       width.each do |x|
-        arena[x+walker.x, y+walker.y] = @empty_space
+        unless arena[x+walker.x, y+walker.y] == @down_stairs
+          arena[x+walker.x, y+walker.y] = @empty_space
+        end
       end
     end
   end

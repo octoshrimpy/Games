@@ -6,11 +6,26 @@ class Game
     $time = 0
     $player = Player.new
     $dungeon = []
+    $log = []
     # $player.x = 5
     # $player.y = 5
     # dungeon = Array.new(100) {Array.new(50) {"  "}}
     # $dungeon[$player.depth] = dungeon
     make_dungeon
+  end
+
+  def self.overlay_string(str, color, times, gui_width)
+    new_str = []
+    new_str << "\e[#{color}m"
+    str = str[0..18] if str.length > 18
+    padding = (gui_width - str.length - 1).times.map {' '}.join('')
+    "#{str}#{padding}".split('').each_with_index do |char, pos|
+      colorize = pos < times ? "" : "\e[100m"
+      new_str << "#{colorize}#{char}"
+    end
+    new_str << "\e[100m"
+    binding.pry if new_str.length < gui_width
+    new_str.join('')
   end
 
   def self.input(bool=true)
@@ -26,18 +41,74 @@ class Game
   end
 
   def self.draw(board=$level)
+    stats_gui_width = 10
+    logs_gui_height = 10
     Game.input(true)
-    i = 0
-    board.first.length.times {print " _"}
+    print "\e[100m"
+    (board.first.length + stats_gui_width + 1).times {print "--"}
+    print " \rStats "
     puts
+    # Print out the board
+    i = 0
     while i < board.length
       print "|"
+      stats_gui_width.times do |t|
+        print "  "
+      end
+      print "|\e[0m"
       print board[i].join
+      print "\e[100m"
       print "|"
+      print "\r| "
+      print case i
+      when 0
+        hp = ($player.health / $player.max_health.to_f) * 100.00
+        max = ((hp / stats_gui_width.to_f) * 2.00).round
+        color = case hp
+        when 60..100 then 42
+        when 30..60 then 43
+        when 0..30 then 41
+        else 7
+        end
+        print "\e[30m"
+        overlay_string(" Health: #{$player.health}/#{$player.max_health}", color, max, stats_gui_width*2)
+      when 1
+        hp = ($player.mana / $player.max_mana.to_f) * 100.00
+        max = ((hp / stats_gui_width.to_f) * 2.00).round
+        color = case hp
+        when 60..100 then 46
+        when 20..60 then 104
+        when 0..20 then 45
+        else 7
+        end
+        print "\e[30m"
+        overlay_string(" Mana: #{$player.mana}/#{$player.max_mana}", color, max, stats_gui_width*2)
+      end
+      print "\e[100;37m"
       puts ""
       i += 1
     end
-    board.first.length.times {print " _"}
+    print "\e[100m"
+    (board.first.length + stats_gui_width + 1).times {print "--"}
+    print " \rLogs "
+    puts
+    i = 0
+    while i < logs_gui_height
+      print "|"
+      (board.first.length + stats_gui_width).times do |t|
+        print "  "
+      end
+      print " |"
+      print "\r| "
+      logs = $log.last(20).reverse
+      print "\e[30m"
+      print logs[i][0..((board.first.length + stats_gui_width - 1)*2)] if logs[i]
+      print "\e[100;37m"
+      puts ""
+      i += 1
+    end
+    (board.first.length + stats_gui_width + 1).times {print "--"}
+    print " \e[0m"
     puts
     puts "Time: #{$tick}"
     puts "FPS: #{1 / (Time.now.to_f - $time)}"
@@ -149,7 +220,7 @@ class Game
       pixel = $dungeon[$player.depth][seen[:y]][seen[:x]]
       $level[seen[:y] - y_offset][seen[:x] - x_offset] = pixel == "  " ? "\e[90m. \e[0m" : "\e[90m#{pixel}\e[0m"
     end
-    visible = Visible.new($dungeon[$player.depth], {x: $player.x, y: $player.y}, 5).find_visible
+    visible = Visible.new($dungeon[$player.depth], {x: $player.x, y: $player.y}, $player.vision_radius).find_visible
     visible.each do |in_sight|
       $player.seen[$player.depth] << in_sight
         # This makes the current visibility yellow.
