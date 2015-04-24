@@ -48,7 +48,7 @@ class Game
     (board.first.length + stats_gui_width + 1).times {print "--"}
     print " \rStats "
     puts
-    # Print out the board
+    # Should calculate the board first, then draw it all at once.
     i = 0
     while i < board.length
       print "|"
