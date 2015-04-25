@@ -45,14 +45,14 @@ class Walker
   # How wiggley are the dungeons? Bigger numbers are more wiggly
   # and compact.
   def wiggle_max
-    0.9
+    0.5
   end
 
   # How smooth are tunnels? Larger numbers give smoother more
   # 'catacombe' like tunnels (and smaller dungeons). Smaller
   # numbers give more cartesian & straight tunnels.
   def smoothing
-    0.9
+    0.5
   end
 
 end

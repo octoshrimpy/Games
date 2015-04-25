@@ -53,7 +53,7 @@ class Dungeon
   end
 
   def create_room(arena, walker)
-    max = 10
+    max = 6
     width = -rand(max)..rand(max)
     height = -rand(max)..rand(max)
     height.each do |y|

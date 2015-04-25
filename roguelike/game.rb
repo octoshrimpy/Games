@@ -142,7 +142,7 @@ class Game
   end
 
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
-    dungeon = Dungeon.new.build(200)
+    dungeon = Dungeon.new.build(300)
     $dungeon[$player.depth] = dungeon.to_array
 
     $player.x = dungeon.left.abs + 1
