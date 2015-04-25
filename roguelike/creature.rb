@@ -16,7 +16,7 @@ class Creature
 
   def destroy
     $npcs[Player.me.depth].delete(self)
-    $log << "#{color(@name)} was stomped to death."
+    $log << "#{$tick}: " +  "#{color(@name)} was stomped to death."
   end
 
   def coords
@@ -25,7 +25,7 @@ class Creature
 
   def hurt(damage=1, src="#{color(@name)} received some damage.")
     @health -= damage
-    $log << src
+    $log << "#{$tick}: " +  src
     self.destroy if @health <= 0
   end
 

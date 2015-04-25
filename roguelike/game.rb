@@ -100,6 +100,9 @@ class Game
     print " \rLogs "
     puts
     i = 0
+    logs = $log.last(logs_gui_height).reverse
+    logs << nil while logs.length < logs_gui_height
+    logs.reverse!
     while i < logs_gui_height
       print "|"
       (board.first.length + stats_gui_width).times do |t|
@@ -107,7 +110,6 @@ class Game
       end
       print " |"
       print "\r| "
-      logs = $log.last(20).reverse
       print "\e[40;37m"
       print " #{logs[i][0..((board.first.length + stats_gui_width - 1)*2)]} " if logs[i]
       print "\e[100;37m"

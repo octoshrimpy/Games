@@ -28,7 +28,7 @@ class Player
 
   def verify_stats
     if self.health <= 0
-      $log << "You have been slaughtered."
+      $log << "#{$tick}: " +  "You have been slaughtered."
       Game.draw
       Game.end
     end
@@ -40,25 +40,25 @@ class Player
   def hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
-    $log << src
+    $log << "#{$tick}: " +  src
     verify_stats
   end
 
   def heal(regenerate=1, src="You got healed by an unknown source.")
     self.health += regenerate
-    $log << src
+    $log << "#{$tick}: " +  src
     verify_stats
   end
 
   def drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
-    $log << src
+    $log << "#{$tick}: " +  src
     verify_stats
   end
 
   def restore(gain=1, src="You restored mana from an unknown source.")
     self.mana += gain
-    $log << src
+    $log << "#{$tick}: " +  src
     verify_stats
   end
 
