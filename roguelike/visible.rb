@@ -24,6 +24,17 @@ class Visible
     @board.reverse!
   end
 
+  def self.in_range(range, coords_from, coords_to)
+    if distance_to(coords_from, coords_to) <= range
+      line_coords = get_line(coords_from[:x], coords_from[:y], coords_to[:x], coords_to[:y])
+      line = line_coords.map {|coords| Dungeon.current[coords[:y]][coords[:x]]}
+      blocks_in_line = line.map {|e| e.is_solid? ? true : nil}
+      blocks_in_line.compact.count == 0
+    else
+      false
+    end
+  end
+
   def find_visible
     # Carve the square into a circle, check all the points
     # This does the radii points first, to get the longest possible-
@@ -52,7 +63,7 @@ class Visible
 
   def in_linear_view(x0,y0,x1,y1) #0..@radius*2
     # Check Quadrant, do not sort unless necessary.
-    line_coords = get_line(x0, y0, x1, y1).sort_by do |coord|
+    line_coords = Visible.get_line(x0, y0, x1, y1).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])
     end
     line = line_coords.map {|coords| @board[coords[:y]][coords[:x]]}
@@ -68,7 +79,7 @@ class Visible
     end
   end
 
-  def get_line(x0,y0,x1,y1)
+  def self.get_line(x0,y0,x1,y1)
     points = []
     steep = ((y1-y0).abs) > ((x1-x0).abs)
 
@@ -112,6 +123,10 @@ class Visible
 
   def distance_from_center(x, y)
     return Math.sqrt((x - @radius)**2 + (y - @radius)**2)
+  end
+
+  def self.distance_to(from, to)
+    return Math.sqrt((from[:x] - to[:x])**2 + (from[:y] - to[:y])**2)
   end
 
 end

@@ -11,10 +11,10 @@ class Player
     @gold = 0
 
     @vision_radius = 5
-    @health = 100
-    @max_health = 100
-    @mana = 100
-    @max_mana = 100
+    @health = 20
+    @max_health = 20
+    @mana = 20
+    @max_mana = 20
     @strength = 10
     @speed = 10
     $player = self

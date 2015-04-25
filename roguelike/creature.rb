@@ -2,7 +2,7 @@ class Creature
   attr_accessor :x, :y, :health, :speed, :name
 
   def initialize(options={})
-    @health = 5
+    @health = 3
     @speed = 10
     @mask = "x "
     @color = "\e[31m"
@@ -42,14 +42,20 @@ class Creature
     $npcs[Player.me.depth] << self
   end
 
-  def move(type)
+  def move(type="check")
     move_to = case type
+    when "check"
+      if Visible.in_range(6, self.coords, Player.me.coords)
+        charge.sample
+      else
+        wander.sample
+      end
     when "wander" then wander.sample
-    when "charge" then charge
-    when "retreat" then retreat
+    when "charge" then charge.sample
+    when "retreat" then retreat.sample
     end
     if move_to && move_to == Player.me.coords
-      damage = rand(10) == 0 ? 0 : rand(2) + 1
+      damage = rand(10) == 0 ? 0 : rand(1) + 1
       if damage == 0
         Log.add "#{color(@name)} missed you!"
       else
@@ -81,10 +87,21 @@ class Creature
 
   def charge
     move_to = wander
+    shortest_distance = 100
+    possible = []
     if move_to
-
+      move_to.each do |spot|
+        distance = Visible.distance_to(spot, Player.me.coords)
+        if distance < shortest_distance
+          shortest_distance = distance
+          possible = []
+        end
+        if Visible.distance_to(spot, Player.me.coords) == shortest_distance
+          possible << spot
+        end
+      end
     end
-    move_to
+    possible
   end
 
   def retreat

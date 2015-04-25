@@ -18,7 +18,7 @@ while(true)
   if Player.me.try_action(input)
     $time = Time.now.to_f
     $npcs[Player.me.depth].each do |creature|
-      creature.wander
+      creature.move
     end if $npcs[Player.me.depth]
     $level = Game.update_level
     Player.me.seen[Player.me.depth].uniq!
