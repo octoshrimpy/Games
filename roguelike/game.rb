@@ -16,6 +16,11 @@ class Game
     make_dungeon
   end
 
+  def self.end
+    Game.input(true)
+    exit 0
+  end
+
   def self.overlay_string(str, color, times, gui_width)
     new_str = []
     new_str << "\e[#{color}m"
@@ -103,8 +108,8 @@ class Game
       print " |"
       print "\r| "
       logs = $log.last(20).reverse
-      print "\e[30m"
-      print logs[i][0..((board.first.length + stats_gui_width - 1)*2)] if logs[i]
+      print "\e[40;37m"
+      print " #{logs[i][0..((board.first.length + stats_gui_width - 1)*2)]} " if logs[i]
       print "\e[100;37m"
       puts ""
       i += 1
@@ -157,6 +162,8 @@ class Game
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
     dungeon = Dungeon.new.build(300)
     $dungeon[Player.me.depth] = dungeon.to_array
+
+    populate_dungeon
 
     Player.me.x = dungeon.left.abs + 1
     Player.me.y = dungeon.top.abs + 1
@@ -215,6 +222,13 @@ class Game
   # Dungeon should never be colored!
   # Player.me vision no longer shows?
   #  53x20?
+
+  def self.populate_dungeon
+    10.times do |t|
+      Creature.new.spawn
+    end
+
+  end
 
   def self.update_level
     viewport_width = 41

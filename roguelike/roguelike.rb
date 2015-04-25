@@ -9,9 +9,6 @@ require './input.rb'
 require './monkey_patches.rb'
 
 Game.start
-10.times do |t|
-  Creature.new.spawn
-end
 system 'clear' or system 'cls'
 Game.draw
 
@@ -27,7 +24,7 @@ while(true)
     system 'clear' or system 'cls'
     Game.draw
     $tick += 1
-    # sleep 0.05
+    sleep 0.1
   end
   Game.draw($dungeon[Player.me.depth]) if input == "D"
 end

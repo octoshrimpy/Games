@@ -27,7 +27,11 @@ class Player
   end
 
   def verify_stats
-    self.health = 0 if self.health < 0
+    if self.health <= 0
+      $log << "You have been slaughtered."
+      Game.draw
+      Game.end
+    end
     self.health = self.max_health if self.health > self.max_health
     self.mana = 0 if self.mana < 0
     self.mana = self.max_mana if self.mana > self.max_mana
@@ -98,6 +102,12 @@ class Player
       x_dest = -1
     when "s"
       tick = true
+    when "S"
+      print "\nUp: "
+      $dungeon[Player.me.depth].search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      print "\n\rDown: "
+      $dungeon[Player.me.depth].search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      puts
     when ">"
       if $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].uncolor == ">"
         Game.use_stairs("DOWN")
@@ -128,6 +138,12 @@ class Player
       unless $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].is_solid?
         self.x += x_dest
         self.y += y_dest
+
+        $npcs[Player.me.depth].each do |creature|
+          if creature.coords == Player.me.coords
+            creature.hurt(1, "You stomped on #{creature.color(creature.name)}.")
+          end
+        end
       end
     end
     tick

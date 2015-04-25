@@ -43,8 +43,7 @@ class Input
       "DELETE"
     when "\u0003"
       "CONTROL-C"
-      Game.input(true)
-      exit 0
+      Game.end
     when /^.$/
       c
     else

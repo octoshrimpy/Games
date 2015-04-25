@@ -1,5 +1,5 @@
 class Creature
-  attr_accessor :x, :y, :health, :speed
+  attr_accessor :x, :y, :health, :speed, :name
 
   def initialize(options={})
     @health = 5
@@ -14,8 +14,23 @@ class Creature
     end
   end
 
+  def destroy
+    $npcs[Player.me.depth].delete(self)
+    $log << "#{color(@name)} was stomped to death."
+  end
+
+  def coords
+    {x: self.x, y: self.y}
+  end
+
+  def hurt(damage=1, src="#{color(@name)} received some damage.")
+    @health -= damage
+    $log << src
+    self.destroy if @health <= 0
+  end
+
   def color(str)
-    "#{@color}#{str}\e[0m"
+    "#{@color}#{str}\e[37m"
   end
 
   def spawn
