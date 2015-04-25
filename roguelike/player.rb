@@ -1,4 +1,3 @@
-require 'pry'
 class Player
   attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                 :max_mana, :strength, :speed
@@ -17,6 +16,14 @@ class Player
     @max_mana = 100
     @strength = 10
     @speed = 10
+  end
+
+  def self.me
+    $player
+  end
+
+  def coords
+    {x: Player.me.x, y: Player.me.y}
   end
 
   def verify_stats
@@ -92,12 +99,12 @@ class Player
     when "s"
       tick = true
     when ">"
-      if $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].uncolor == ">"
+      if $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].uncolor == ">"
         Game.use_stairs("DOWN")
         tick = true
       end
     when "<"
-      if $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].uncolor == "<"
+      if $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].uncolor == "<"
         Game.use_stairs("UP")
         tick = true
       end
@@ -118,7 +125,7 @@ class Player
       tick = true
     end
     if x_dest != 0 || y_dest != 0
-      unless $dungeon[$player.depth][self.y + y_dest][self.x + x_dest].is_solid?
+      unless $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].is_solid?
         self.x += x_dest
         self.y += y_dest
       end
@@ -131,11 +138,11 @@ class Player
     py = self.y
     (-1..1).each do |x|
       (-1..1).each do |y|
-        not_nil = !($dungeon[$player.depth][y + py].nil?)
-        solid_block = $dungeon[$player.depth][y + py][x + px].is_solid?
-        breakable = !($dungeon[$player.depth][y + py][x + px].is_unbreakable?)
+        not_nil = !($dungeon[Player.me.depth][y + py].nil?)
+        solid_block = $dungeon[Player.me.depth][y + py][x + px].is_solid?
+        breakable = !($dungeon[Player.me.depth][y + py][x + px].is_unbreakable?)
         if not_nil && solid_block && breakable
-          $dungeon[$player.depth][y + py][x + px] = "  "
+          $dungeon[Player.me.depth][y + py][x + px] = "  "
         end
       end
     end

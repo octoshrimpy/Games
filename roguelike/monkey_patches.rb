@@ -4,6 +4,22 @@ class Object
   end
 end
 
+class Array
+
+  def search_for(str)
+    coords = []
+    (self.length - 1).times do |y|
+      (self[y].length - 1).times do |x|
+        if self[y][x] == str
+          coords << {x: x, y: y}
+        end
+      end
+    end
+    coords
+  end
+
+end
+
 class String
 # 1 bold
 # 4 underline
