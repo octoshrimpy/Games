@@ -1,6 +1,7 @@
 require 'pry'
 class Player
-  attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health, :max_mana, :strength, :speed
+  attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
+                :max_mana, :strength, :speed
 
   def initialize
     @x = 0

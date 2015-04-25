@@ -7,6 +7,7 @@ class Game
     $player = Player.new
     $dungeon = []
     $log = []
+    $fps = []
     # $player.x = 5
     # $player.y = 5
     # dungeon = Array.new(100) {Array.new(50) {"  "}}
@@ -110,8 +111,13 @@ class Game
     (board.first.length + stats_gui_width + 1).times {print "--"}
     print " \e[0m"
     puts
+    fps = 1 / (Time.now.to_f - $time)
+    $fps << fps
+    $fps.shift while $fps.length > 50
+    avg_fps = $fps.inject(:+).to_f / $fps.size
     puts "Time: #{$tick}"
-    puts "FPS: #{1 / (Time.now.to_f - $time)}"
+    puts "FPS: #{fps}"
+    puts "Average FPS: #{avg_fps}"
     puts "Depth: #{$player.depth}"
     Game.input(false)
   end
@@ -184,6 +190,19 @@ class Game
     end
 
     $level = update_level
+  end
+
+  def self.run_dungeon_tests(num)
+    time = Time.now.to_f
+    count = 0
+    print "\e[32m"
+    num.times do |t|
+      dungeon = Dungeon.new.build(300).to_array.flatten
+      print dungeon.include?("< ") ? "." : (count+=1;"\e[31mF\e[32m")
+      print dungeon.include?("> ") ? "." : (count+=1;"\e[31mF \e[32m")
+    end
+    puts "\e[0m"
+    puts "Created #{num} dungeons. Took #{(Time.now.to_f - time).round(1)} seconds. There was #{count} failures."
   end
 
   # Dungeon should never be colored!

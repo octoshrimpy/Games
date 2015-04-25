@@ -24,7 +24,7 @@ class Dungeon
       walk_length -=1
 
       # Cut out a bit of tunnel where I am.
-      arena[*walker.position] = @empty_space
+      arena[*walker.position] = @empty_space unless arena[*walker.position] == @down_stairs
       walker.wander
 
       # Bosh down a room occasionally.
