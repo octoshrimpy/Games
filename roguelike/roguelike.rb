@@ -3,6 +3,7 @@ require 'pry-remote'
 require './visible.rb'
 require './dungeon.rb'
 require './player.rb'
+require './log.rb'
 require './creature.rb'
 require './game.rb'
 require './input.rb'
@@ -26,5 +27,5 @@ while(true)
     $tick += 1
     sleep 0.1
   end
-  Game.draw($dungeon[Player.me.depth]) if input == "D"
+  Game.draw(Dungeon.current) if input == "D"
 end

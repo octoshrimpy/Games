@@ -1,6 +1,6 @@
 class Player
   attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
-                :max_mana, :strength, :speed
+                :max_mana, :strength, :speed, :gold
 
   def initialize
     @x = 0
@@ -8,6 +8,7 @@ class Player
     @depth = 1
     @dungeon_level = 1 # 0 for town?
     @seen = []
+    @gold = 0
 
     @vision_radius = 5
     @health = 100
@@ -16,6 +17,7 @@ class Player
     @max_mana = 100
     @strength = 10
     @speed = 10
+    $player = self
   end
 
   def self.me
@@ -28,7 +30,7 @@ class Player
 
   def verify_stats
     if self.health <= 0
-      $log << "#{$tick}: " +  "You have been slaughtered."
+      Log.add("You have been slaughtered.")
       Game.draw
       Game.end
     end
@@ -40,25 +42,25 @@ class Player
   def hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
-    $log << "#{$tick}: " +  src
+    Log.add(src)
     verify_stats
   end
 
   def heal(regenerate=1, src="You got healed by an unknown source.")
     self.health += regenerate
-    $log << "#{$tick}: " +  src
+    Log.add(src)
     verify_stats
   end
 
   def drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
-    $log << "#{$tick}: " +  src
+    Log.add(src)
     verify_stats
   end
 
   def restore(gain=1, src="You restored mana from an unknown source.")
     self.mana += gain
-    $log << "#{$tick}: " +  src
+    Log.add(src)
     verify_stats
   end
 
@@ -104,17 +106,17 @@ class Player
       tick = true
     when "S"
       print "\nUp: "
-      $dungeon[Player.me.depth].search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       print "\n\rDown: "
-      $dungeon[Player.me.depth].search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       puts
     when ">"
-      if $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].uncolor == ">"
+      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == ">"
         Game.use_stairs("DOWN")
         tick = true
       end
     when "<"
-      if $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].uncolor == "<"
+      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "<"
         Game.use_stairs("UP")
         tick = true
       end
@@ -135,14 +137,24 @@ class Player
       tick = true
     end
     if x_dest != 0 || y_dest != 0
-      unless $dungeon[Player.me.depth][self.y + y_dest][self.x + x_dest].is_solid?
-        self.x += x_dest
-        self.y += y_dest
+      unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
 
-        $npcs[Player.me.depth].each do |creature|
-          if creature.coords == Player.me.coords
+        is_creature = false
+        $npcs[Player.me.depth].map do |creature|
+          if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
             creature.hurt(1, "You stomped on #{creature.color(creature.name)}.")
+            is_creature = true
           end
+        end
+        unless is_creature
+          self.x += x_dest
+          self.y += y_dest
+        end
+        if Dungeon.current[self.y][self.x] == "* "
+          Dungeon.current[self.y][self.x] = "  "
+          gold = rand(4) + 1
+          Log.add("Gained #{gold} gold!")
+          @gold += gold
         end
       end
     end
@@ -154,11 +166,11 @@ class Player
     py = self.y
     (-1..1).each do |x|
       (-1..1).each do |y|
-        not_nil = !($dungeon[Player.me.depth][y + py].nil?)
-        solid_block = $dungeon[Player.me.depth][y + py][x + px].is_solid?
-        breakable = !($dungeon[Player.me.depth][y + py][x + px].is_unbreakable?)
+        not_nil = !(Dungeon.current[y + py].nil?)
+        solid_block = Dungeon.current[y + py][x + px].is_solid?
+        breakable = !(Dungeon.current[y + py][x + px].is_unbreakable?)
         if not_nil && solid_block && breakable
-          $dungeon[Player.me.depth][y + py][x + px] = "  "
+          Dungeon.current[y + py][x + px] = "  "
         end
       end
     end

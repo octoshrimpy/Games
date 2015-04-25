@@ -16,7 +16,7 @@ class Creature
 
   def destroy
     $npcs[Player.me.depth].delete(self)
-    $log << "#{$tick}: " +  "#{color(@name)} was stomped to death."
+    Log.add("#{color(@name)} was stomped to death.")
   end
 
   def coords
@@ -25,7 +25,7 @@ class Creature
 
   def hurt(damage=1, src="#{color(@name)} received some damage.")
     @health -= damage
-    $log << "#{$tick}: " +  src
+    Log.add(src)
     self.destroy if @health <= 0
   end
 
@@ -34,8 +34,8 @@ class Creature
   end
 
   def spawn
-    coord = $dungeon[Player.me.depth].search_for("  ").sample
-    # $dungeon[Player.me.depth][coord[:y]][coord[:x]] = self.show
+    coord = Dungeon.current.search_for("  ").sample
+    # Dungeon.current[coord[:y]][coord[:x]] = self.show
     @x = coord[:x]
     @y = coord[:y]
     $npcs[Player.me.depth] ||= []
@@ -43,18 +43,30 @@ class Creature
   end
 
   def move(type)
-    case type
-    when "wander" then wander
+    move_to = case type
+    when "wander" then wander.sample
     when "charge" then charge
     when "retreat" then retreat
+    end
+    if move_to && move_to == Player.me.coords
+      damage = rand(10) == 0 ? 0 : rand(2) + 1
+      if damage == 0
+        Log.add "#{color(@name)} missed you!"
+      else
+        verb = %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore shredded slugged shot ).sample
+        Player.me.hurt(damage, "#{color(@name)} #{verb} you for #{damage} damage.")
+      end
+    else
+      @x = move_to[:x]
+      @y = move_to[:y]
     end
   end
 
   def wander
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
-        if $dungeon[Player.me.depth][@y + y] && $dungeon[Player.me.depth][@y + y][@x + x]
-          unless $dungeon[Player.me.depth][@y + y][@x + x].is_solid?
+        if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
+          unless Dungeon.current[@y + y][@x + x].is_solid?
             {x: @x + x, y: @y + y}
           else
             nil
@@ -63,20 +75,16 @@ class Creature
           nil
         end
       end
-    end.flatten.compact.sample
-    return false unless move_to
-    if move_to == Player.me.coords
-      damage = rand(10)
-      verb = %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore shredded slugged shot ).sample
-      Player.me.hurt(damage, "#{color(@name)} #{verb} you for #{damage} damage.")
-    else
-      @x = move_to[:x]
-      @y = move_to[:y]
-    end
-    true
+    end.flatten.compact
+    move_to
   end
 
   def charge
+    move_to = wander
+    if move_to
+
+    end
+    move_to
   end
 
   def retreat

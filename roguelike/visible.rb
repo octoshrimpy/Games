@@ -32,7 +32,7 @@ class Visible
     @board.each_with_index do |x, xpos|
       x.each_with_index do |y, ypos|
         if distance_from_center(xpos, ypos).round == @radius
-          @visible += in_linear_view(xpos, ypos)
+          @visible += in_linear_view(@radius, @radius, xpos, ypos)
         end
       end
     end
@@ -41,7 +41,7 @@ class Visible
       x.each_with_index do |y, ypos|
         if distance_from_center(xpos, ypos).round <= @radius
           unless @visible.include?({x: xpos, y: ypos})
-            @visible += in_linear_view(xpos, ypos)
+            @visible += in_linear_view(@radius, @radius, xpos, ypos)
           end
         end
       end
@@ -50,9 +50,9 @@ class Visible
     @visible.uniq!
   end
 
-  def in_linear_view(x, y) #0..@radius*2
+  def in_linear_view(x0,y0,x1,y1) #0..@radius*2
     # Check Quadrant, do not sort unless necessary.
-    line_coords = get_line(@radius, @radius, x, y).sort_by do |coord|
+    line_coords = get_line(x0, y0, x1, y1).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])
     end
     line = line_coords.map {|coords| @board[coords[:y]][coords[:x]]}
@@ -64,7 +64,7 @@ class Visible
       visible = line_coords
     end
     visible.uniq.map do |see|
-      {x: (@coords[:x] + see[:x] - @radius), y: (@coords[:y] + see[:y] - @radius)}
+      {x: (@coords[:x] + see[:x] - x0), y: (@coords[:y] + see[:y] - y0)}
     end
   end
 

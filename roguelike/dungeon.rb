@@ -11,6 +11,10 @@ class Dungeon
     @down_stairs = '> '
   end
 
+  def self.current
+    $dungeon[Player.me.depth]
+  end
+
   def build(size)
     arena = Arena.new
     create_dungeon(arena, size)
