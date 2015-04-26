@@ -1,5 +1,10 @@
 class Game
 
+  SPAWN_RATE = 100
+  MAX_ENEMIES = 10
+  STATS_GUI_WIDTH = 10
+  LOGS_GUI_HEIGHT = 10
+
   def self.start
     $world = []
     $tick = 0
@@ -47,71 +52,31 @@ class Game
   end
 
   def self.draw(board=$level)
-    stats_gui_width = 10
-    logs_gui_height = 10
+    spawn_creature if ($tick % 20 == 0 && Creature.count < MAX_ENEMIES)
     Game.input(true)
     print "\e[100m"
-    (board.first.length + stats_gui_width + 1).times {print "--"}
-    print " \rStats "
-    puts
+    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    puts " \rStats "
     # Should calculate the board first, then draw it all at once.
     i = 0
     while i < board.length
       print "|"
-      stats_gui_width.times do |t|
+      STATS_GUI_WIDTH.times do |t|
         print "  "
       end
       print "|\e[0m"
       print board[i].join
       print "\e[100m|\r| "
-      print case i
-      when 0
-        hp = (Player.me.health / Player.me.max_health.to_f) * 100.00
-        max = ((hp / stats_gui_width.to_f) * 2.00).round
-        color = case hp
-        when 60..100 then 42
-        when 30..60 then 43
-        when 0..30 then 41
-        else 7
-        end
-        print "\e[30m"
-        overlay_string(" Health: #{Player.me.health}/#{Player.me.max_health}", color, max, stats_gui_width*2)
-      when 1
-        hp = (Player.me.mana / Player.me.max_mana.to_f) * 100.00
-        max = ((hp / stats_gui_width.to_f) * 2.00).round
-        color = case hp
-        when 60..100 then 46
-        when 20..60 then 104
-        when 0..20 then 45
-        else 7
-        end
-        print "\e[30m"
-        overlay_string(" Mana: #{Player.me.mana}/#{Player.me.max_mana}", color, max, stats_gui_width*2)
-      end
-      puts "\e[100;37m"
+      print draw_stats(i)
       i += 1
     end
     print "\e[100m"
-    (board.first.length + stats_gui_width + 1).times {print "--"}
-    print " \rLogs "
-    puts
-    i = 0
-    logs = Log.retrieve(logs_gui_height)
-    logs << nil while logs.length < logs_gui_height
-    logs.reverse!
-    while i < logs_gui_height
-      print "|"
-      (board.first.length + stats_gui_width).times do |t|
-        print "  "
-      end
-      print " |\r|"
-      print " #{logs[i][0..((board.first.length + stats_gui_width - 1)*2)]} ".color(:white, :black) if logs[i]
-      puts "\e[100;37m"
-      i += 1
-    end
-    (board.first.length + stats_gui_width + 1).times {print "--"}
-    print " \e[0m"
-    puts
+    draw_logs(board)
+    debugger_tools
+    Game.input(false)
+  end
+
+  def self.debugger_tools
     fps = 1 / (Time.now.to_f - $time)
     $fps << fps
     $fps.shift while $fps.length > 50
@@ -126,7 +91,60 @@ class Game
       "(#{creature.x}, #{creature.y})"
     end if $npcs[Player.me.depth]
     puts "Creature locations: #{creature_locations}"
-    Game.input(false)
+  end
+
+  def self.draw_stats(row)
+    print case row
+    when 0
+      hp = (Player.me.health / Player.me.max_health.to_f) * 100.00
+      max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
+      color = case hp
+      when 60..100 then 42
+      when 30..60 then 43
+      when 0..30 then 41
+      else 7
+      end
+      print "\e[30m"
+      overlay_string(" Health: #{Player.me.health}/#{Player.me.max_health}", color, max, STATS_GUI_WIDTH*2)
+    when 1
+      hp = (Player.me.mana / Player.me.max_mana.to_f) * 100.00
+      max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
+      color = case hp
+      when 60..100 then 46
+      when 20..60 then 104
+      when 0..20 then 45
+      else 7
+      end
+      print "\e[30m"
+      overlay_string(" Mana: #{Player.me.mana}/#{Player.me.max_mana}", color, max, STATS_GUI_WIDTH*2)
+    when 19
+      " 1 2 3 4 5 6 7 8 9"
+    when 20
+
+    end
+    puts "\e[100;37m"
+  end
+
+  def self.draw_logs(board)
+    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    print " \rLogs "
+    puts
+    i = 0
+    logs = Log.retrieve(LOGS_GUI_HEIGHT)
+    logs << nil while logs.length < LOGS_GUI_HEIGHT
+    logs.reverse!
+    while i < LOGS_GUI_HEIGHT
+      print "|"
+      (board.first.length + STATS_GUI_WIDTH).times do |t|
+        print "  "
+      end
+      print " |\r|"
+      print " #{logs[i][0..((board.first.length + STATS_GUI_WIDTH - 1)*2)]} ".color(:white, :black) if logs[i]
+      puts "\e[100;37m"
+      i += 1
+    end
+    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    puts " \e[0m"
   end
 
   def self.use_stairs(direction)
@@ -155,7 +173,13 @@ class Game
   end
 
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
-    dungeon = Dungeon.new.build(300)
+    until (dungeon_up ||= false) && (dungeon_down ||= false)
+      dungeon = Dungeon.new.build(300)
+      flat_dungeon = dungeon.to_array.flatten
+      dungeon_up = flat_dungeon.include?("< ") ? true : false
+      dungeon_down = flat_dungeon.include?("> ") ? true : false
+    end
+
     $dungeon[Player.me.depth] = dungeon.to_array
 
     populate_dungeon
@@ -214,19 +238,24 @@ class Game
     puts "Created #{num} dungeons. Took #{(Time.now.to_f - time).round(1)} seconds. There was #{count} failures."
   end
 
-  # Dungeon should never be colored!
-  # Player.me vision no longer shows?
-  #  53x20?
-
   def self.populate_dungeon
     10.times do |t|
-      Creature.new.spawn
+      spawn_creature
     end
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
-        Dungeon.current[ypos][xpos] = "* " if rand(50) == 0
+        Dungeon.current[ypos][xpos] = "* " if rand(100) == 0
       end
     end
+  end
+
+  def self.spawn_creature
+    color = :red
+    type = case Player.me.depth
+    when 1 then %w( s r a b f ).sample
+    else "x"
+    end
+    Creature.new(type, color).spawn
   end
 
   def self.update_level

@@ -1,6 +1,6 @@
 class Player
   attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
-                :max_mana, :strength, :speed, :gold
+                :max_mana, :strength, :speed, :gold, :selected, :quick_bar
 
   def initialize
     @x = 0
@@ -9,6 +9,8 @@ class Player
     @dungeon_level = 1 # 0 for town?
     @seen = []
     @gold = 0
+    @selected = 0
+    @quick_bar = Array.new(9) {nil}
 
     @vision_radius = 5
     @health = 20
@@ -111,12 +113,12 @@ class Player
       Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       puts
     when ">"
-      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == ">"
+      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
         tick = true
       end
     when "<"
-      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "<"
+      if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
         tick = true
       end
@@ -135,7 +137,14 @@ class Player
     when "j"
       drain
       tick = true
+    when "H"
+      heal
+      tick = true
+    when "J"
+      restore
+      tick = true
     end
+    self.selected = 0
     if x_dest != 0 || y_dest != 0
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
 
