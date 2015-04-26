@@ -1,6 +1,7 @@
 class Player
   attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
-                :max_mana, :strength, :speed, :gold, :selected, :quick_bar
+                :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
+                :max_energy
 
   def initialize
     @x = 0
@@ -17,6 +18,8 @@ class Player
     @max_health = 20
     @mana = 20
     @max_mana = 20
+    @energy = 5
+    @max_energy = 20
     @strength = 10
     @speed = 10
     $player = self
@@ -39,31 +42,39 @@ class Player
     self.health = self.max_health if self.health > self.max_health
     self.mana = 0 if self.mana < 0
     self.mana = self.max_mana if self.mana > self.max_mana
+    self.energy = 0 if self.energy < 0
+    self.energy = self.max_energy if self.energy > self.max_energy
   end
 
   def hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
     Log.add(src)
-    verify_stats
   end
 
   def heal(regenerate=1, src="You got healed by an unknown source.")
     self.health += regenerate
     Log.add(src)
-    verify_stats
   end
 
   def drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
     Log.add(src)
-    verify_stats
   end
 
   def restore(gain=1, src="You restored mana from an unknown source.")
     self.mana += gain
     Log.add(src)
-    verify_stats
+  end
+
+  def weaken(deplete=1, src=nil)
+    self.energy -= deplete
+    Log.add(src) if src
+  end
+
+  def energize(gain=1, src=nil)
+    self.energy += gain
+    Log.add(src) if src
   end
 
   def show
@@ -137,22 +148,37 @@ class Player
     when "j"
       drain
       tick = true
+    when "k"
+      weaken
+      tick = true
     when "H"
       heal
       tick = true
     when "J"
       restore
       tick = true
+    when "K"
+      energize
+      tick = true
     end
     self.selected = 0
-    if x_dest != 0 || y_dest != 0
+    if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
-
         is_creature = false
         Creature.all.map do |creature|
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
-            creature.hurt(1, "You hit #{creature.color(creature.name)}.")
             is_creature = true
+            if self.energy > 0
+              self.energy = self.max_energy if self.energy > self.max_energy
+              self.energy -= 1
+              creature.hurt(1, "You hit #{creature.color(creature.name)}.")
+            else
+              Log.add("I'm out of energy!")
+            end
+          else
+            gain = (rand(20) == 0 ? 1 : 0)
+            binding.pry if gain > 1
+            self.energy += gain
           end
         end
         unless is_creature
@@ -165,8 +191,11 @@ class Player
           Log.add("Gained #{gold} gold!")
           @gold += gold
         end
+      else
+        tick = false
       end
     end
+    verify_stats
     tick
   end
 

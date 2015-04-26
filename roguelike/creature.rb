@@ -110,6 +110,7 @@ class Creature
     @strength = stats[:strength]
     @attack_speed = stats[:attack_speed]
     @run_speed = stats[:run_speed]
+    @verbs = stats[:verbs]
     @name = stats[:name]
   end
 
@@ -149,7 +150,6 @@ class Creature
   end
 
   def move(type="check")
-    # Don't let creatures step on each other!
     move_to = case type
     when "check"
       if Visible.in_range(10, self.coords, Player.me.coords)
@@ -166,7 +166,7 @@ class Creature
       if damage == 0
         Log.add "#{color(@name)} missed you!"
       else
-        Player.me.hurt(damage, "#{color(@name)} #{self.verbs.sample} you for #{damage} damage.")
+        Player.me.hurt(damage, "#{color(@name)} #{@verbs.sample} you for #{damage} damage.")
       end
     else
       @x = move_to[:x]

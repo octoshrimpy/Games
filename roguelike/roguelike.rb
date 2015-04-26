@@ -23,8 +23,8 @@ while(true)
     $level = Game.update_level
     Player.me.seen[Player.me.depth].uniq!
     system 'clear' or system 'cls'
-    Game.draw
     $tick += 1
+    Game.draw
     sleep 0.1
   end
   Game.draw(Dungeon.current) if input == "D"

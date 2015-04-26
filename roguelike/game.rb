@@ -3,7 +3,7 @@ class Game
   SPAWN_RATE = 100
   MAX_ENEMIES = 10
   STATS_GUI_WIDTH = 10
-  LOGS_GUI_HEIGHT = 10
+  LOGS_GUI_HEIGHT = 5
 
   def self.start
     $world = []
@@ -117,6 +117,16 @@ class Game
       end
       overlay_string(" Mana: #{Player.me.mana}/#{Player.me.max_mana}", color, max, STATS_GUI_WIDTH*2)
     when 2
+      hp = (Player.me.energy / Player.me.max_energy.to_f) * 100.00
+      max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
+      color = case hp
+      when 60..100 then 43
+      when 20..60 then 103
+      when 0..20 then 47
+      else 7
+      end
+      overlay_string(" Energy: #{Player.me.energy}/#{Player.me.max_energy}", color, max, STATS_GUI_WIDTH*2)
+    when 3
       "Gold: #{Player.me.gold}"
     when 19
       " 1 2 3 4 5 6 7 8 9"

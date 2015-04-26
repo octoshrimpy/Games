@@ -21,27 +21,6 @@ class Array
 end
 
 class String
-# 1 bold
-# 4 underline
-# 7 invert
-#
-# Single digits -
-# #0 Black
-# #1 Red
-# #2 Green
-# #3 Yellow
-# #4 Blue
-# #5 Magenta
-# #6 Cyan
-# #7 White
-#
-# Text
-# 3# - Normal
-# 9# - Light
-# Backgrounds
-# 4# - Normal
-# 10# - Light
-
   def is_color
     if self.include?("\e")
       self[self.index("\e")..self.index("m")]
