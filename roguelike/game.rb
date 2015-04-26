@@ -94,6 +94,7 @@ class Game
   end
 
   def self.draw_stats(row)
+    print "\e[30m"
     print case row
     when 0
       hp = (Player.me.health / Player.me.max_health.to_f) * 100.00
@@ -104,7 +105,6 @@ class Game
       when 0..30 then 41
       else 7
       end
-      print "\e[30m"
       overlay_string(" Health: #{Player.me.health}/#{Player.me.max_health}", color, max, STATS_GUI_WIDTH*2)
     when 1
       hp = (Player.me.mana / Player.me.max_mana.to_f) * 100.00
@@ -115,8 +115,9 @@ class Game
       when 0..20 then 45
       else 7
       end
-      print "\e[30m"
       overlay_string(" Mana: #{Player.me.mana}/#{Player.me.max_mana}", color, max, STATS_GUI_WIDTH*2)
+    when 2
+      "Gold: #{Player.me.gold}"
     when 19
       " 1 2 3 4 5 6 7 8 9"
     when 20

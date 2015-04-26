@@ -11,6 +11,7 @@ class Creature
         strength: (1),
         attack_speed: (4),
         run_speed: (10),
+        verbs: %w( bit clawed cut ),
         name: "Giant Ant"
       }
     when "b"
@@ -19,50 +20,39 @@ class Creature
         strength: (1),
         attack_speed: (4),
         run_speed: (12),
+        verbs: %w( bit clawed slammed cut tore\ at shredded),
         name: "Giant Bat"
       }
     when "c"
-      ""
     when "d"
-      ""
     when "e"
-      ""
     when "f"
       {
         health: (3),
         strength: (1),
         attack_speed: (4),
         run_speed: (15),
+        verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
         name: "Possessed Fox"
       }
     when "g"
-      ""
     when "h"
-      ""
     when "i"
-      ""
     when "j"
-      ""
     when "k"
-      ""
     when "l"
-      ""
     when "m"
-      ""
     when "n"
-      ""
     when "o"
-      ""
     when "p"
-      ""
     when "q"
-      ""
     when "r"
       {
         health: (3),
         strength: (1),
         attack_speed: (4),
         run_speed: (15),
+        verbs: %w( bit clawed slammed tore\ at shredded ),
         name: "Giant Rat"
       }
     when "s"
@@ -71,80 +61,50 @@ class Creature
         strength: (3),
         attack_speed: (5),
         run_speed: (3),
+        verbs: %w( bit struck whipped choked ),
         name: "Snake"
       }
     when "t"
-      ""
     when "u"
-      ""
     when "v"
-      ""
     when "w"
-      ""
     when "x"
       {
         health: (2),
         strength: (3),
         attack_speed: (5),
         run_speed: (3),
+        verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
         name: "Unknown Beast"
       }
     when "y"
-      ""
     when "z"
-      ""
     when "A"
-      ""
     when "B"
-      ""
     when "C"
-      ""
     when "D"
-      ""
     when "E"
-      ""
     when "F"
-      ""
     when "G"
-      ""
     when "H"
-      ""
     when "I"
-      ""
     when "J"
-      ""
     when "K"
-      ""
     when "L"
-      ""
     when "M"
-      ""
     when "N"
-      ""
     when "O"
-      ""
     when "P"
-      ""
     when "Q"
-      ""
     when "R"
-      ""
     when "S"
-      ""
     when "T"
-      ""
     when "U"
-      ""
     when "V"
-      ""
     when "W"
-      ""
     when "X"
-      ""
     when "Y"
-      ""
     when "Z"
-      ""
     end
     @health = stats[:health]
     @strength = stats[:strength]
@@ -161,9 +121,9 @@ class Creature
     $npcs[Player.me.depth]
   end
 
-  def destroy
+  def destroy(src)
     $npcs[Player.me.depth].delete(self)
-    Log.add("#{color(@name)} was stomped to death.")
+    Log.add("#{color(@name)} was beaten to death.")
   end
 
   def coords
@@ -173,7 +133,7 @@ class Creature
   def hurt(damage=1, src="#{color(@name)} received some damage.")
     @health -= damage
     Log.add(src)
-    self.destroy if @health <= 0
+    self.destroy(src) if @health <= 0
   end
 
   def color(str)
@@ -206,8 +166,7 @@ class Creature
       if damage == 0
         Log.add "#{color(@name)} missed you!"
       else
-        verb = %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ).sample
-        Player.me.hurt(damage, "#{color(@name)} #{verb} you for #{damage} damage.")
+        Player.me.hurt(damage, "#{color(@name)} #{self.verbs.sample} you for #{damage} damage.")
       end
     else
       @x = move_to[:x]
@@ -219,7 +178,7 @@ class Creature
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
-          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.all.include?({x: @x + x, y: @y + y})
+          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.all.map {|m|m.coords}.include?({x: @x + x, y: @y + y})
             {x: @x + x, y: @y + y}
           else
             nil
