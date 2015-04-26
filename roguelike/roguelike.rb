@@ -17,9 +17,9 @@ while(true)
   input = Input.read_single_key
   if Player.me.try_action(input)
     $time = Time.now.to_f
-    $npcs[Player.me.depth].each do |creature|
+    Creature.all.each do |creature|
       creature.move
-    end if $npcs[Player.me.depth]
+    end if Creature.all
     $level = Game.update_level
     Player.me.seen[Player.me.depth].uniq!
     system 'clear' or system 'cls'

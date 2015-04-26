@@ -85,11 +85,11 @@ class Game
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
     puts "Depth: #{Player.me.depth}"
-    puts "Creatures left: #{$npcs[Player.me.depth].count if $npcs[Player.me.depth]}"
+    puts "Creatures left: #{Creature.count if Creature.all}"
     puts "My location: (#{Player.me.x}, #{Player.me.y})"
-    creature_locations = $npcs[Player.me.depth].map do |creature|
+    creature_locations = Creature.all.map do |creature|
       "(#{creature.x}, #{creature.y})"
-    end if $npcs[Player.me.depth]
+    end if Creature.all
     puts "Creature locations: #{creature_locations}"
   end
 
@@ -300,11 +300,11 @@ class Game
         floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
         $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor
       end
-      $npcs[Player.me.depth].each do |creature|
+      Creature.all.each do |creature|
         if creature.x == in_sight[:x] && creature.y == in_sight[:y]
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show
         end
-      end if $npcs[Player.me.depth]
+      end if Creature.all
     end
     $level[Player.me.y - y_offset][Player.me.x - x_offset] = Player.me.show
     $level

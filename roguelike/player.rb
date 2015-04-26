@@ -149,9 +149,9 @@ class Player
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
 
         is_creature = false
-        $npcs[Player.me.depth].map do |creature|
+        Creature.all.map do |creature|
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
-            creature.hurt(1, "You stomped on #{creature.color(creature.name)}.")
+            creature.hurt(1, "You hit #{creature.color(creature.name)}.")
             is_creature = true
           end
         end

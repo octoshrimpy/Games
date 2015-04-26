@@ -157,6 +157,10 @@ class Creature
     $npcs[Player.me.depth].length
   end
 
+  def self.all
+    $npcs[Player.me.depth]
+  end
+
   def destroy
     $npcs[Player.me.depth].delete(self)
     Log.add("#{color(@name)} was stomped to death.")
@@ -215,7 +219,7 @@ class Creature
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
-          unless Dungeon.current[@y + y][@x + x].is_solid?
+          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.all.include?({x: @x + x, y: @y + y})
             {x: @x + x, y: @y + y}
           else
             nil
