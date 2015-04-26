@@ -24,6 +24,7 @@ while(true)
     Player.me.seen[Player.me.depth].uniq!
     system 'clear' or system 'cls'
     $tick += 1
+    Player.me.verify_stats
     Game.draw
     sleep 0.1
   end

@@ -70,8 +70,8 @@ class Creature
     when "w"
     when "x"
       {
-        health: (2),
-        strength: (3),
+        health: (5),
+        strength: (4),
         attack_speed: (5),
         run_speed: (3),
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),

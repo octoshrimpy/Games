@@ -18,8 +18,8 @@ class Player
     @max_health = 20
     @mana = 20
     @max_mana = 20
-    @energy = 5
-    @max_energy = 20
+    @energy = 100
+    @max_energy = 100
     @strength = 10
     @speed = 10
     $player = self
@@ -133,7 +133,7 @@ class Player
         Game.use_stairs("UP")
         tick = true
       end
-      # Game settings
+      #-------------------- Game settings
     when "P"
       Game.input(true)
       binding.pry
@@ -141,27 +141,11 @@ class Player
     when "SPACE"
       tick = true
       blow_walls
-      # Battle
-    when "h"
-      hurt
-      tick = true
-    when "j"
-      drain
-      tick = true
-    when "k"
-      weaken
-      tick = true
+      #-------------------- Battle
     when "H"
       heal
       tick = true
-    when "J"
-      restore
-      tick = true
-    when "K"
-      energize
-      tick = true
     end
-    self.selected = 0
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
         is_creature = false
@@ -169,16 +153,10 @@ class Player
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
             is_creature = true
             if self.energy > 0
-              self.energy = self.max_energy if self.energy > self.max_energy
-              self.energy -= 1
               creature.hurt(1, "You hit #{creature.color(creature.name)}.")
             else
               Log.add("I'm out of energy!")
             end
-          else
-            gain = (rand(20) == 0 ? 1 : 0)
-            binding.pry if gain > 1
-            self.energy += gain
           end
         end
         unless is_creature
@@ -195,7 +173,13 @@ class Player
         tick = false
       end
     end
-    verify_stats
+    if tick
+      self.selected = 0
+      gain = (rand(5) == 0 ? 1 : 0)
+      self.energy -= gain
+      gain = (rand(50) == 0 ? 1 : 0)
+      self.health += gain
+    end
     tick
   end
 
