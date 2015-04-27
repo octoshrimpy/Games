@@ -12,6 +12,7 @@ class Player
     @gold = 0
     @selected = 0
     @quick_bar = Array.new(9) {nil}
+    @inventory = []
 
     @vision_radius = 5
     @health = 20
@@ -34,6 +35,7 @@ class Player
   end
 
   def verify_stats
+    Player.me.seen[Player.me.depth].uniq!
     if self.health <= 0
       Log.add("You have been slaughtered.")
       Game.draw
@@ -135,8 +137,7 @@ class Player
       end
       #-------------------- Game settings
     when "P"
-      Game.input(true)
-      binding.pry
+      Game.pause
       # Or pause?
     when "SPACE"
       tick = true
@@ -175,9 +176,9 @@ class Player
     end
     if tick
       self.selected = 0
-      gain = (rand(5) == 0 ? 1 : 0)
+      gain = (rand(20) == 0 ? 1 : 0)
       self.energy -= gain
-      gain = (rand(50) == 0 ? 1 : 0)
+      gain = (rand(20) == 0 ? 1 : 0)
       self.health += gain
     end
     tick

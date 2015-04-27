@@ -5,7 +5,7 @@ class Log
   end
 
   def self.add(log)
-    $log << "#{$tick}: #{log} "
+    $log << "#{$time}: #{log} "
   end
 
   def self.all

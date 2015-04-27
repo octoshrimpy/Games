@@ -1,26 +1,31 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops
 
   def initialize(type, color)
     @mask = "#{type} "
     @color = color
+    level = Player.me.depth
+    drops = %w( g )
+    amount = rand(5)
     stats = case type
     when "a"
       {
-        health: (3),
-        strength: (1),
-        attack_speed: (4),
-        run_speed: (10),
+        health: (3 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + level * 0.3)).round,
+        attack_speed: (4 * (1 + level * 0.3)).round,
+        run_speed: (10 * (1 + level * 0.3)).round,
         verbs: %w( bit clawed cut ),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Giant Ant"
       }
     when "b"
       {
-        health: (2),
-        strength: (1),
-        attack_speed: (4),
-        run_speed: (12),
+        health: (2 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + level * 0.3)).round,
+        attack_speed: (4 * (1 + level * 0.3)).round,
+        run_speed: (12 * (1 + level * 0.3)).round,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Giant Bat"
       }
     when "c"
@@ -28,11 +33,12 @@ class Creature
     when "e"
     when "f"
       {
-        health: (3),
-        strength: (1),
-        attack_speed: (4),
-        run_speed: (15),
+        health: (3 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + level * 0.3)).round,
+        attack_speed: (4 * (1 + level * 0.3)).round,
+        run_speed: (15 * (1 + level * 0.3)).round,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Possessed Fox"
       }
     when "g"
@@ -48,20 +54,22 @@ class Creature
     when "q"
     when "r"
       {
-        health: (3),
-        strength: (1),
-        attack_speed: (4),
-        run_speed: (15),
+        health: (3 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + level * 0.3)).round,
+        attack_speed: (4 * (1 + level * 0.3)).round,
+        run_speed: (15 * (1 + level * 0.3)).round,
         verbs: %w( bit clawed slammed tore\ at shredded ),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Giant Rat"
       }
     when "s"
       {
-        health: (2),
-        strength: (3),
-        attack_speed: (5),
-        run_speed: (3),
+        health: (2 * (1 + level * 0.3)).round,
+        strength: (3 * (1 + level * 0.3)).round,
+        attack_speed: (5 * (1 + level * 0.3)).round,
+        run_speed: (3 * (1 + level * 0.3)).round,
         verbs: %w( bit struck whipped choked ),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Snake"
       }
     when "t"
@@ -70,11 +78,12 @@ class Creature
     when "w"
     when "x"
       {
-        health: (5),
-        strength: (4),
-        attack_speed: (5),
-        run_speed: (3),
+        health: (5 * (1 + level * 0.3)).round,
+        strength: (4 * (1 + level * 0.3)).round,
+        attack_speed: (5 * (1 + level * 0.3)).round,
+        run_speed: (3 * (1 + level * 0.3)).round,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
+        drops: ["#{drops.sample}#{amount}"],
         name: "Unknown Beast"
       }
     when "y"
@@ -111,6 +120,7 @@ class Creature
     @attack_speed = stats[:attack_speed]
     @run_speed = stats[:run_speed]
     @verbs = stats[:verbs]
+    @drops = stats[:drops]
     @name = stats[:name]
   end
 
@@ -123,8 +133,31 @@ class Creature
   end
 
   def destroy(src)
-    $npcs[Player.me.depth].delete(self)
     Log.add("#{color(@name)} was beaten to death.")
+    drop_locations = (-1..1).map do |y|
+      (-1..1).map do |x|
+        if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
+          unless Dungeon.current[@y + y][@x + x].is_solid?
+            {x: @x + x, y: @y + y}
+          else
+            nil
+          end
+        else
+          nil
+        end
+      end
+    end.flatten.compact
+    self.drops.each do |d|
+      d[1].to_i.times do
+        drop_item = case d[0]
+        when "g" then "* "
+        else "o "
+        end
+        spot = drop_locations.sample
+        Dungeon.current[spot[:y]][spot[:x]] = drop_item
+      end
+    end
+    $npcs[Player.me.depth].delete(self)
   end
 
   def coords
@@ -150,6 +183,10 @@ class Creature
   end
 
   def move(type="check")
+    # Remember the last place the player was seen, and go there.
+    # If player in vision, set 'target' to player. Then 'chase' target.
+    # Once target is set, target stays until player is seen again- which changes target to player
+    # Or once the target is the current spot, then switch target back to nil, which goes back to nil.
     move_to = case type
     when "check"
       if Visible.in_range(10, self.coords, Player.me.coords)

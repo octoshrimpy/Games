@@ -16,15 +16,10 @@ Game.draw
 while(true)
   input = Input.read_single_key
   if Player.me.try_action(input)
-    $time = Time.now.to_f
-    Creature.all.each do |creature|
-      creature.move
-    end if Creature.all
-    $level = Game.update_level
-    Player.me.seen[Player.me.depth].uniq!
+    $milli_tick = Time.now.to_f
+    Game.run_time(Player.me.speed) #Change this to reflect whether the action is movement or attack
+
     system 'clear' or system 'cls'
-    $tick += 1
-    Player.me.verify_stats
     Game.draw
     sleep 0.1
   end

@@ -7,11 +7,12 @@ class Game
 
   def self.start
     $world = []
-    $tick = 0
     $time = 0
+    $milli_tick = 0
     $npcs = []
     $dungeon = []
     $fps = []
+    $tick = 1
     # Player.me.x = 5
     # Player.me.y = 5
     # dungeon = Array.new(100) {Array.new(50) {"  "}}
@@ -19,6 +20,23 @@ class Game
     Player.new
     Log.new
     make_dungeon
+  end
+
+  def self.run_time(time)
+    (100 - time).times do |t|
+      Creature.all.each do |creature|
+        creature.move if $tick % (100 - creature.run_speed) == 0
+      end if Creature.all
+      $tick += 1
+    end
+    $level = Game.update_level
+    Player.me.verify_stats
+    $time += 1
+  end
+
+  def self.pause
+    Game.input(true)
+    binding.pry
   end
 
   def self.end
@@ -52,7 +70,7 @@ class Game
   end
 
   def self.draw(board=$level)
-    spawn_creature if ($tick % 20 == 0 && Creature.count < MAX_ENEMIES)
+    spawn_creature if ($time % 20 == 0 && Creature.count < MAX_ENEMIES)
     Game.input(true)
     print "\e[100m"
     (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
@@ -77,11 +95,12 @@ class Game
   end
 
   def self.debugger_tools
-    fps = 1 / (Time.now.to_f - $time)
+    fps = 1 / (Time.now.to_f - $milli_tick)
     $fps << fps
     $fps.shift while $fps.length > 50
     avg_fps = $fps.inject(:+).to_f / $fps.size
-    puts "Time: #{$tick}"
+    puts "Time: #{$time}"
+    puts "Ticks: #{$tick}"
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
     puts "Depth: #{Player.me.depth}"
@@ -263,7 +282,7 @@ class Game
   def self.spawn_creature
     color = :red
     type = case Player.me.depth
-    when 1 then %w( s r a b f ).sample
+    when 1..100 then %w( s r a b f ).sample
     else "x"
     end
     Creature.new(type, color).spawn
@@ -311,6 +330,7 @@ class Game
         floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
         $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor
       end
+# Draw Items
       Creature.all.each do |creature|
         if creature.x == in_sight[:x] && creature.y == in_sight[:y]
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show
