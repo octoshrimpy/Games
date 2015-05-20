@@ -1,41 +1,34 @@
 class Player
-  attr_accessor :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
-                :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                :max_energy
+  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
+                   :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
+                   :max_energy, :visible
 
-  def initialize
-    @x = 0
-    @y = 0
-    @depth = 1
-    @dungeon_level = 1 # 0 for town?
-    @seen = []
-    @gold = 0
-    @selected = 0
-    @quick_bar = Array.new(9) {nil}
-    @inventory = []
+    @@x = 0
+    @@y = 0
+    @@depth = 1
+    @@dungeon_level = 1 #0 for town?
+    @@seen = []
+    @@gold = 0
+    @@selected = 0
+    @@quick_bar = Array.new(9) {nil}
+    @@inventory = []
+    @@vision_radius = 5
+    @@health = 20
+    @@max_health = 20
+    @@mana = 20
+    @@max_mana = 20
+    @@energy = 100
+    @@max_energy = 100
+    @@strength = 10
+    @@speed = 10
+    @@visible = true
 
-    @vision_radius = 5
-    @health = 20
-    @max_health = 20
-    @mana = 20
-    @max_mana = 20
-    @energy = 100
-    @max_energy = 100
-    @strength = 10
-    @speed = 10
-    $player = self
+  def self.coords
+    {x: Player.x, y: Player.y}
   end
 
-  def self.me
-    $player
-  end
-
-  def coords
-    {x: Player.me.x, y: Player.me.y}
-  end
-
-  def verify_stats
-    Player.me.seen[Player.me.depth].uniq!
+  def self.verify_stats
+    Player.seen[Player.depth].uniq!
     if self.health <= 0
       Log.add("You have been slaughtered.")
       Game.draw
@@ -48,42 +41,44 @@ class Player
     self.energy = self.max_energy if self.energy > self.max_energy
   end
 
-  def hurt(damage=1, src="You got hurt by an unknown source.")
+  def self.hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
     Log.add(src)
   end
 
-  def heal(regenerate=1, src="You got healed by an unknown source.")
+  def self.heal(regenerate=1, src="You got healed by an unknown source.")
     self.health += regenerate
     Log.add(src)
   end
 
-  def drain(deplete=1, src="You lost mana from an unknown source.")
+  def self.drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
     Log.add(src)
   end
 
-  def restore(gain=1, src="You restored mana from an unknown source.")
+  def self.restore(gain=1, src="You restored mana from an unknown source.")
     self.mana += gain
     Log.add(src)
   end
 
-  def weaken(deplete=1, src=nil)
+  def self.weaken(deplete=1, src=nil)
     self.energy -= deplete
     Log.add(src) if src
   end
 
-  def energize(gain=1, src=nil)
+  def self.energize(gain=1, src=nil)
     self.energy += gain
     Log.add(src) if src
   end
 
-  def show
-    "\e[94m@ \e[0m"
+  def self.show
+    special = "94"
+    special = "47;34" unless Player.visible
+    "\e[#{special}m@ \e[0m"
   end
 
-  def try_action(input)
+  def self.try_action(input)
     x_dest = 0
     y_dest = 0
     tick = false
@@ -125,6 +120,10 @@ class Player
       print "\n\rDown: "
       Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       puts
+    when "R"
+
+    when "I"
+      Player.toggle_visibility
     when ">"
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
@@ -164,12 +163,6 @@ class Player
           self.x += x_dest
           self.y += y_dest
         end
-        if Dungeon.current[self.y][self.x] == "* "
-          Dungeon.current[self.y][self.x] = "  "
-          gold = rand(4) + 1
-          Log.add("Gained #{gold} gold!")
-          @gold += gold
-        end
       else
         tick = false
       end
@@ -181,10 +174,26 @@ class Player
       gain = (rand(20) == 0 ? 1 : 0)
       self.health += gain
     end
+    pickup_items
     tick
   end
 
-  def blow_walls
+  def self.pickup_items
+    Gold.all.each do |gold_piece|
+      if gold_piece.coords == coords
+        increase = gold_piece.value
+        self.gold += increase
+        Log.add("Gained #{increase} gold! (#{self.gold})")
+        gold_piece.destroy
+      end
+    end
+  end
+
+  def self.toggle_visibility
+    self.visible = self.visible ? false : true
+  end
+
+  def self.blow_walls
     px = self.x
     py = self.y
     (-1..1).each do |x|

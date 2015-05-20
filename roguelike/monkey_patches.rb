@@ -4,8 +4,20 @@ class Object
   end
 end
 
-class Array
+class Module
+  def class_accessible(*attribute_names)
+    attribute_names.each do |attribute_name|
+      define_singleton_method(attribute_name) do
+        class_variable_get("@@#{attribute_name}")
+      end
+      define_singleton_method("#{attribute_name}=") do |val|
+        class_variable_set("@@#{attribute_name}", val)
+      end
+    end
+  end
+end
 
+class Array
   def search_for(str)
     coords = []
     (self.length - 1).times do |y|
@@ -17,7 +29,6 @@ class Array
     end
     coords
   end
-
 end
 
 class String

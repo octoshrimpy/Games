@@ -12,7 +12,12 @@ class Dungeon
   end
 
   def self.current
-    $dungeon[Player.me.depth]
+    $dungeon[Player.depth]
+  end
+
+  def self.at(coord)
+    return nil unless current[coord[:y]]
+    current[coord[:y]][coord[:x]]
   end
 
   def build(size)

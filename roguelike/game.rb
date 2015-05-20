@@ -10,14 +10,10 @@ class Game
     $time = 0
     $milli_tick = 0
     $npcs = []
+    $items = []
     $dungeon = []
     $fps = []
     $tick = 1
-    # Player.me.x = 5
-    # Player.me.y = 5
-    # dungeon = Array.new(100) {Array.new(50) {"  "}}
-    # Dungeon.current = dungeon
-    Player.new
     Log.new
     make_dungeon
   end
@@ -30,7 +26,7 @@ class Game
       $tick += 1
     end
     $level = Game.update_level
-    Player.me.verify_stats
+    Player.verify_stats
     $time += 1
   end
 
@@ -100,12 +96,13 @@ class Game
     $fps.shift while $fps.length > 50
     avg_fps = $fps.inject(:+).to_f / $fps.size
     puts "Time: #{$time}"
+    puts "Player: #{Player.visible ? 'visible' : 'invisible'}"
     puts "Ticks: #{$tick}"
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
-    puts "Depth: #{Player.me.depth}"
+    puts "Depth: #{Player.depth}"
     puts "Creatures left: #{Creature.count if Creature.all}"
-    puts "My location: (#{Player.me.x}, #{Player.me.y})"
+    puts "My location: (#{Player.x}, #{Player.y})"
     creature_locations = Creature.all.map do |creature|
       "(#{creature.x}, #{creature.y})"
     end if Creature.all
@@ -116,7 +113,7 @@ class Game
     print "\e[30m"
     print case row
     when 0
-      hp = (Player.me.health / Player.me.max_health.to_f) * 100.00
+      hp = (Player.health / Player.max_health.to_f) * 100.00
       max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
       color = case hp
       when 60..100 then 42
@@ -124,9 +121,9 @@ class Game
       when 0..30 then 41
       else 7
       end
-      overlay_string(" Health: #{Player.me.health}/#{Player.me.max_health}", color, max, STATS_GUI_WIDTH*2)
+      overlay_string(" Health: #{Player.health}/#{Player.max_health}", color, max, STATS_GUI_WIDTH*2)
     when 1
-      hp = (Player.me.mana / Player.me.max_mana.to_f) * 100.00
+      hp = (Player.mana / Player.max_mana.to_f) * 100.00
       max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
       color = case hp
       when 60..100 then 46
@@ -134,9 +131,9 @@ class Game
       when 0..20 then 45
       else 7
       end
-      overlay_string(" Mana: #{Player.me.mana}/#{Player.me.max_mana}", color, max, STATS_GUI_WIDTH*2)
+      overlay_string(" Mana: #{Player.mana}/#{Player.max_mana}", color, max, STATS_GUI_WIDTH*2)
     when 2
-      hp = (Player.me.energy / Player.me.max_energy.to_f) * 100.00
+      hp = (Player.energy / Player.max_energy.to_f) * 100.00
       max = ((hp / STATS_GUI_WIDTH.to_f) * 2.00).round
       color = case hp
       when 60..100 then 43
@@ -144,9 +141,9 @@ class Game
       when 0..20 then 47
       else 7
       end
-      overlay_string(" Energy: #{Player.me.energy}/#{Player.me.max_energy}", color, max, STATS_GUI_WIDTH*2)
+      overlay_string(" Energy: #{Player.energy}/#{Player.max_energy}", color, max, STATS_GUI_WIDTH*2)
     when 3
-      "Gold: #{Player.me.gold}"
+      "Gold: #{Player.gold}"
     when 19
       " 1 2 3 4 5 6 7 8 9"
     when 20
@@ -180,24 +177,24 @@ class Game
   def self.use_stairs(direction)
     case direction
     when "UP"
-      if $dungeon[Player.me.depth - 1]
-        Player.me.depth -= 1
-        Player.me.x += ($world[Player.me.depth + 1][:offset][:x] - $world[Player.me.depth][:offset][:x])
-        Player.me.y += ($world[Player.me.depth + 1][:offset][:y] - $world[Player.me.depth][:offset][:y])
+      if $dungeon[Player.depth - 1]
+        Player.depth -= 1
+        Player.x += ($world[Player.depth + 1][:offset][:x] - $world[Player.depth][:offset][:x])
+        Player.y += ($world[Player.depth + 1][:offset][:y] - $world[Player.depth][:offset][:y])
 
         $height = Dungeon.current.length
         $width = Dungeon.current.first.length
       end
     when "DOWN"
-      Player.me.depth += 1
+      Player.depth += 1
       if Dungeon.current
-        Player.me.x += ($world[Player.me.depth - 1][:offset][:x] - $world[Player.me.depth][:offset][:x])
-        Player.me.y += ($world[Player.me.depth - 1][:offset][:y] - $world[Player.me.depth][:offset][:y])
+        Player.x += ($world[Player.depth - 1][:offset][:x] - $world[Player.depth][:offset][:x])
+        Player.y += ($world[Player.depth - 1][:offset][:y] - $world[Player.depth][:offset][:y])
 
         $height = Dungeon.current.length
         $width = Dungeon.current.first.length
       else
-        Game.make_dungeon($world[Player.me.depth - 1][:offset], {x: Player.me.x, y: Player.me.y})
+        Game.make_dungeon($world[Player.depth - 1][:offset], {x: Player.x, y: Player.y})
       end
     end
   end
@@ -210,21 +207,21 @@ class Game
       dungeon_down = flat_dungeon.include?("> ") ? true : false
     end
 
-    $dungeon[Player.me.depth] = dungeon.to_array
+    $dungeon[Player.depth] = dungeon.to_array
 
     populate_dungeon
 
-    Player.me.x = dungeon.left.abs + 1
-    Player.me.y = dungeon.top.abs + 1
+    Player.x = dungeon.left.abs + 1
+    Player.y = dungeon.top.abs + 1
 
-    $world[Player.me.depth] ||= {}
-    $world[Player.me.depth][:up] ||= []
-    $world[Player.me.depth][:down] ||= []
+    $world[Player.depth] ||= {}
+    $world[Player.depth][:up] ||= []
+    $world[Player.depth][:down] ||= []
     layer_offset = {
-      x: (offset[:x] + player_coords[:x] - Player.me.x),
-      y: (offset[:y] + player_coords[:y] - Player.me.y)
+      x: (offset[:x] + player_coords[:x] - Player.x),
+      y: (offset[:y] + player_coords[:y] - Player.y)
     }
-    $world[Player.me.depth][:offset] = layer_offset
+    $world[Player.depth][:offset] = layer_offset
 
     $height = Dungeon.current.length
     $width = Dungeon.current.first.length
@@ -242,7 +239,7 @@ class Game
         when ">" then :down
         end
         if direction
-          $world[Player.me.depth][direction] << {
+          $world[Player.depth][direction] << {
             x: x,
             y: y
           }
@@ -269,19 +266,22 @@ class Game
   end
 
   def self.populate_dungeon
-    10.times do |t|
+    MAX_ENEMIES.times do |t|
       spawn_creature
     end
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
-        Dungeon.current[ypos][xpos] = "* " if rand(100) == 0
+        if rand(100) == 0
+          Gold.new({x: xpos, y: ypos, value: rand(1..3)})
+          Dungeon.current[ypos][xpos] = "  "
+        end
       end
     end
   end
 
   def self.spawn_creature
     color = :red
-    type = case Player.me.depth
+    type = case Player.depth
     when 1..100 then %w( s r a b f ).sample
     else "x"
     end
@@ -291,11 +291,11 @@ class Game
   def self.update_level
     viewport_width = 41
     viewport_height = 21
-    Player.me.seen[Player.me.depth] ||= []
+    Player.seen[Player.depth] ||= []
     # $level = Array.new (Dungeon.current.length) {Array.new(Dungeon.current.first.count) {"  "}}
     $level = Array.new (viewport_height) {Array.new(viewport_width) {"  "}}
-    x_offset = Player.me.x - (viewport_width / 2)
-    y_offset = Player.me.y - (viewport_height / 2)
+    x_offset = Player.x - (viewport_width / 2)
+    y_offset = Player.y - (viewport_height / 2)
     x_offset = x_offset < 0 ? 0 : x_offset
     y_offset = y_offset < 0 ? 0 : y_offset
     x_offset = x_offset > ($width - viewport_width + 1) ? ($width - viewport_width + 1) : x_offset
@@ -306,29 +306,30 @@ class Game
     # Only do 1 calculation.
 
     viewport = []
-    Player.me.seen[Player.me.depth].each do |see|
+    Player.seen[Player.depth].each do |see|
       in_x = (see[:x] >= x_offset) && (see[:x] < x_offset + viewport_width)
       in_y = (see[:y] >= y_offset) && (see[:y] < y_offset + viewport_height)
       viewport << {x: see[:x], y: see[:y]} if in_x && in_y
     end
-    # binding.pry
-    # Player.me.seen[Player.me.depth].each do |seen|
     viewport.each do |seen|
-      # This makes what the Player.me has previously seen gray.
+      # This makes what the Player has previously seen gray.
       pixel = Dungeon.current[seen[:y]][seen[:x]]
       $level[seen[:y] - y_offset][seen[:x] - x_offset] = pixel == "  " ? "\e[90m. \e[0m" : "\e[90m#{pixel}\e[0m"
     end
-    visible = Visible.new(Dungeon.current, {x: Player.me.x, y: Player.me.y}, Player.me.vision_radius).find_visible
+    visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
     visible.each do |in_sight|
-      Player.me.seen[Player.me.depth] << in_sight
+      Player.seen[Player.depth] << in_sight
         # This makes the current visibility white.
       if Dungeon.current[in_sight[:y]][in_sight[:x]] == "  "
         $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = ". "
-      elsif Dungeon.current[in_sight[:y]][in_sight[:x]] == "* "
-        $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = "* ".color(:light_yellow)
       else
         floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
         $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor
+      end
+      Gold.all.each do |gold|
+        if gold.x == in_sight[:x] && gold.y == in_sight[:y]
+          $level[gold.y - y_offset][gold.x - x_offset] = Gold.show
+        end
       end
 # Draw Items
       Creature.all.each do |creature|
@@ -337,7 +338,7 @@ class Game
         end
       end if Creature.all
     end
-    $level[Player.me.y - y_offset][Player.me.x - x_offset] = Player.me.show
+    $level[Player.y - y_offset][Player.x - x_offset] = Player.show
     $level
   end
 end

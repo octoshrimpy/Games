@@ -25,7 +25,7 @@ class Visible
   end
 
   def self.in_range(range, coords_from, coords_to)
-    if distance_to(coords_from, coords_to) <= range
+    if distance_between(coords_from, coords_to) <= range
       line_coords = get_line(coords_from[:x], coords_from[:y], coords_to[:x], coords_to[:y])
       line = line_coords.map {|coords| Dungeon.current[coords[:y]][coords[:x]]}
       blocks_in_line = line.map {|e| e.is_solid? ? true : nil}
@@ -125,7 +125,7 @@ class Visible
     return Math.sqrt((x - @radius)**2 + (y - @radius)**2)
   end
 
-  def self.distance_to(from, to)
+  def self.distance_between(from, to)
     return Math.sqrt((from[:x] - to[:x])**2 + (from[:y] - to[:y])**2)
   end
 

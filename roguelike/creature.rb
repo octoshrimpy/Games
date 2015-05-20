@@ -1,16 +1,19 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops ,:destination, :vision, :rarity
 
   def initialize(type, color)
     @mask = "#{type} "
     @color = color
-    level = Player.me.depth
+    @destination = nil
+    level = Player.depth
     drops = %w( g )
     amount = rand(5)
     stats = case type
     when "a"
       {
         health: (3 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
         run_speed: (10 * (1 + level * 0.3)).round,
@@ -21,6 +24,8 @@ class Creature
     when "b"
       {
         health: (2 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
         run_speed: (12 * (1 + level * 0.3)).round,
@@ -34,6 +39,8 @@ class Creature
     when "f"
       {
         health: (3 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
         run_speed: (15 * (1 + level * 0.3)).round,
@@ -55,6 +62,8 @@ class Creature
     when "r"
       {
         health: (3 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
         run_speed: (15 * (1 + level * 0.3)).round,
@@ -65,6 +74,8 @@ class Creature
     when "s"
       {
         health: (2 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (3 * (1 + level * 0.3)).round,
         attack_speed: (5 * (1 + level * 0.3)).round,
         run_speed: (3 * (1 + level * 0.3)).round,
@@ -79,6 +90,8 @@ class Creature
     when "x"
       {
         health: (5 * (1 + level * 0.3)).round,
+        # rarity: ,
+        vision: 10,
         strength: (4 * (1 + level * 0.3)).round,
         attack_speed: (5 * (1 + level * 0.3)).round,
         run_speed: (3 * (1 + level * 0.3)).round,
@@ -116,6 +129,8 @@ class Creature
     when "Z"
     end
     @health = stats[:health]
+    @vision = stats[:vision]
+    @rarity = stats[:rarity]
     @strength = stats[:strength]
     @attack_speed = stats[:attack_speed]
     @run_speed = stats[:run_speed]
@@ -125,11 +140,11 @@ class Creature
   end
 
   def self.count
-    $npcs[Player.me.depth].length
+    $npcs[Player.depth].length
   end
 
   def self.all
-    $npcs[Player.me.depth]
+    $npcs[Player.depth]
   end
 
   def destroy(src)
@@ -149,15 +164,14 @@ class Creature
     end.flatten.compact
     self.drops.each do |d|
       d[1].to_i.times do
-        drop_item = case d[0]
-        when "g" then "* "
+        spot = drop_locations.sample
+        case d[0]
+        when "g" then Gold.new({x: spot[:x], y: spot[:y], value: rand(1..3)})
         else "o "
         end
-        spot = drop_locations.sample
-        Dungeon.current[spot[:y]][spot[:x]] = drop_item
       end
     end
-    $npcs[Player.me.depth].delete(self)
+    $npcs[Player.depth].delete(self)
   end
 
   def coords
@@ -178,40 +192,76 @@ class Creature
     coord = Dungeon.current.search_for("  ").sample
     @x = coord[:x]
     @y = coord[:y]
-    $npcs[Player.me.depth] ||= []
-    $npcs[Player.me.depth] << self
+    $npcs[Player.depth] ||= []
+    $npcs[Player.depth] << self
+  end
+
+  def random_open_space
+    move_on = false
+    until move_on
+      coord = random_coord
+      move_on = Dungeon.at(coord) == "  " ? true : false
+    end
+    coord
+  end
+
+  def random_coord
+    {x: (@x-10..@x+10).to_a.sample, y: (@y-10..@y+10).to_a.sample}
   end
 
   def move(type="check")
-    # Remember the last place the player was seen, and go there.
-    # If player in vision, set 'target' to player. Then 'chase' target.
-    # Once target is set, target stays until player is seen again- which changes target to player
-    # Or once the target is the current spot, then switch target back to nil, which goes back to nil.
-    move_to = case type
-    when "check"
-      if Visible.in_range(10, self.coords, Player.me.coords)
-        charge.sample
+    @destination = nil if @destination == coords
+    @destination = if player_in_range?
+      Player.coords
+      # Eventually give me scared AI to run away from Player
+    else
+      @destination = if @destination
+        rand(10) == 0 ? nil : @destination
       else
-        wander.sample
+        case rand(6)
+        when 0 then nil
+        else random_open_space
+        end
       end
-    when "wander" then wander.sample
-    when "charge" then charge.sample
-    when "retreat" then retreat.sample
     end
-    if move_to && move_to == Player.me.coords
+
+    move_to = @destination ? move_to_target : self.coords
+
+    if move_to == Player.coords
       damage = rand(10) == 0 ? 0 : rand(@strength) + 1
       if damage == 0
         Log.add "#{color(@name)} missed you!"
       else
-        Player.me.hurt(damage, "#{color(@name)} #{@verbs.sample} you for #{damage} damage.")
+        Player.hurt(damage, "#{color(@name)} #{@verbs.sample} you for #{damage} damage.")
       end
-    else
+    elsif move_to
       @x = move_to[:x]
       @y = move_to[:y]
     end
   end
 
-  def wander
+  def move_to_target
+    moves = []
+    dist = 100
+    possible_moves.each do |move|
+      distance_to = Visible.distance_between(move, @destination).round
+      if distance_to < dist
+        moves = []
+        dist = distance_to
+        moves << move
+      elsif distance_to == dist
+        moves << move
+      end
+    end
+    moves.sample
+  end
+
+  def player_in_range?
+    return false unless Player.visible
+    Visible.in_range(10, self.coords, Player.coords)
+  end
+
+  def possible_moves
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
@@ -234,12 +284,12 @@ class Creature
     possible = []
     if move_to
       move_to.each do |spot|
-        distance = Visible.distance_to(spot, Player.me.coords)
+        distance = Visible.distance_between(spot, Player.coords)
         if distance < shortest_distance
           shortest_distance = distance
           possible = []
         end
-        if Visible.distance_to(spot, Player.me.coords) == shortest_distance
+        if Visible.distance_between(spot, Player.coords) == shortest_distance
           possible << spot
         end
       end
