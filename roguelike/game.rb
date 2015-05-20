@@ -11,6 +11,7 @@ class Game
     $milli_tick = 0
     $npcs = []
     $items = []
+    $drops = []
     $dungeon = []
     $fps = []
     $tick = 1

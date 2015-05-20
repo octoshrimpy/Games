@@ -5,8 +5,11 @@ require './monkey_patches.rb'
 require './input.rb'
 require './log.rb'
 
-require './item.rb'
 require './gold.rb'
+require './equipment.rb'
+require './melee_weapon.rb'
+require './ranged_weapon.rb'
+require './magic_weapon.rb'
 
 require './creature.rb'
 require './player.rb'

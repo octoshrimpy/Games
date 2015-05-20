@@ -1,16 +1,16 @@
-class Gold < Item
+class Gold
   attr_accessor :value, :x, :y, :coords
 
   def initialize(attributes)
     @x = attributes[:x]
     @y = attributes[:y]
     @value = attributes[:value]
-    $items[Player.depth] ||= []
-    $items[Player.depth] << self
+    $drops[Player.depth] ||= []
+    $drops[Player.depth] << self
   end
 
   def destroy
-    $items[Player.depth].delete(self)
+    $drops[Player.depth].delete(self)
   end
 
   def self.count
@@ -18,7 +18,7 @@ class Gold < Item
   end
 
   def self.all
-    $items[Player.depth]
+    $drops[Player.depth]
   end
 
   def coords

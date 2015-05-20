@@ -1,7 +1,7 @@
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                    :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                   :max_energy, :visible
+                   :max_energy, :visible, :defense, :equipped
 
     @@x = 0
     @@y = 0
@@ -12,6 +12,19 @@ class Player
     @@selected = 0
     @@quick_bar = Array.new(9) {nil}
     @@inventory = []
+    @@equipped = {
+      head: nil,
+      torso: nil,
+      left_hand: nil,
+      right_hand: nil,
+      ring1: nil,
+      ring2: nil,
+      ring3: nil,
+      ring4: nil,
+      waist: nil,
+      leggings: nil,
+      feet: nil
+    }
     @@vision_radius = 5
     @@health = 20
     @@max_health = 20
@@ -19,6 +32,7 @@ class Player
     @@max_mana = 20
     @@energy = 100
     @@max_energy = 100
+    @@defense
     @@strength = 10
     @@speed = 10
     @@visible = true
