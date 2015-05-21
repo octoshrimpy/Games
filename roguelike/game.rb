@@ -290,11 +290,12 @@ class Game
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
         if rand(100) == 0 && !(Dungeon.current[ypos][xpos].is_unbreakable?)
-          Gold.new({x: xpos, y: ypos, value: rand(1..3)})
-          Dungeon.current[ypos][xpos] = "  "
+          # Gold.new({x: xpos, y: ypos, value: rand(1..3)})
+          # Dungeon.current[ypos][xpos] = "  "
         end
       end
     end
+    5.times { Gold.new({x: 18, y: 18, value: rand(1..3)}) }
     sword = Items["Excalibur"]
     sword.depth = 1
     sword.x = 20

@@ -98,38 +98,38 @@ class Player
     tick = false
     case input
       # Movement
-    when "UP", "w"
+    when "UP", $key_move_up
       tick = true
       y_dest = -1
-    when "LEFT", "a"
+    when "LEFT", $key_move_left
       tick = true
       x_dest = -1
-    when "DOWN", "x"
+    when "DOWN", $key_move_down
       tick = true
       y_dest = 1
-    when "RIGHT", "d"
+    when "RIGHT", $key_move_right
       tick = true
       x_dest = 1
-    when "q"
+    when $key_move_up_left
       tick = true
       y_dest = -1
       x_dest = -1
-    when "p"
+    when $key_move_up_right
+      tick = true
+      y_dest = -1
+      x_dest = 1
+    when $key_move_down_right
+      tick = true
+      y_dest = 1
+      x_dest = 1
+    when $key_move_down_left
+      tick = true
+      y_dest = 1
+      x_dest = -1
+    when $key_move_nowhere
+      tick = true
+    when $key_pickup_items
       pickup_items
-      tick = true
-    when "e"
-      tick = true
-      y_dest = -1
-      x_dest = 1
-    when "c"
-      tick = true
-      y_dest = 1
-      x_dest = 1
-    when "z"
-      tick = true
-      y_dest = 1
-      x_dest = -1
-    when "s"
       tick = true
     when "S"
       print "\nUp: "
@@ -142,26 +142,29 @@ class Player
     when "I"
       Player.toggle_visibility
       Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
-    when ">"
+    when $key_down_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
         Log.add "You go down the stairs..."
         tick = true
       end
-    when "<"
+    when $key_up_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
         Log.add "You go up the stairs..."
         tick = true
       end
       #-------------------- Game settings
-    when "i"
+    when $key_open_help
       $gamemode = "info"
+      Settings.show
+    when $key_open_logs
+      $gamemode = "logs"
       Settings.show
     when "P"
       Game.pause
       # Or pause?
-    when "SPACE"
+    when "RETURN"
       tick = true
       blow_walls
       Log.add "The walls around you are blown away."
@@ -204,10 +207,10 @@ class Player
   def self.pickup_items
     picked_up = 0
     Gold.all.each do |gold_piece|
-      if gold_piece.coords == coords
+      if gold_piece.coords == Player.coords
         increase = gold_piece.value
-        self.gold += increase
-        Log.add("Gained #{increase} gold! (#{self.gold})")
+        Player.gold += increase
+        Log.add("Gained #{increase} gold! (#{Player.gold})")
         gold_piece.destroy
         picked_up += 1
       end

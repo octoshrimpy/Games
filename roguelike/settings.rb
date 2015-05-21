@@ -1,53 +1,65 @@
 class Settings
-  @@scroll = 0
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
 
   def self.receive(input)
     tick = false
     case input
-    when "UP", "w"
+    when "UP", $key_move_up
       tick = true
       scroll_up
-    when "Left", "a"
+    when "LEFT", $key_move_left
       tick = true
       scroll_left
-    when "DOWN", "x"
+    when "DOWN", $key_move_down
       tick = true
       scroll_down
-    when "RIGHT", "d"
+    when "RIGHT", $key_move_right
       tick = true
       scroll_right
     when "ESCAPE"
       $gamemode = "play"
       @@scroll = nil
       Game.draw
+    when $key_open_logs
+      if $gamemode == "logs"
+        $gamemode = "play"
+        @@scroll = nil
+        Game.draw
+      end
+    when $key_open_help
+      if $gamemode == "info"
+        $gamemode = "play"
+        @@scroll = nil
+        Game.draw
+      end
     end
+
     tick
   end
 
   def self.scroll_up
     case $gamemode
-    when "info"
+    when "logs"
       @@scroll -= 1 if @@scroll > 0
     end
   end
 
   def self.scroll_left
     case $gamemode
-    when "info"
+    when "logs"
     end
   end
 
   def self.scroll_right
     case $gamemode
-    when "info"
+    when "logs"
     end
   end
 
   def self.scroll_down
     case $gamemode
-    when "info"
+    when "logs"
       @@scroll += 1 if @@scroll < Log.all.count - @@game_height + 4
     end
   end
@@ -71,7 +83,9 @@ class Settings
     $settings = Array.new(@@game_height) {""}
     case $gamemode
     when "info"
-      # Fix less than logs above/below count showing total logs
+    when "settings"
+    when "inspect"
+    when "logs"
       @@scroll ||= Log.all.count - @@game_height + 4
       @@scroll = @@scroll > 0 ? @@scroll : 0
       above_count = @@scroll
@@ -84,9 +98,6 @@ class Settings
       below_count = below_count > 0 ? below_count : 0
       bottom = "v #{below_count} v"
       $settings[@@game_height - 2] = "#{'  '*(@@game_width/2 - bottom.length/2)}#{bottom}"
-    when "settings"
-    when "inspect"
-    when "logs"
     end
   end
 end

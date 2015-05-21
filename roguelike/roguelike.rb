@@ -2,6 +2,7 @@ require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
 require './monkey_patches.rb'
+require './key_bindings.rb'
 require './input.rb'
 require './log.rb'
 
