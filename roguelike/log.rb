@@ -13,7 +13,7 @@ class Log
   end
 
   def self.retrieve(num)
-    $log.last(num).reverse
+    all.first(num)
   end
 
 end

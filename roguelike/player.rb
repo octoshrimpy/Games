@@ -141,25 +141,30 @@ class Player
 
     when "I"
       Player.toggle_visibility
+      Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
     when ">"
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
+        Log.add "You go down the stairs..."
         tick = true
       end
     when "<"
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
+        Log.add "You go up the stairs..."
         tick = true
       end
       #-------------------- Game settings
     when "i"
       $gamemode = "info"
+      Settings.show
     when "P"
       Game.pause
       # Or pause?
     when "SPACE"
       tick = true
       blow_walls
+      Log.add "The walls around you are blown away."
       #-------------------- Battle
     when "H"
       heal

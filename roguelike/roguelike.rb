@@ -32,14 +32,19 @@ while(true)
       $milli_tick = Time.now.to_f
       Game.run_time(Player.speed) #Change this to reflect whether the action is movement or attack
 
-      system 'clear' or system 'cls'
       Game.draw
       sleep 0.1
     end
-  when "logs"
-  when "info"
-  when "settings"
+  when "logs", "info", "settings", "inspect"
+    if Settings.receive(input)
+      Settings.show
+      sleep 0.1
+    end
   when "inspect"
+    if Settings.receive(input)
+      Settings.show
+      sleep 0.1
+    end
   end
   Game.draw(Dungeon.current) if input == "D"
 end

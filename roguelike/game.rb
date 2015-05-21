@@ -20,6 +20,7 @@ class Game
     $fps = []
     $tick = 1
     Log.new
+    Log.add "Welcome to the game!"
     make_dungeon
   end
 
@@ -71,6 +72,7 @@ class Game
   end
 
   def self.draw(board=$level)
+    system 'clear' or system 'cls'
     spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES)
     Game.input(true)
     print "\e[100m"
@@ -89,8 +91,7 @@ class Game
     (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
     puts " \rStats "
     # Should calculate the board first, then draw it all at once.
-    i = 0
-    while i < board.length
+    VIEWPORT_HEIGHT.times do |i|
       print "|"
       STATS_GUI_WIDTH.times do |t|
         print "  "
@@ -99,7 +100,6 @@ class Game
       print board[i].join
       print "\e[100m|\r| "
       print draw_stats(i)
-      i += 1
     end
     print "\e[100m"
     draw_logs(board)

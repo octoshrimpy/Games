@@ -40,46 +40,41 @@ class String
     end
   end
 
+  def override_foreground_with(color)
+    self.gsub /\[(3|9)\d/, "[#{sym_to_escape(color, 'text')}"
+  end
+  def override_background_with(color)
+    self.gsub /[4|10]\dm/, "#{sym_to_escape(color, 'back')}m"
+  end
+
+  def sym_to_escape(color, type)
+    swab = case color
+    when :black then ["30", "40"]
+    when :red then ["31", "41"]
+    when :green then ["32", "42"]
+    when :yellow then ["33", "43"]
+    when :blue then ["34", "44"]
+    when :magenta then ["35", "45"]
+    when :cyan then ["36", "46"]
+    when :white then ["37", "47"]
+    when :light_black then ["90", "100"]
+    when :light_red then ["91", "101"]
+    when :light_green then ["92", "102"]
+    when :light_yellow then ["93", "103"]
+    when :light_blue then ["94", "104"]
+    when :light_magenta then ["95", "105"]
+    when :light_cyan then ["96", "106"]
+    when :light_white then ["97", "107"]
+    else nil
+    end
+    return color if swab == nil
+    type == 'text' ? swab[0] : swab[1]
+  end
+
   def color(color, background="")
     old_color = self.is_color
-    color_text = case color
-    when :black then "30"
-    when :red then "31"
-    when :green then "32"
-    when :yellow then "33"
-    when :blue then "34"
-    when :magenta then "35"
-    when :cyan then "36"
-    when :white then "37"
-    when :light_black then "90"
-    when :light_red then "91"
-    when :light_green then "92"
-    when :light_yellow then "93"
-    when :light_blue then "94"
-    when :light_magenta then "95"
-    when :light_cyan then "96"
-    when :light_white then "97"
-    else nil
-    end
-    color_background = case background
-    when :black then "40"
-    when :red then "41"
-    when :green then "42"
-    when :yellow then "43"
-    when :blue then "44"
-    when :magenta then "45"
-    when :cyan then "46"
-    when :white then "47"
-    when :light_black then "100"
-    when :light_red then "101"
-    when :light_green then "102"
-    when :light_yellow then "103"
-    when :light_blue then "104"
-    when :light_magenta then "105"
-    when :light_cyan then "106"
-    when :light_white then "107"
-    else nil
-    end
+    color_text = sym_to_escape(color, 'text')
+    color_background = sym_to_escape(background, 'back')
     new_str = ""
     if color_text || color_background
       new_str << "\e[#{color_text}"
