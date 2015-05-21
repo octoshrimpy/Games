@@ -152,6 +152,8 @@ class Player
         tick = true
       end
       #-------------------- Game settings
+    when "i"
+      $gamemode = "info"
     when "P"
       Game.pause
       # Or pause?

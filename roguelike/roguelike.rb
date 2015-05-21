@@ -16,6 +16,7 @@ require './creature.rb'
 require './player.rb'
 
 require './game.rb'
+require './settings.rb'
 require './dungeon.rb'
 require './visible.rb'
 
@@ -38,6 +39,7 @@ while(true)
   when "logs"
   when "info"
   when "settings"
+  when "inspect"
   end
   Game.draw(Dungeon.current) if input == "D"
 end

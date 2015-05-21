@@ -52,7 +52,7 @@ class Walker
   # 'catacombe' like tunnels (and smaller dungeons). Smaller
   # numbers give more cartesian & straight tunnels.
   def smoothing
-    0.7
+    0.4
   end
 
 end

@@ -4,6 +4,8 @@ class Game
   MAX_ENEMIES = 10
   STATS_GUI_WIDTH = 10
   LOGS_GUI_HEIGHT = 5
+  VIEWPORT_WIDTH = 41
+  VIEWPORT_HEIGHT = 21
 
   def self.start
     Items.generate
@@ -72,7 +74,7 @@ class Game
     spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES)
     Game.input(true)
     print "\e[100m"
-    (board.first.length + STATS_GUI_WIDTH + 1).times {print "  "}
+    (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "  "}
     print "|\r|"
     message_title = "Message"
     half_way_mark = (STATS_GUI_WIDTH - (message_title.length/2))/2
@@ -80,11 +82,11 @@ class Game
     print "-#{message_title}"
     half_way_mark.times {print "--"}
     if $message.length > 0
-      print " #{$message[0..board.first.length*2]}"
+      print " #{$message[0..VIEWPORT_WIDTH*2]}"
       $message = ""
     end
     puts
-    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
     puts " \rStats "
     # Should calculate the board first, then draw it all at once.
     i = 0
@@ -169,7 +171,7 @@ class Game
   end
 
   def self.draw_logs(board)
-    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
     print " \rLogs "
     puts
     i = 0
@@ -178,15 +180,15 @@ class Game
     logs.reverse!
     while i < LOGS_GUI_HEIGHT
       print "|"
-      (board.first.length + STATS_GUI_WIDTH).times do |t|
+      (VIEWPORT_WIDTH + STATS_GUI_WIDTH).times do |t|
         print "  "
       end
       print " |\r|"
-      print " #{logs[i][0..((board.first.length + STATS_GUI_WIDTH - 1)*2)]} ".color(:white, :black) if logs[i]
+      print " #{logs[i][0..((VIEWPORT_WIDTH + STATS_GUI_WIDTH - 1)*2)]} ".color(:white, :black) if logs[i]
       puts "\e[100;37m"
       i += 1
     end
-    (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
+    (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
     puts " \e[0m"
   end
 
@@ -310,17 +312,15 @@ class Game
   end
 
   def self.update_level
-    viewport_width = 41
-    viewport_height = 21
     Player.seen[Player.depth] ||= []
     # $level = Array.new (Dungeon.current.length) {Array.new(Dungeon.current.first.count) {"  "}}
-    $level = Array.new (viewport_height) {Array.new(viewport_width) {"  "}}
-    x_offset = Player.x - (viewport_width / 2)
-    y_offset = Player.y - (viewport_height / 2)
+    $level = Array.new (VIEWPORT_HEIGHT) {Array.new(VIEWPORT_WIDTH) {"  "}}
+    x_offset = Player.x - (VIEWPORT_WIDTH / 2)
+    y_offset = Player.y - (VIEWPORT_HEIGHT / 2)
     x_offset = x_offset < 0 ? 0 : x_offset
     y_offset = y_offset < 0 ? 0 : y_offset
-    x_offset = x_offset > ($width - viewport_width + 1) ? ($width - viewport_width + 1) : x_offset
-    y_offset = y_offset > ($height - viewport_height) ? ($height - viewport_height) : y_offset
+    x_offset = x_offset > ($width - VIEWPORT_WIDTH + 1) ? ($width - VIEWPORT_WIDTH + 1) : x_offset
+    y_offset = y_offset > ($height - VIEWPORT_HEIGHT) ? ($height - VIEWPORT_HEIGHT) : y_offset
 
     # Do not do circle code unless dungeon == dark
     # Check distance between all enemies. If in radius, then draw them
@@ -328,8 +328,8 @@ class Game
 
     viewport = []
     Player.seen[Player.depth].each do |see|
-      in_x = (see[:x] >= x_offset) && (see[:x] < x_offset + viewport_width)
-      in_y = (see[:y] >= y_offset) && (see[:y] < y_offset + viewport_height)
+      in_x = (see[:x] >= x_offset) && (see[:x] < x_offset + VIEWPORT_WIDTH)
+      in_y = (see[:y] >= y_offset) && (see[:y] < y_offset + VIEWPORT_HEIGHT)
       viewport << {x: see[:x], y: see[:y]} if in_x && in_y
     end
     viewport.each do |seen|
