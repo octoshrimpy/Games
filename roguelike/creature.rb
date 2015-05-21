@@ -185,7 +185,7 @@ class Creature
   end
 
   def color(str)
-    "#{str.color(@color)}\e[37m"
+    str.color(@color)
   end
 
   def spawn

@@ -70,13 +70,14 @@ class Settings
     $settings = Array.new(@@game_height) {""}
     case $gamemode
     when "info"
+      # Fix less than logs above/below count showing total logs
       @@scroll ||= Log.all.count - @@game_height + 4
       @@scroll = @@scroll > 0 ? @@scroll : 0
       above_count = Log.all.count - @@scroll
       top = "^ #{above_count} ^"
       $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}"
       (@@game_height - 4).times do |y|
-        $settings[y + 2] = " #{Log.all.reverse[@@scroll + y]}".override_background_with(:white)
+        $settings[y + 2] = " #{Log.all.reverse[@@scroll + y]}".override_background_with(:white).override_foreground_with(:black)
       end
       below_count = Log.all.count - @@scroll
       bottom = "v #{below_count} v"

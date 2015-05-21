@@ -41,10 +41,14 @@ class String
   end
 
   def override_foreground_with(color)
-    self.gsub /\[(3|9)\d/, "[#{sym_to_escape(color, 'text')}"
+    reinstate_color = self.gsub /\[0m/, "[0m\e[#{sym_to_escape(color, 'text')}m"
+    reinstate_color.gsub /\[(3|9)\d/, "[#{sym_to_escape(color, 'text')}"
+    "\e[#{sym_to_escape(color, 'back')}m#{reinstate_color}\e[0m"
   end
   def override_background_with(color)
-    self.gsub /[4|10]\dm/, "#{sym_to_escape(color, 'back')}m"
+    reinstate_color = self.gsub /\[0m/, "[0m\e[#{sym_to_escape(color, 'back')}m"
+    reinstate_color.gsub /(4|10){1,2}\dm/, "#{sym_to_escape(color, 'back')}m"
+    "\e[#{sym_to_escape(color, 'back')}m#{reinstate_color}\e[0m"
   end
 
   def sym_to_escape(color, type)
