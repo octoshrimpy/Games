@@ -25,13 +25,19 @@ Game.draw
 
 while(true)
   input = Input.read_single_key
-  if Player.try_action(input)
-    $milli_tick = Time.now.to_f
-    Game.run_time(Player.speed) #Change this to reflect whether the action is movement or attack
+  case $gamemode
+  when "play"
+    if Player.try_action(input)
+      $milli_tick = Time.now.to_f
+      Game.run_time(Player.speed) #Change this to reflect whether the action is movement or attack
 
-    system 'clear' or system 'cls'
-    Game.draw
-    sleep 0.1
+      system 'clear' or system 'cls'
+      Game.draw
+      sleep 0.1
+    end
+  when "logs"
+  when "info"
+  when "settings"
   end
   Game.draw(Dungeon.current) if input == "D"
 end

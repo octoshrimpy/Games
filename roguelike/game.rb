@@ -7,6 +7,8 @@ class Game
 
   def self.start
     Items.generate
+    $message = "Welcome! Press 'i' at any time to view how to play."
+    $gamemode = "play"
     $world = []
     $time = 0
     $milli_tick = 0
@@ -67,9 +69,21 @@ class Game
   end
 
   def self.draw(board=$level)
-    spawn_creature if ($time % 20 == 0 && Creature.count < MAX_ENEMIES)
+    spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES)
     Game.input(true)
     print "\e[100m"
+    (board.first.length + STATS_GUI_WIDTH + 1).times {print "  "}
+    print "|\r|"
+    message_title = "Message"
+    half_way_mark = (STATS_GUI_WIDTH - (message_title.length/2))/2
+    half_way_mark.times {print "--"}
+    print "-#{message_title}"
+    half_way_mark.times {print "--"}
+    if $message.length > 0
+      print " #{$message[0..board.first.length*2]}"
+      $message = ""
+    end
+    puts
     (board.first.length + STATS_GUI_WIDTH + 1).times {print "--"}
     puts " \rStats "
     # Should calculate the board first, then draw it all at once.
@@ -104,10 +118,11 @@ class Game
     puts "Depth: #{Player.depth}"
     puts "Creatures left: #{Creature.count if Creature.all}"
     puts "My location: (#{Player.x}, #{Player.y})"
-    creature_locations = Creature.all.map do |creature|
-      "(#{creature.x}, #{creature.y})"
+    print "Creature locations: "
+    Creature.all.each do |creature|
+      print " (#{creature.x}, #{creature.y}) "
     end if Creature.all
-    puts "Creature locations: #{creature_locations}"
+    puts
   end
 
   def self.draw_stats(row)
