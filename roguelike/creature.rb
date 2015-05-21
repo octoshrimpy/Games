@@ -244,7 +244,7 @@ class Creature
     moves = []
     dist = 100
     possible_moves.each do |move|
-      distance_to = Visible.distance_between(move, @destination).round
+      distance_to = Visible.distance_between(move, @destination)
       if distance_to < dist
         moves = []
         dist = distance_to

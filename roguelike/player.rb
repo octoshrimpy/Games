@@ -1,7 +1,7 @@
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                    :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                   :max_energy, :visible, :defense, :equipped
+                   :max_energy, :visible, :defense, :equipped, :inventory
 
     @@x = 0
     @@y = 0
@@ -89,7 +89,7 @@ class Player
   def self.show
     special = "94"
     special = "47;34" unless Player.visible
-    "\e[#{special}m@ \e[0m"
+    "\e[#{special}m@\e[0m "
   end
 
   def self.try_action(input)
@@ -114,6 +114,9 @@ class Player
       tick = true
       y_dest = -1
       x_dest = -1
+    when "p"
+      pickup_items
+      tick = true
     when "e"
       tick = true
       y_dest = -1
@@ -188,23 +191,33 @@ class Player
       gain = (rand(20) == 0 ? 1 : 0)
       self.health += gain
     end
-    pickup_items
     tick
   end
 
   def self.pickup_items
+    picked_up = 0
     Gold.all.each do |gold_piece|
       if gold_piece.coords == coords
         increase = gold_piece.value
         self.gold += increase
         Log.add("Gained #{increase} gold! (#{self.gold})")
         gold_piece.destroy
+        picked_up += 1
       end
     end
+    Items.on_board.each do |item|
+      if item.coords == coords
+        self.inventory << item
+        item.pickup
+        Log.add "Picked up #{item.name}"
+        picked_up += 1
+      end
+    end
+    Log.add("Nothing to pick up.") if picked_up == 0
   end
 
   def self.toggle_visibility
-    self.visible = self.visible ? false : true
+    self.visible = !self.visible
   end
 
   def self.blow_walls

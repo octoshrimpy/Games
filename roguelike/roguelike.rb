@@ -6,6 +6,7 @@ require './input.rb'
 require './log.rb'
 
 require './gold.rb'
+require './items.rb'
 require './equipment.rb'
 require './melee_weapon.rb'
 require './ranged_weapon.rb'

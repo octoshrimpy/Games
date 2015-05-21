@@ -26,6 +26,6 @@ class Gold
   end
 
   def self.show(color=:light_yellow)
-    "* ".color(color)
+    "$ ".color(color)
   end
 end

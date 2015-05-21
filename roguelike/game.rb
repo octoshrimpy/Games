@@ -6,11 +6,11 @@ class Game
   LOGS_GUI_HEIGHT = 5
 
   def self.start
+    Items.generate
     $world = []
     $time = 0
     $milli_tick = 0
     $npcs = []
-    $items = []
     $drops = []
     $dungeon = []
     $fps = []
@@ -272,12 +272,17 @@ class Game
     end
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
-        if rand(100) == 0
+        if rand(100) == 0 && !(Dungeon.current[ypos][xpos].is_unbreakable?)
           Gold.new({x: xpos, y: ypos, value: rand(1..3)})
           Dungeon.current[ypos][xpos] = "  "
         end
       end
     end
+    sword = Items["Excalibur"]
+    sword.depth = 1
+    sword.x = 20
+    sword.y = 20
+    Dungeon.current[20][20] = "  "
   end
 
   def self.spawn_creature
@@ -332,7 +337,13 @@ class Game
           $level[gold.y - y_offset][gold.x - x_offset] = Gold.show
         end
       end
-# Draw Items
+      Items.on_board.each do |item|
+        if item.coords
+          if item.x == in_sight[:x] && item.y == in_sight[:y]
+            $level[item.y - y_offset][item.x - x_offset] = item.show
+          end
+        end
+      end
       Creature.all.each do |creature|
         if creature.x == in_sight[:x] && creature.y == in_sight[:y]
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show

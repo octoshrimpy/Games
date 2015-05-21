@@ -1,5 +1,5 @@
 class Equipment
-  attr_accessor :weight, :bonus_hp, :bonus_mana, :bonus_damage, :bonus_defense, :name, :icon
+  attr_accessor :weight, :bonus_hp, :bonus_mana, :bonus_damage, :bonus_defense, :name, :icon, :color, :x, :y, :depth
   attr_accessor :equipment_slot
 
   def initialize(defaults)
@@ -8,5 +8,20 @@ class Equipment
     end
     $items << self
   end
+
+  def show
+    @color ||= :white
+    "#{icon} ".color(color)
+  end
+
+  def coords
+    return nil unless x && y
+    {x: x, y: y}
+  end
+
+  def pickup
+    self.x = nil
+    self.y = nil
+    self.depth = nil
+  end
 end
-# a = Equipment.new({name: "Excalibur"})
