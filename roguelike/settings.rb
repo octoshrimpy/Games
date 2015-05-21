@@ -29,7 +29,7 @@ class Settings
   def self.scroll_up
     case $gamemode
     when "info"
-      @@scroll += 1 if @@scroll < Log.all.count - @@game_height + 4
+      @@scroll -= 1 if @@scroll > 0
     end
   end
 
@@ -48,7 +48,7 @@ class Settings
   def self.scroll_down
     case $gamemode
     when "info"
-      @@scroll -= 1 if @@scroll > 0
+      @@scroll += 1 if @@scroll < Log.all.count - @@game_height + 4
     end
   end
 
@@ -63,6 +63,7 @@ class Settings
       print "|".color(:black, :white)
       puts "\r|#{$settings[y]}".color(:black, :white)
     end
+    puts @@scroll
     Game.input(false)
   end
 
@@ -73,13 +74,14 @@ class Settings
       # Fix less than logs above/below count showing total logs
       @@scroll ||= Log.all.count - @@game_height + 4
       @@scroll = @@scroll > 0 ? @@scroll : 0
-      above_count = Log.all.count - @@scroll
+      above_count = @@scroll
       top = "^ #{above_count} ^"
       $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}"
       (@@game_height - 4).times do |y|
         $settings[y + 2] = " #{Log.all.reverse[@@scroll + y]}".override_background_with(:white).override_foreground_with(:black)
       end
-      below_count = Log.all.count - @@scroll
+      below_count = Log.all.count - @@scroll - @@game_height + 4
+      below_count = below_count > 0 ? below_count : 0
       bottom = "v #{below_count} v"
       $settings[@@game_height - 2] = "#{'  '*(@@game_width/2 - bottom.length/2)}#{bottom}"
     when "settings"
