@@ -32,6 +32,11 @@ class Array
 end
 
 class String
+
+  def toggle(arg1, arg2)
+    self == arg1 ? arg2 : arg1
+  end
+
   def is_color
     if self.include?("\e")
       self[self.index("\e")..self.index("m")]

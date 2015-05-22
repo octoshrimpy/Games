@@ -1,7 +1,7 @@
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                    :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                   :max_energy, :visible, :defense, :equipped, :inventory
+                   :max_energy, :visible, :defense, :equipped, :inventory, :autopickup
 
     @@x = 0
     @@y = 0
@@ -36,6 +36,7 @@ class Player
     @@strength = 10
     @@speed = 10
     @@visible = true
+    @@autopickup = true
 
   def self.coords
     {x: Player.x, y: Player.y}
@@ -93,6 +94,7 @@ class Player
   end
 
   def self.try_action(input)
+    return false unless $gamemode == 'play'
     x_dest = 0
     y_dest = 0
     tick = false
@@ -131,17 +133,6 @@ class Player
     when $key_pickup_items
       pickup_items
       tick = true
-    when "S"
-      print "\nUp: "
-      Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
-      print "\n\rDown: "
-      Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
-      puts
-    when "R"
-
-    when "I"
-      Player.toggle_visibility
-      Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
     when $key_down_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
@@ -154,13 +145,21 @@ class Player
         Log.add "You go up the stairs..."
         tick = true
       end
-      #-------------------- Game settings
-    when $key_open_help
-      $gamemode = "info"
-      Settings.show
-    when $key_open_logs
-      $gamemode = "logs"
-      Settings.show
+      # ----------------------------------------------------CHEATS ----------------------------
+    when "H"
+      heal
+      tick = true
+    when "S"
+      print "\nUp: "
+      Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      print "\n\rDown: "
+      Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      puts
+    when "R"
+
+    when "I"
+      Player.toggle_visibility
+      Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
     when "P"
       Game.pause
       # Or pause?
@@ -168,10 +167,6 @@ class Player
       tick = true
       blow_walls
       Log.add "The walls around you are blown away."
-      #-------------------- Battle
-    when "H"
-      heal
-      tick = true
     end
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
@@ -201,10 +196,11 @@ class Player
       gain = (rand(20) == 0 ? 1 : 0)
       self.health += gain
     end
+    pickup_items('auto') if autopickup
     tick
   end
 
-  def self.pickup_items
+  def self.pickup_items(method="key_press")
     picked_up = 0
     Gold.all.each do |gold_piece|
       if gold_piece.coords == Player.coords
@@ -223,7 +219,7 @@ class Player
         picked_up += 1
       end
     end
-    Log.add("Nothing to pick up.") if picked_up == 0
+    Log.add("Nothing to pick up.") if picked_up == 0 && method == 'key_press'
   end
 
   def self.toggle_visibility

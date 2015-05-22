@@ -9,7 +9,7 @@ class Game
 
   def self.start
     Items.generate
-    $message = "Welcome! Press 'i' at any time to view how to play."
+    $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $gamemode = "play"
     $world = []
     $time = 0

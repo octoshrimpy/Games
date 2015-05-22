@@ -12,7 +12,8 @@ $key_down_stairs = ">"
 $key_up_stairs = "<"
 
 $key_open_logs = "l"
-$key_open_help = "i"
+$key_open_help = "h"
+$key_open_keybindings = "K"
 
 $key_pickup_items = "SPACE"
 $key_ = ""
