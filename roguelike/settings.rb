@@ -91,9 +91,6 @@ class Settings
     when ""
     when "logs"
       build_log_menu
-    else
-      Game.input(true)
-      binding.pry
     end
     build_menu(lines)
   end

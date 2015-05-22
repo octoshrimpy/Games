@@ -11,6 +11,7 @@ class Game
     Items.generate
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $gamemode = "play"
+    $spawn_creatures = true
     $world = []
     $time = 0
     $milli_tick = 0
@@ -42,6 +43,7 @@ class Game
   end
 
   def self.end
+    Game.pause
     Game.input(true)
     exit 0
   end
@@ -73,7 +75,11 @@ class Game
 
   def self.draw(board=$level)
     system 'clear' or system 'cls'
-    spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES)
+    if Creature.all && Creature.count == 0 && $spawn_creatures == true
+      $spawn_creatures = false
+      Log.add "You have eradicated all forms of life on this floor."
+    end
+    spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
     Game.input(true)
     print "\e[100m"
     (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "  "}
@@ -202,6 +208,8 @@ class Game
 
         $height = Dungeon.current.length
         $width = Dungeon.current.first.length
+        $spawn_creatures = true
+        spawn_creature
       end
     when "DOWN"
       Player.depth += 1
@@ -211,6 +219,8 @@ class Game
 
         $height = Dungeon.current.length
         $width = Dungeon.current.first.length
+        $spawn_creatures = true
+        spawn_creature
       else
         Game.make_dungeon($world[Player.depth - 1][:offset], {x: Player.x, y: Player.y})
       end

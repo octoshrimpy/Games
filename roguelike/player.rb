@@ -1,7 +1,8 @@
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                    :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                   :max_energy, :visible, :defense, :equipped, :inventory, :autopickup
+                   :max_energy, :visible, :defense, :equipped, :inventory, :autopickup,
+                   :last_hit_by
 
     @@x = 0
     @@y = 0
@@ -37,6 +38,7 @@ class Player
     @@speed = 10
     @@visible = true
     @@autopickup = true
+    @@last_hit_by = nil
 
   def self.coords
     {x: Player.x, y: Player.y}
@@ -45,7 +47,7 @@ class Player
   def self.verify_stats
     Player.seen[Player.depth].uniq!
     if self.health <= 0
-      Log.add("You have been slaughtered.")
+      Log.add("You have been slaughtered by #{last_hit_by}.")
       Game.draw
       Game.end
     end
@@ -60,6 +62,8 @@ class Player
     # Reflect if getting dangerously low on stats
     self.health -= damage
     Log.add(src)
+    ratio = (health / max_health.to_f) * 100.00
+    Log.add "You are critically low on health." if ratio < 20
   end
 
   def self.heal(regenerate=1, src="You got healed by an unknown source.")
@@ -70,6 +74,8 @@ class Player
   def self.drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
     Log.add(src)
+    ratio = (mana / max_mana.to_f) * 100.00
+    Log.add "You are critically low on mana." if ratio < 20
   end
 
   def self.restore(gain=1, src="You restored mana from an unknown source.")
@@ -85,6 +91,8 @@ class Player
   def self.energize(gain=1, src=nil)
     self.energy += gain
     Log.add(src) if src
+    ratio = (energy / max_energy.to_f) * 100.00
+    Log.add "You are critically low on Energy." if ratio < 20
   end
 
   def self.show
@@ -219,6 +227,7 @@ class Player
         picked_up += 1
       end
     end
+    self.pickup_items('do_again') if picked_up > 0
     Log.add("Nothing to pick up.") if picked_up == 0 && method == 'key_press'
   end
 

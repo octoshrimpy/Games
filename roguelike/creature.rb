@@ -233,6 +233,7 @@ class Creature
         Log.add "#{color(@name)} missed you!"
       else
         Player.hurt(damage, "#{color(@name)} #{@verbs.sample} you for #{damage} damage.")
+        Player.last_hit_by = color(@name)
       end
     elsif move_to
       @x = move_to[:x]

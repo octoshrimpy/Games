@@ -34,8 +34,9 @@ while(true)
       Game.run_time(Player.speed) #Change this to reflect whether the action is movement or attack
 
       Game.draw
+      sleep 0.05
     end
-    sleep 0.1
+    sleep 0.05
   end
   Game.draw(Dungeon.current) if input == "D"
 end
