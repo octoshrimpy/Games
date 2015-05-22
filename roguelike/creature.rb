@@ -215,13 +215,9 @@ class Creature
       Player.coords
       # Eventually give me scared AI to run away from Player
     else
-      @destination = if @destination
-        rand(10) == 0 ? nil : @destination
-      else
-        case rand(6)
-        when 0 then nil
-        else random_open_space
-        end
+      @destination = case rand(6)
+      when 0 then nil
+      else random_open_space
       end
     end
 

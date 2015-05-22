@@ -18,81 +18,95 @@ class Settings
       when "RIGHT", $key_move_right
         tick = true
         scroll_right
+      when $key_move_up_right
+        tick = true
+        scroll_up_right
+      when $key_move_up_left
+        tick = true
+        scroll_up_left
+      when $key_move_down_right
+        tick = true
+        scroll_down_right
+      when $key_move_down_left
+        tick = true
+        scroll_down_left
       when "ESCAPE"
         $gamemode = "play"
-        @@scroll = nil
+        clear_scroll
         Game.draw
       end
-      tick
+      show if tick
     end
 
     case input
     when $key_open_help
       $gamemode = $gamemode.toggle("help", 'play')
-      $gamemode == 'play' ? (Game.draw; @@scroll = nil) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
     when $key_open_logs
       $gamemode = $gamemode.toggle("logs", 'play')
-      $gamemode == 'play' ? (Game.draw; @@scroll = nil) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
     when $key_open_keybindings
       $gamemode = $gamemode.toggle("key_bindings", 'play')
-      $gamemode == 'play' ? (Game.draw; @@scroll = nil) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
+    when $key_inspect_surroundings
+      $gamemode = $gamemode.toggle("map", 'play')
+      $screen_shot = nil
+      if $gamemode == 'play'
+        $level = Game.update_level
+        Game.draw
+        clear_scroll
+      else
+        @@scroll = Player.y
+        @@scroll_horz = Player.x
+        Game.show
+      end
     end
-
   end
 
-  def self.scroll_up
-    case $gamemode
-    when "logs"
-      @@scroll -= 1
-    end
-    show
-  end
-
-  def self.scroll_left
-    case $gamemode
-    when "logs"
-    end
-    show
-  end
-
-  def self.scroll_right
-    case $gamemode
-    when "logs"
-    end
-    show
-  end
-
-  def self.scroll_down
-    case $gamemode
-    when "logs"
-      @@scroll += 1
-    end
-    show
-  end
+  def self.clear_scroll; @@scroll = nil; @@scroll_horz = nil; end
+  def self.scroll_up; @@scroll -= 1; end
+  def self.scroll_left; @@scroll_horz -= 1; end
+  def self.scroll_right; @@scroll_horz += 1; end
+  def self.scroll_down; @@scroll += 1; end
+  def self.scroll_up_right; @@scroll -= 1; @@scroll_horz += 1; end
+  def self.scroll_up_left; @@scroll -= 1; @@scroll_horz -= 1; end
+  def self.scroll_down_right; @@scroll += 1; @@scroll_horz += 1; end
+  def self.scroll_down_left; @@scroll += 1; @@scroll_horz -= 1; end
 
   def self.show
-    generate_settings
-    system 'clear' or system 'cls'
-    Game.input(true)
-    @@game_height.times do |y|
-      @@game_width.times do |x|
-        print (y == 0 || y == @@game_height-1 ? "--" : "  ").color(:black, :white)
+    if generate_settings
+      system 'clear' or system 'cls'
+      Game.input(true)
+      @@game_height.times do |y|
+        @@game_width.times do |x|
+          print (y == 0 || y == @@game_height-1 ? "--" : "  ").color(:black, :white)
+        end
+        print "|".color(:black, :white)
+        puts "\r|#{$settings[y]}".color(:black, :white)
       end
-      print "|".color(:black, :white)
-      puts "\r|#{$settings[y]}".color(:black, :white)
+      Game.input(false)
     end
-    Game.input(false)
   end
 
   def self.generate_settings
-    lines = case $gamemode
-    when "help"
-      build_help_menu
-    when ""
-    when "logs"
-      build_log_menu
+    if $gamemode == "map"
+      max = $width
+      @@scroll_horz = @@scroll_horz > max ? max : @@scroll_horz
+      @@scroll_horz = @@scroll_horz > 0 ? @@scroll_horz : 0
+      max = $height - 1
+      @@scroll = @@scroll > max ? max : @@scroll
+      @@scroll = @@scroll > 0 ? @@scroll : 0
+      Game.show({x: @@scroll_horz, y: @@scroll})
+      false
+    else
+      lines = case $gamemode
+      when "help"
+        build_help_menu
+      when "logs"
+        build_log_menu
+      end
+      build_menu(lines)
     end
-    build_menu(lines)
   end
 
   def self.build_menu(lines)
@@ -126,7 +140,7 @@ class Settings
           line += " #{word}"
         else
           lines << line
-          line = ""
+          line = " #{word}"
         end
       end
       lines << line

@@ -28,10 +28,10 @@ Game.draw
 while(true)
   input = Input.read_single_key
   if input
+    $milli_tick = Time.now.to_f
     Settings.receive(input)
     if Player.try_action(input)
-      $milli_tick = Time.now.to_f
-      Game.run_time(Player.speed) #Change this to reflect whether the action is movement or attack
+      Game.run_time(Player.speed)
 
       Game.draw
       sleep 0.05

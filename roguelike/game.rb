@@ -12,6 +12,7 @@ class Game
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $gamemode = "play"
     $spawn_creatures = true
+    $screen_shot = nil
     $world = []
     $time = 0
     $milli_tick = 0
@@ -43,7 +44,6 @@ class Game
   end
 
   def self.end
-    Game.pause
     Game.input(true)
     exit 0
   end
@@ -73,6 +73,36 @@ class Game
     end
   end
 
+  def self.show(coords=Player.coords)
+    $level = Array.new (VIEWPORT_HEIGHT) {Array.new(VIEWPORT_WIDTH) {"  "}}
+
+    x_offset = coords[:x] - (VIEWPORT_WIDTH / 2)
+    y_offset = coords[:y] - (VIEWPORT_HEIGHT / 2)
+    x_offset = x_offset < 0 ? 0 : x_offset
+    y_offset = y_offset < 0 ? 0 : y_offset
+    x_offset = x_offset > ($width - VIEWPORT_WIDTH + 1) ? ($width - VIEWPORT_WIDTH + 1) : x_offset
+    y_offset = y_offset > ($height - VIEWPORT_HEIGHT) ? ($height - VIEWPORT_HEIGHT) : y_offset
+
+    get_screen_shot.each_with_index do |row, y|
+      row.each_with_index do |pixel, x|
+        in_x = (x >= x_offset) && (x < x_offset + VIEWPORT_WIDTH)
+        in_y = (y >= y_offset) && (y < y_offset + VIEWPORT_HEIGHT)
+        if in_x && in_y
+          # Do message logic here based on what pixel and the coords
+          if y == coords[:y] && x == coords[:x]
+            $message = Game.describe(pixel)
+            pixel = "#{pixel[0]}#{'<'.color(:white)}".color("", :blue)
+          end
+          $level[y - y_offset][x - x_offset] = pixel
+        end
+      end
+    end
+    # Game.input(true)
+    # binding.pry
+    Game.draw
+    puts "Looking at: (#{coords[:x]}, #{coords[:y]})"
+  end
+
   def self.draw(board=$level)
     system 'clear' or system 'cls'
     if Creature.all && Creature.count == 0 && $spawn_creatures == true
@@ -91,6 +121,7 @@ class Game
     half_way_mark.times {print "--"}
     if $message.length > 0
       print " #{$message[0..VIEWPORT_WIDTH*2]}"
+      # Give option to read more?
       $message = ""
     end
     puts
@@ -300,12 +331,11 @@ class Game
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
         if rand(100) == 0 && !(Dungeon.current[ypos][xpos].is_unbreakable?)
-          # Gold.new({x: xpos, y: ypos, value: rand(1..3)})
-          # Dungeon.current[ypos][xpos] = "  "
+          Gold.new({x: xpos, y: ypos, value: rand(1..3)})
+          Dungeon.current[ypos][xpos] = "  "
         end
       end
     end
-    5.times { Gold.new({x: 18, y: 18, value: rand(1..3)}) }
     sword = Items["Excalibur"]
     sword.depth = 1
     sword.x = 20
@@ -324,7 +354,6 @@ class Game
 
   def self.update_level
     Player.seen[Player.depth] ||= []
-    # $level = Array.new (Dungeon.current.length) {Array.new(Dungeon.current.first.count) {"  "}}
     $level = Array.new (VIEWPORT_HEIGHT) {Array.new(VIEWPORT_WIDTH) {"  "}}
     x_offset = Player.x - (VIEWPORT_WIDTH / 2)
     y_offset = Player.y - (VIEWPORT_HEIGHT / 2)
@@ -348,6 +377,11 @@ class Game
       pixel = Dungeon.current[seen[:y]][seen[:x]]
       $level[seen[:y] - y_offset][seen[:x] - x_offset] = pixel == "  " ? "\e[90m. \e[0m" : "\e[90m#{pixel}\e[0m"
     end
+    find_currently_visible(x_offset, y_offset)
+    $level
+  end
+
+  def self.find_currently_visible(x_offset, y_offset)
     visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
     visible.each do |in_sight|
       Player.seen[Player.depth] << in_sight
@@ -377,6 +411,44 @@ class Game
       end if Creature.all
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
-    $level
+  end
+
+  def self.get_screen_shot
+    return $screen_shot if $screen_shot
+    $screen_shot = Dungeon.current
+  #   $screen_shot = []
+  #   Dungeon.current.each_with_index do |row, y|
+  #     $screen_shot[y] ||= []
+  #     row.each_with_index do |col, x|
+  #       if Player.seen[Player.depth].include?({x: x, y: y})
+  #         $screen_shot[y][x] = Dungeon.current[y][x]
+  #       else
+  #         $screen_shot[y][x] = "  "
+  #       end
+  #     end
+  #   end
+  end
+
+  def self.describe(pixel)
+    response = case pixel.uncolor.split.join
+    when '▒' then 'an unbreakable wall'
+    when '#' then 'a rock'
+    when '>' then 'a staircase downwards'
+    when '<' then 'a staircase upwards'
+    when '@' then 'me'
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    when '' then ''
+    else ""
+    end
+    response.length > 0 ? "This is #{response}." : "I don't know what this is."
   end
 end

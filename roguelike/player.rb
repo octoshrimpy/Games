@@ -2,7 +2,7 @@ class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
                    :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
                    :max_energy, :visible, :defense, :equipped, :inventory, :autopickup,
-                   :last_hit_by
+                   :last_hit_by, :self_regen
 
     @@x = 0
     @@y = 0
@@ -39,6 +39,7 @@ class Player
     @@visible = true
     @@autopickup = true
     @@last_hit_by = nil
+    @@self_regen = 1
 
   def self.coords
     {x: Player.x, y: Player.y}
@@ -199,10 +200,13 @@ class Player
     end
     if tick
       self.selected = 0
-      gain = (rand(20) == 0 ? 1 : 0)
+      gain = (rand(10) == 0 ? 1 : 0)
       self.energy -= gain
-      gain = (rand(20) == 0 ? 1 : 0)
-      self.health += gain
+      gain = (rand(5) == 0 ? @@self_regen : 0)
+      if energy > 0
+        self.health += gain
+      else
+      end
     end
     pickup_items('auto') if autopickup
     tick
