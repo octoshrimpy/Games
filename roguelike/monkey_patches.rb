@@ -45,6 +45,16 @@ class String
     end
   end
 
+  def articlize
+    if %w( a e i o u ).include?(self.uncolor[0].downcase)
+      "an #{self}"
+    elsif self.uncolor == "gold"
+      "some gold"
+    else
+      "a #{self}"
+    end
+  end
+
   def override_foreground_with(color)
     reinstate_color = self.gsub /\[0m/, "[0m\e[#{sym_to_escape(color, 'text')}m"
     reinstate_color.gsub /\[(3|9)\d/, "[#{sym_to_escape(color, 'text')}"

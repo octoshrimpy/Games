@@ -211,11 +211,11 @@ class Creature
 
   def move(type="check")
     @destination = nil if @destination == coords
-    @destination = if player_in_range?
-      Player.coords
+    if player_in_range?
+      @destination = Player.coords
       # Eventually give me scared AI to run away from Player
     else
-      @destination = case rand(6)
+      @destination ||= case rand(6)
       when 0 then nil
       else random_open_space
       end

@@ -25,7 +25,19 @@ class Gold
     {x: @x, y: @y}
   end
 
+  def name
+    "gold"
+  end
+
+  def self.name
+    "gold"
+  end
+
   def self.show(color=:light_yellow)
+    "$ ".color(color)
+  end
+
+  def show(color=:light_yellow)
     "$ ".color(color)
   end
 end

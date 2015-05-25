@@ -74,7 +74,7 @@ class Game
   end
 
   def self.show(coords=Player.coords)
-    $level = Array.new (VIEWPORT_HEIGHT) {Array.new(VIEWPORT_WIDTH) {"  "}}
+    board = Array.new (VIEWPORT_HEIGHT) {Array.new(VIEWPORT_WIDTH) {"  "}}
 
     x_offset = coords[:x] - (VIEWPORT_WIDTH / 2)
     y_offset = coords[:y] - (VIEWPORT_HEIGHT / 2)
@@ -83,23 +83,41 @@ class Game
     x_offset = x_offset > ($width - VIEWPORT_WIDTH + 1) ? ($width - VIEWPORT_WIDTH + 1) : x_offset
     y_offset = y_offset > ($height - VIEWPORT_HEIGHT) ? ($height - VIEWPORT_HEIGHT) : y_offset
 
+    $screen_shot_visible_coords
+
     get_screen_shot.each_with_index do |row, y|
       row.each_with_index do |pixel, x|
         in_x = (x >= x_offset) && (x < x_offset + VIEWPORT_WIDTH)
         in_y = (y >= y_offset) && (y < y_offset + VIEWPORT_HEIGHT)
         if in_x && in_y
-          # Do message logic here based on what pixel and the coords
-          if y == coords[:y] && x == coords[:x]
-            $message = Game.describe(pixel)
-            pixel = "#{pixel[0]}#{'<'.color(:white)}".color("", :blue)
+          pixel = if $screen_shot_visible.include?({x: x, y: y})
+            pixel.color(:white)
+          else
+            pixel.color(:light_black)
           end
-          $level[y - y_offset][x - x_offset] = pixel
+          if y == coords[:y] && x == coords[:x]
+            $message = Game.describe(pixel, coords)
+            pixel = "#{pixel.uncolor[0]}#{'<'}".color(:white, :blue)
+          end
+          board[y - y_offset][x - x_offset] = pixel
         end
       end
     end
-    # Game.input(true)
-    # binding.pry
-    Game.draw
+
+    $screen_shot_objects.each do |obj|
+      in_x = (obj[:x] >= x_offset) && (obj[:x] < x_offset + VIEWPORT_WIDTH)
+      in_y = (obj[:y] >= y_offset) && (obj[:y] < y_offset + VIEWPORT_HEIGHT)
+      if in_x && in_y
+        pixel = if {y: obj[:y], x: obj[:x]} == coords
+          "#{obj[:instance].show.uncolor[0]}#{'<'}".color(:white, :blue)
+        else
+          obj[:instance].show
+        end
+        board[obj[:y] - y_offset][obj[:x] - x_offset] = pixel
+      end
+    end
+
+    Game.draw(board)
     puts "Looking at: (#{coords[:x]}, #{coords[:y]})"
   end
 
@@ -415,28 +433,60 @@ class Game
 
   def self.get_screen_shot
     return $screen_shot if $screen_shot
-    $screen_shot = Dungeon.current
-  #   $screen_shot = []
-  #   Dungeon.current.each_with_index do |row, y|
-  #     $screen_shot[y] ||= []
-  #     row.each_with_index do |col, x|
-  #       if Player.seen[Player.depth].include?({x: x, y: y})
-  #         $screen_shot[y][x] = Dungeon.current[y][x]
-  #       else
-  #         $screen_shot[y][x] = "  "
-  #       end
-  #     end
-  #   end
+    $screen_shot = []
+    $screen_shot_objects = []
+    $screen_shot_visible = []
+    Dungeon.current.each_with_index do |row, y|
+      $screen_shot[y] ||= []
+      row.each_with_index do |col, x|
+        if Player.seen[Player.depth].include?({x: x, y: y})
+          pixel = Dungeon.current[y][x]
+          $screen_shot[y][x] = (pixel == "  " ? ". " : pixel).color(:light_black)
+        else
+          $screen_shot[y][x] = "  "
+        end
+      end
+    end
+    visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
+    visible.each do |in_sight|
+        # This makes the current visibility white.
+      if Dungeon.current[in_sight[:y]][in_sight[:x]] == "  "
+        $screen_shot[in_sight[:y]][in_sight[:x]] = ". "
+        $screen_shot_visible << {x: in_sight[:x], y: in_sight[:y]}
+      else
+        floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
+        $screen_shot[in_sight[:y]][in_sight[:x]] = floor
+        $screen_shot_visible << {x: in_sight[:x], y: in_sight[:y]}
+      end
+      Gold.all.each do |gold|
+        if gold.x == in_sight[:x] && gold.y == in_sight[:y]
+          $screen_shot_objects << {instance: gold, x: gold.x, y: gold.y}
+        end
+      end
+      Items.on_board.each do |item|
+        if item.coords
+          if item.x == in_sight[:x] && item.y == in_sight[:y]
+            $screen_shot_objects << {instance: item, x: item.x, y: item.y}
+          end
+        end
+      end
+      Creature.all.each do |creature|
+        if creature.x == in_sight[:x] && creature.y == in_sight[:y]
+          $screen_shot_objects << {instance: creature, x: creature.x, y: creature.y}
+        end
+      end if Creature.all
+    end
+    $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
+    $screen_shot
   end
 
-  def self.describe(pixel)
-    response = case pixel.uncolor.split.join
+  def self.describe(pixel, coords)
+    response = case pixel.clone.uncolor.split.join
     when '▒' then 'an unbreakable wall'
     when '#' then 'a rock'
     when '>' then 'a staircase downwards'
     when '<' then 'a staircase upwards'
-    when '@' then 'me'
-    when '' then ''
+    when '.' then 'some dirt'
     when '' then ''
     when '' then ''
     when '' then ''
@@ -449,6 +499,45 @@ class Game
     when '' then ''
     else ""
     end
-    response.length > 0 ? "This is #{response}." : "I don't know what this is."
+    stack = []
+    # Do not change their color
+    $screen_shot_objects.each do |obj|
+      stack << obj if {x: obj[:x], y: obj[:y]} == coords
+    end
+    if response.length > 0 || stack.length > 0
+      if stack.count == 0
+        "This is #{response}."
+      else
+        case stack.count
+        when 1
+          case stack.first[:instance].class.to_s
+          when "Class" then "I am standing on #{response}."
+          when "Gold" then "There is some gold #{('on ' + response + ' ') if response != 'some dirt'}here."
+          when "" then Game.input true; binding.pry
+          else
+            if stack.first[:instance].name
+              "There is #{stack.first[:instance].name.articlize} #{('on ' + response + ' ') if response != 'some dirt'}here."
+            else
+              "Something is weird."
+              Game.input true; binding.pry
+            end
+          end
+        when 2
+          if stack.map {|s|s[:instance].class.to_s}.uniq.length == 1
+            "There is a stack of #{stack.first[:instance].name} here."
+          else
+            "There is #{stack.last[:instance].name.articlize} on #{stack.first[:instance].name.articlize} here."
+          end
+        else "There are #{stack.count} things here. "
+          if stack.map {|s|s[:instance].class.to_s}.uniq.length == 1
+            "There is a stack of #{stack.first[:instance].name} here."
+          else
+            "There is a stack of #{stack.first[:instance].name.articlize} and other things."
+          end
+        end
+      end
+    else
+      "I don't know what this is."
+    end
   end
 end
