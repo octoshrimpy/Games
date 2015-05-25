@@ -1,6 +1,5 @@
 class Equipment
-  attr_accessor :weight, :bonus_hp, :bonus_mana, :bonus_damage, :bonus_defense, :name, :icon, :color, :x, :y, :depth
-  attr_accessor :equipment_slot
+  attr_accessor :weight, :bonus_hp, :bonus_mana, :bonus_damage, :bonus_defense, :name, :icon, :color, :x, :y, :depth, :equipment_slot
 
   def initialize(defaults)
     defaults.each do |key, value|

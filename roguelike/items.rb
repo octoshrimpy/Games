@@ -19,9 +19,10 @@ class Items
       # MeleeWeapon.new({
       #   name:,
       #   icon:,
+      #   equipment_slot:,
       #   color:,
       #   weight:,
-      #   bonus_hp:,
+      #   bonus_health:,
       #   bonus_mana:,
       #   bonus_damage:,
       #   bonus_defense:
@@ -32,9 +33,10 @@ class Items
       MeleeWeapon.new({
         name: 'Excalibur',
         icon: '†',
+        equipment_slot: :right_hand,
         color: :light_yellow,
         weight: 12,
-        bonus_hp: 50,
+        bonus_health: 50,
         bonus_mana: 50,
         bonus_damage: 10,
         bonus_defense: 0
@@ -48,7 +50,7 @@ class Items
       #   range:,
       #   thrown:,
       #   weight:,
-      #   bonus_hp:,
+      #   bonus_health:,
       #   bonus_mana:,
       #   bonus_damage:,
       #   bonus_defense:
@@ -62,7 +64,7 @@ class Items
         range: '10',
         thrown: false,
         weight: 3,
-        bonus_hp: 0,
+        bonus_health: 0,
         bonus_mana: 0,
         bonus_damage: 0,
         bonus_defense: 0
@@ -72,11 +74,12 @@ class Items
       # MagicWeapon.new({
       #   name:,
       #   icon:,
+      #   equipment_slot:,
       #   color:,
       #   range:,
       #   type:,
       #   weight:,
-      #   bonus_hp:,
+      #   bonus_health:,
       #   bonus_mana:,
       #   bonus_damage:,
       #   bonus_defense:
@@ -91,7 +94,7 @@ class Items
       #   color:,
       #   equipment_slot:,
       #   weight:,
-      #   bonus_hp:,
+      #   bonus_health:,
       #   bonus_mana:,
       #   bonus_damage:,
       #   bonus_defense:

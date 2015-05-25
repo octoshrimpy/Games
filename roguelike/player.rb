@@ -1,18 +1,22 @@
 class Player
-  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :max_health,
-                   :max_mana, :strength, :speed, :gold, :selected, :quick_bar, :energy,
-                   :max_energy, :visible, :defense, :equipped, :inventory, :autopickup,
-                   :last_hit_by, :self_regen
+  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
+                   :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
+                   :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
+                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy
 
     @@x = 0
     @@y = 0
+    @@vision_radius = 5
+
     @@depth = 1
     @@dungeon_level = 1 #0 for town?
     @@seen = []
-    @@gold = 0
+
     @@selected = 0
     @@quick_bar = Array.new(9) {nil}
     @@inventory = []
+    @@gold = 0
+
     @@equipped = {
       head: nil,
       torso: nil,
@@ -26,20 +30,31 @@ class Player
       leggings: nil,
       feet: nil
     }
-    @@vision_radius = 5
+    @@bonus_stats = {
+      max_health: 0,
+      max_mana: 0,
+      max_energy: 0,
+      accuracy: 0,
+      defense: 0,
+      strength: 0,
+      speed: 0,
+      self_regen: 0
+    }
+    @@raw_accuracy = 90
     @@health = 20
-    @@max_health = 20
+    @@raw_max_health = 20
     @@mana = 20
-    @@max_mana = 20
+    @@raw_max_mana = 20
     @@energy = 100
-    @@max_energy = 100
-    @@defense
-    @@strength = 10
-    @@speed = 10
+    @@raw_max_energy = 100
+    @@raw_strength = 1
+    @@raw_defense = 0
+    @@raw_speed = 10
+    @@raw_self_regen = 1
+
     @@visible = true
     @@autopickup = true
     @@last_hit_by = nil
-    @@self_regen = 1
 
   def self.coords
     {x: Player.x, y: Player.y}
@@ -52,18 +67,18 @@ class Player
       Game.draw
       Game.end
     end
-    self.health = self.max_health if self.health > self.max_health
+    self.health = max_health if self.health > max_health
     self.mana = 0 if self.mana < 0
-    self.mana = self.max_mana if self.mana > self.max_mana
+    self.mana = max_mana if self.mana > max_mana
     self.energy = 0 if self.energy < 0
-    self.energy = self.max_energy if self.energy > self.max_energy
+    self.energy = max_energy if self.energy > max_energy
   end
 
   def self.hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
     Log.add(src)
-    ratio = (health / max_health.to_f) * 100.00
+    ratio = (health / raw_max_health.to_f) * 100.00
     Log.add "You are critically low on health." if ratio < 20
   end
 
@@ -75,7 +90,7 @@ class Player
   def self.drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
     Log.add(src)
-    ratio = (mana / max_mana.to_f) * 100.00
+    ratio = (mana / raw_max_mana.to_f) * 100.00
     Log.add "You are critically low on mana." if ratio < 20
   end
 
@@ -92,7 +107,7 @@ class Player
   def self.energize(gain=1, src=nil)
     self.energy += gain
     Log.add(src) if src
-    ratio = (energy / max_energy.to_f) * 100.00
+    ratio = (energy / raw_max_energy.to_f) * 100.00
     Log.add "You are critically low on Energy." if ratio < 20
   end
 
@@ -184,7 +199,14 @@ class Player
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
             is_creature = true
             if self.energy > 0
-              creature.hurt(1, "You hit #{creature.color(creature.name)}.")
+              damage = (0..100).to_a.sample > accuracy ? -1 : (strength + (-1..1).to_a.sample)
+              if damage == 0
+                Log.add "#{creature.color(creature.name)} blocked your attack."
+              elsif damage < 0
+                Log.add "You missed #{creature.color(creature.name)}."
+              else
+                creature.hurt(damage, "You hit #{creature.color(creature.name)} for #{damage} damage.")
+              end
             else
               Log.add("I'm out of energy!")
             end
@@ -202,7 +224,7 @@ class Player
       self.selected = 0
       gain = (rand(10) == 0 ? 1 : 0)
       self.energy -= gain
-      gain = (rand(5) == 0 ? @@self_regen : 0)
+      gain = (rand(5) == 0 ? self_regen : 0)
       if energy > 0
         self.health += gain
       else
@@ -234,6 +256,16 @@ class Player
     self.pickup_items('do_again') if picked_up > 0
     Log.add("Nothing to pick up.") if picked_up == 0 && method == 'key_press'
   end
+
+  def self.strength; raw_strength + bonus_stats[:strength]; end
+  def self.defense; raw_defense + bonus_stats[:defense]; end
+  def self.accuracy; raw_accuracy + bonus_stats[:accuracy]; end
+  def self.speed; raw_speed + bonus_stats[:speed]; end
+  def self.max_health; raw_max_health + bonus_stats[:max_health]; end
+  def self.max_mana; raw_max_mana + bonus_stats[:max_mana]; end
+  def self.max_energy; raw_max_energy + bonus_stats[:max_energy]; end
+  def self.self_regen; raw_self_regen + bonus_stats[:self_regen]; end
+
 
   def self.toggle_visibility
     self.visible = !self.visible
