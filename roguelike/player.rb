@@ -1,3 +1,5 @@
+# TODO Configure defense of player and creatures to reduce damage taken.
+
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
@@ -224,9 +226,11 @@ class Player
       self.selected = 0
       gain = (rand(10) == 0 ? 1 : 0)
       self.energy -= gain
-      gain = (rand(5) == 0 ? self_regen : 0)
+      hp_gain = (rand(5) == 0 ? self_regen : 0)
+      mana_gain = (rand(3) == 0 ? self_regen : 0)
       if energy > 0
-        self.health += gain
+        self.health += hp_gain
+        self.mana += mana_gain
       else
       end
     end
@@ -247,7 +251,8 @@ class Player
     end
     Items.on_board.each do |item|
       if item.coords == coords
-        self.inventory << item
+        equipped[:right_hand] = item
+        # self.inventory << item
         item.pickup
         Log.add "Picked up #{item.name}"
         picked_up += 1
@@ -257,14 +262,31 @@ class Player
     Log.add("Nothing to pick up.") if picked_up == 0 && method == 'key_press'
   end
 
-  def self.strength; raw_strength + bonus_stats[:strength]; end
-  def self.defense; raw_defense + bonus_stats[:defense]; end
-  def self.accuracy; raw_accuracy + bonus_stats[:accuracy]; end
-  def self.speed; raw_speed + bonus_stats[:speed]; end
-  def self.max_health; raw_max_health + bonus_stats[:max_health]; end
-  def self.max_mana; raw_max_mana + bonus_stats[:max_mana]; end
-  def self.max_energy; raw_max_energy + bonus_stats[:max_energy]; end
-  def self.self_regen; raw_self_regen + bonus_stats[:self_regen]; end
+  def self.strength; raw_strength + bonuses[:strength].to_i; end
+  def self.defense; raw_defense + bonuses[:defense].to_i; end
+  def self.accuracy; raw_accuracy + bonuses[:accuracy].to_i; end
+  def self.speed; raw_speed + bonuses[:speed].to_i; end
+  def self.max_health; raw_max_health + bonuses[:max_health].to_i; end
+  def self.max_mana; raw_max_mana + bonuses[:max_mana].to_i; end
+  def self.max_energy; raw_max_energy + bonuses[:max_energy].to_i; end
+  def self.self_regen; raw_self_regen + bonuses[:self_regen].to_i; end
+
+  def self.bonuses
+    bonus = {}
+    equipped.each do |location, equipment|
+      if equipment
+        bonus[:strength] = bonus_stats[:strength].to_i + equipment.bonus_strength.to_i
+        bonus[:defense] = bonus_stats[:defense].to_i + equipment.bonus_defense.to_i
+        bonus[:accuracy] = bonus_stats[:accuracy].to_i + equipment.bonus_accuracy.to_i
+        bonus[:speed] = bonus_stats[:speed].to_i + equipment.bonus_speed.to_i
+        bonus[:max_health] = bonus_stats[:health].to_i + equipment.bonus_health.to_i
+        bonus[:max_mana] = bonus_stats[:mana].to_i + equipment.bonus_mana.to_i
+        bonus[:max_energy] = bonus_stats[:energy].to_i + equipment.bonus_energy.to_i
+        bonus[:self_regen] = bonus_stats[:self_regen].to_i + equipment.bonus_self_regen.to_i
+      end
+    end
+    bonus
+  end
 
 
   def self.toggle_visibility

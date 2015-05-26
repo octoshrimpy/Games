@@ -47,7 +47,6 @@ class Input
     when /^.$/
       c
     else
-      wsda
       # \e[1;2A Shift Up
       # \e[1;2B Shift Down
       # \e[1;2C Shift Right

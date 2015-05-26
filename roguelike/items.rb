@@ -22,10 +22,14 @@ class Items
       #   equipment_slot:,
       #   color:,
       #   weight:,
+      #   bonus_strength:,
+      #   bonus_defense:,
+      #   bonus_accuracy:,
+      #   bonus_speed:,
       #   bonus_health:,
       #   bonus_mana:,
-      #   bonus_damage:,
-      #   bonus_defense:
+      #   bonus_energy:,
+      #   bonus_self_regen:
       # })
       # Two-handed??
   def self.generate_melee_weapons
@@ -38,7 +42,7 @@ class Items
         weight: 12,
         bonus_health: 50,
         bonus_mana: 50,
-        bonus_damage: 10,
+        bonus_strength: 10,
         bonus_defense: 0
       })
     ]
@@ -50,10 +54,14 @@ class Items
       #   range:,
       #   thrown:,
       #   weight:,
+      #   bonus_strength:,
+      #   bonus_defense:,
+      #   bonus_accuracy:,
+      #   bonus_speed:,
       #   bonus_health:,
       #   bonus_mana:,
-      #   bonus_damage:,
-      #   bonus_defense:
+      #   bonus_energy:,
+      #   bonus_self_regen:
       # })
   def self.generate_ranged_weapons
     [
@@ -66,7 +74,7 @@ class Items
         weight: 3,
         bonus_health: 0,
         bonus_mana: 0,
-        bonus_damage: 0,
+        bonus_strength: 0,
         bonus_defense: 0
       })
     ]
@@ -79,10 +87,14 @@ class Items
       #   range:,
       #   type:,
       #   weight:,
+      #   bonus_strength:,
+      #   bonus_defense:,
+      #   bonus_accuracy:,
+      #   bonus_speed:,
       #   bonus_health:,
       #   bonus_mana:,
-      #   bonus_damage:,
-      #   bonus_defense:
+      #   bonus_energy:,
+      #   bonus_self_regen:
       # })
   def self.generate_magic_weapons
     [
@@ -94,10 +106,14 @@ class Items
       #   color:,
       #   equipment_slot:,
       #   weight:,
+      #   bonus_strength:,
+      #   bonus_defense:,
+      #   bonus_accuracy:,
+      #   bonus_speed:,
       #   bonus_health:,
       #   bonus_mana:,
-      #   bonus_damage:,
-      #   bonus_defense:
+      #   bonus_energy:,
+      #   bonus_self_regen:
       # })
   def self.generate_equipment
     [
