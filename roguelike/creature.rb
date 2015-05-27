@@ -1,5 +1,5 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops ,:destination, :vision, :rarity
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops ,:destination, :vision, :rarity, :accuracy
 
   def initialize(type, color)
     @mask = "#{type} "
@@ -13,6 +13,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
@@ -25,6 +26,7 @@ class Creature
       {
         health: (2 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
@@ -40,6 +42,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
@@ -63,6 +66,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
         attack_speed: (4 * (1 + level * 0.3)).round,
@@ -75,6 +79,7 @@ class Creature
       {
         health: (2 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (3 * (1 + level * 0.3)).round,
         attack_speed: (5 * (1 + level * 0.3)).round,
@@ -91,6 +96,7 @@ class Creature
       {
         health: (5 * (1 + level * 0.3)).round,
         # rarity: ,
+        accuracy: 90,
         vision: 10,
         strength: (4 * (1 + level * 0.3)).round,
         attack_speed: (5 * (1 + level * 0.3)).round,
@@ -131,6 +137,7 @@ class Creature
     @health = stats[:health]
     @vision = stats[:vision]
     @rarity = stats[:rarity]
+    @accuracy = stats[:accuracy]
     @strength = stats[:strength]
     @attack_speed = stats[:attack_speed]
     @run_speed = stats[:run_speed]
@@ -224,7 +231,8 @@ class Creature
     move_to = @destination ? move_to_target : self.coords
 
     if move_to == Player.coords
-      damage = rand(10) == 0 ? 0 : rand(@strength) + 1
+      damage = rand(Player.visible ? @accuracy : 4) <= 1 ? 0 : rand(@strength) + 1
+
       if damage == 0
         Log.add "#{color(@name)} missed you!"
       else

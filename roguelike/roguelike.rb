@@ -1,3 +1,19 @@
+# TODO
+=begin
+Expand 'stack' to more info in Explore- list all items in the stack
+Show inventory
+press 's' to bring up 'select'
+hit 's' again to choose
+hit 'esc' to deactivate select
+'Select' cursor in relevant menus
+'select' inventory
+'select' to change hotkeys
+refactor heal/hurt sources to objects instaed of strings
+change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
+
+
+
+=end
 require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
@@ -34,9 +50,8 @@ while(true)
       Game.run_time(Player.speed)
 
       Game.draw
-      sleep 0.05
+      sleep 0.03
     end
-    sleep 0.05
+    sleep 0.07
   end
-  Game.draw(Dungeon.current) if input == "D"
 end

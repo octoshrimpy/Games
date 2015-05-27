@@ -1,7 +1,6 @@
 require './walker.rb'
 require './arena.rb'
 
-
 class Dungeon
 
   def initialize

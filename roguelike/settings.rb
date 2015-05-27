@@ -1,39 +1,42 @@
 class Settings
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
+  @@title = ""
+  @@select = nil
+  @@scroll = nil
+  @@scroll_horz = nil
+  @@selectable = nil
+  @@selection_objects = []
 
   def self.receive(input)
     unless $gamemode == 'play'
-      tick = false
+      tick = true
       case input
-      when "UP", $key_move_up
-        tick = true
-        scroll_up
-      when "LEFT", $key_move_left
-        tick = true
-        scroll_left
-      when "DOWN", $key_move_down
-        tick = true
-        scroll_down
-      when "RIGHT", $key_move_right
-        tick = true
-        scroll_right
-      when $key_move_up_right
-        tick = true
-        scroll_up_right
-      when $key_move_up_left
-        tick = true
-        scroll_up_left
-      when $key_move_down_right
-        tick = true
-        scroll_down_right
-      when $key_move_down_left
-        tick = true
-        scroll_down_left
+      when "UP", $key_move_up then scroll_up
+      when "LEFT", $key_move_left then scroll_left
+      when "DOWN", $key_move_down then scroll_down
+      when "RIGHT", $key_move_right then scroll_right
+      when "Shift-Up", $key_move_up.capitalize then scroll_up(10)
+      when "Shift-Left", $key_move_left.capitalize then scroll_left(10)
+      when "Shift-Down", $key_move_down.capitalize then scroll_down(10)
+      when "Shift-Right", $key_move_right.capitalize then scroll_right(10)
+      when $key_move_up_right then scroll_up_right
+      when $key_move_up_left then scroll_up_left
+      when $key_move_down_right then scroll_down_right
+      when $key_move_down_left then scroll_down_left
+      when $key_move_up_right.capitalize then scroll_up_right(10)
+      when $key_move_up_left.capitalize then scroll_up_left(10)
+      when $key_move_down_right.capitalize then scroll_down_right(10)
+      when $key_move_down_left.capitalize then scroll_down_left(10)
+      when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll)
+      when $key_confirm then confirm_selection if @@select
       when "ESCAPE"
+        tick = false
         $gamemode = "play"
-        clear_scroll
+        clear_settings
         Game.draw
+      else
+        tick = false
       end
       show if tick
     end
@@ -41,20 +44,26 @@ class Settings
     case input
     when $key_open_help
       $gamemode = $gamemode.toggle("help", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
     when $key_open_logs
       $gamemode = $gamemode.toggle("logs", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
     when $key_open_keybindings
       $gamemode = $gamemode.toggle("key_bindings", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_scroll) : Settings.show
+      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+    when $key_open_inventory
+      $gamemode = $gamemode.toggle("inventory", 'play')
+      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+    when $key_open_equipment
+      $gamemode = $gamemode.toggle("equipment", 'play')
+      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
     when $key_inspect_surroundings
       $gamemode = $gamemode.toggle("map", 'play')
       $screen_shot = nil
       if $gamemode == 'play'
         $level = Game.update_level
         Game.draw
-        clear_scroll
+        clear_settings
       else
         @@scroll = Player.y
         @@scroll_horz = Player.x
@@ -63,15 +72,15 @@ class Settings
     end
   end
 
-  def self.clear_scroll; @@scroll = nil; @@scroll_horz = nil; end
-  def self.scroll_up; @@scroll -= 1; end
-  def self.scroll_left; @@scroll_horz -= 1; end
-  def self.scroll_right; @@scroll_horz += 1; end
-  def self.scroll_down; @@scroll += 1; end
-  def self.scroll_up_right; @@scroll -= 1; @@scroll_horz += 1; end
-  def self.scroll_up_left; @@scroll -= 1; @@scroll_horz -= 1; end
-  def self.scroll_down_right; @@scroll += 1; @@scroll_horz += 1; end
-  def self.scroll_down_left; @@scroll += 1; @@scroll_horz -= 1; end
+  def self.clear_settings; @@scroll = nil; @@scroll_horz = nil; @@select = nil; @@selectable = nil; @@selection_objects = nil; end
+  def self.scroll_up(amount=1); @@select ? (@@select -= amount) : (@@scroll -= amount); end
+  def self.scroll_left(amount=1); @@scroll_horz -= amount if @@scroll_horz; end
+  def self.scroll_right(amount=1); @@scroll_horz += amount if @@scroll_horz; end
+  def self.scroll_down(amount=1); @@select ? (@@select += amount) : (@@scroll += amount); end
+  def self.scroll_up_right(amount=1); @@scroll -= amount if @@select; @@scroll_horz += amount if @@scroll_horz; end
+  def self.scroll_up_left(amount=1); @@scroll -= amount if @@select; @@scroll_horz -= amount if @@scroll_horz; end
+  def self.scroll_down_right(amount=1); @@scroll += amount if @@select; @@scroll_horz += amount if @@scroll_horz; end
+  def self.scroll_down_left(amount=1); @@scroll += amount if @@select; @@scroll_horz -= amount if @@scroll_horz; end
 
   def self.show
     if generate_settings
@@ -100,35 +109,172 @@ class Settings
       false
     else
       lines = case $gamemode
-      when "help"
-        build_help_menu
-      when "logs"
-        build_log_menu
+      when 'help' then build_help_menu
+      when 'logs' then build_log_menu
+      when 'inventory' then build_inventory
+      when 'key_bindings' then build_key_bindings
+      when 'equipment' then build_equipment_menu
+      when 'equip_head' then build_inventory_by('head')
+      when 'equip_torso' then build_inventory_by('torso')
+      when 'equip_left_hand' then build_inventory_by('left_hand')
+      when 'equip_right_hand' then build_inventory_by('right_hand')
+      when 'equip_ring1' then build_inventory_by('ring1')
+      when 'equip_ring2' then build_inventory_by('ring2')
+      when 'equip_ring3' then build_inventory_by('ring3')
+      when 'equip_ring4' then build_inventory_by('ring4')
+      when 'equip_waist' then build_inventory_by('waist')
+      when 'equip_leggings' then build_inventory_by('leggings')
+      when 'equip_feet' then build_inventory_by('feet')
       end
       build_menu(lines)
     end
   end
 
-  def self.build_menu(lines)
+  def self.build_menu(lines=0)
     $settings = Array.new(@@game_height) {""}
     max = lines.count - @@game_height + 4
+    if @@select
+      screen = @@scroll + @@game_height - 5
+      @@select = @@select > screen ? @@scroll : @@select
+      @@select = @@select < @@scroll ? screen : @@select
+    end
+    @@scroll ||= 0
     @@scroll = @@scroll > max ? max : @@scroll
     @@scroll = @@scroll > 0 ? @@scroll : 0
 
     above_count = @@scroll
     top = "^ #{above_count} ^"
-    $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}"
+    $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}\r| -- #{@@title}"
     (@@game_height - 4).times do |y|
-      $settings[y + 2] = " #{lines[@@scroll + y]}".override_background_with(:white).override_foreground_with(:black)
+      $settings[y + 2] = if @@selectable
+        "   #{@@select == (@@scroll + y) ? '>' : ' '}   #{lines[@@scroll + y]}"
+      else
+        " #{lines[@@scroll + y]}"
+      end.override_background_with(:white).override_foreground_with(:black)
     end
     below_count = lines.count - @@scroll - @@game_height + 4
-    bottom = "v #{below_count > 0 ? below_count : 0} v"
+    bottom = "v #{below_count > 0 ? below_count : 0} v #{@@select ? ('Select-' + @@select.to_s) : ''}"
     $settings[@@game_height - 2] = "#{'  '*(@@game_width/2 - bottom.length/2)}#{bottom}"
   end
 
   def self.build_help_menu
-    @@scroll ||= 0
+    @@title = "Help"
     word_wrap(help_menu_text.split("\n"))
+  end
+
+  def self.build_log_menu
+    @@title = "Logs"
+    lines = Log.all.reverse
+    @@scroll ||= lines.count - @@game_height + 4
+    lines
+  end
+
+  def self.build_inventory
+    @@title = "Inventory"
+    @@selectable = true
+    Player.inventory.map { |i| i.name }
+  end
+
+  def self.build_inventory_by(slot)
+    @@title = 'Select item to replace with.'
+    @@selectable = true
+    @@selection_objects = Player.inventory.select do |i|
+      if i.equipment_slot
+        i.equipment_slot == slot.to_sym
+      end
+    end
+    lines = ['None']
+    @@selection_objects.each { |i| lines << i.name }
+    lines
+  end
+
+  def self.build_key_bindings
+    @@title = "Key Binding Menu"
+    @@selectable = true
+    []
+  end
+  # Player.inventory << Items['Excalibur']
+
+  def self.build_equipment_menu
+    lines = []
+    @@selectable = true
+    @@title = 'Equipment'
+    lines << ''
+    %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
+      humanize_slot = case slot
+      when 'head' then "Head"
+      when 'torso' then "Torso"
+      when 'left_hand' then "Left Hand"
+      when 'right_hand' then "Right Hand"
+      when 'ring1' then "Ring 1"
+      when 'ring2' then "Ring 2"
+      when 'ring3' then "Ring 3"
+      when 'ring4' then "Ring 4"
+      when 'waist' then "Waist"
+      when 'leggings' then "Leggings"
+      when 'feet' then "Feet"
+      else 'Dunno'
+      end
+      space = (20 - humanize_slot.length).times.map{' '}.join
+      lines << "#{humanize_slot}:#{space}#{Player.equipped[slot.to_sym] ? Player.equipped[slot.to_sym].name : 'Empty'}"
+    end
+    lines
+  end
+
+  def self.confirm_selection
+    selects = %w( equip_head equip_torso equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
+    menus = %w( equipment )
+    select_selection if selects.include?($gamemode)
+    redirect_selection if menus.include?($gamemode)
+  end
+
+  def self.select_selection
+    equip_item if $gamemode[0..4] == 'equip'
+    # Game.input true
+    # binding.pry
+  end
+
+  def self.equip_item
+    slot = $gamemode[6..$gamemode.length].to_sym
+    item = @@select == 0 ? nil : @@selection_objects[@@select - 1]
+    if Player.equipped[slot]
+      Player.inventory << Player.equipped[slot]
+      Player.equipped[slot] = nil
+    end
+    if item
+      Player.inventory.delete(item)
+      Player.equipped[slot] = item
+    end
+  end
+
+  def self.redirect_selection
+    new_gamemode = case $gamemode
+    when 'equipment'
+      mode = equip
+      mode ? mode : $gamemode
+    else $gamemode
+    end
+    unless $gamemode == new_gamemode
+      clear_settings
+      $gamemode = new_gamemode
+    end
+  end
+
+  def self.equip
+    case @@select
+    when 1 then 'equip_head'
+    when 2 then 'equip_torso'
+    when 3 then 'equip_left_hand'
+    when 4 then 'equip_right_hand'
+    when 5 then 'equip_ring1'
+    when 6 then 'equip_ring2'
+    when 7 then 'equip_ring3'
+    when 8 then 'equip_ring4'
+    when 9 then 'equip_waist'
+    when 10 then 'equip_leggings'
+    when 11 then 'equip_feet'
+    else false
+    end
   end
 
   def self.word_wrap(sections)
@@ -145,12 +291,6 @@ class Settings
       end
       lines << line
     end
-    lines
-  end
-
-  def self.build_log_menu
-    lines = Log.all.reverse
-    @@scroll ||= lines.count - @@game_height + 4
     lines
   end
 

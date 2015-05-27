@@ -4,7 +4,7 @@ class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
-                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy
+                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power
 
     @@x = 0
     @@y = 0
@@ -36,6 +36,7 @@ class Player
       max_health: 0,
       max_mana: 0,
       max_energy: 0,
+      magic_power: 0,
       accuracy: 0,
       defense: 0,
       strength: 0,
@@ -49,6 +50,7 @@ class Player
     @@raw_max_mana = 20
     @@energy = 100
     @@raw_max_energy = 100
+    @@raw_magic_power = 0
     @@raw_strength = 1
     @@raw_defense = 0
     @@raw_speed = 10
@@ -182,10 +184,18 @@ class Player
       Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       puts
     when "R"
-
-    when "I"
+      Dungeon.current.each_with_index do |row, y|
+        row.each_with_index do |col, x|
+          seen[depth] << {x: x, y: y}
+        end
+      end
+      seen.uniq!
+      Log.add "Cheat activated: Full vision."
+      Game.draw
+    when "i"
       Player.toggle_visibility
       Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
+      Game.draw
     when "P"
       Game.pause
       # Or pause?
@@ -251,8 +261,7 @@ class Player
     end
     Items.on_board.each do |item|
       if item.coords == coords
-        equipped[:right_hand] = item
-        # self.inventory << item
+        self.inventory << item
         item.pickup
         Log.add "Picked up #{item.name}"
         picked_up += 1
@@ -263,6 +272,7 @@ class Player
   end
 
   def self.strength; raw_strength + bonuses[:strength].to_i; end
+  def self.magic_power; raw_magic_power + bonuses[:magic_power].to_i; end
   def self.defense; raw_defense + bonuses[:defense].to_i; end
   def self.accuracy; raw_accuracy + bonuses[:accuracy].to_i; end
   def self.speed; raw_speed + bonuses[:speed].to_i; end
@@ -276,6 +286,7 @@ class Player
     equipped.each do |location, equipment|
       if equipment
         bonus[:strength] = bonus_stats[:strength].to_i + equipment.bonus_strength.to_i
+        bonus[:magic_power] = bonus_stats[:magic_power].to_i + equipment.bonus_magic_power.to_i
         bonus[:defense] = bonus_stats[:defense].to_i + equipment.bonus_defense.to_i
         bonus[:accuracy] = bonus_stats[:accuracy].to_i + equipment.bonus_accuracy.to_i
         bonus[:speed] = bonus_stats[:speed].to_i + equipment.bonus_speed.to_i

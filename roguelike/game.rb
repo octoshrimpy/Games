@@ -122,6 +122,7 @@ class Game
   end
 
   def self.draw(board=$level)
+    Player.verify_stats
     system 'clear' or system 'cls'
     if Creature.all && Creature.count == 0 && $spawn_creatures == true
       $spawn_creatures = false
