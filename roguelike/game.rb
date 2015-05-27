@@ -9,7 +9,7 @@ class Game
 
   def self.start
     Items.generate
-    $message = "Welcome! Press '#{$key_open_help}' at any\ntime to view how to play. This makes the message much longer so that I can test the overflow properties."
+    $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
     $gamemode = "play"
     $spawn_creatures = true
