@@ -6,67 +6,67 @@ class Player
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power
 
-    @@x = 0
-    @@y = 0
-    @@vision_radius = 5
+  @@x = 0
+  @@y = 0
+  @@vision_radius = 5
 
-    @@depth = 1
-    @@dungeon_level = 1 #0 for town?
-    @@seen = []
+  @@depth = 1
+  @@dungeon_level = 1 #0 for town?
+  @@seen = []
 
-    @@selected = 0
-    @@quick_bar = Array.new(9) {nil}
-    @@inventory = []
-    @@gold = 0
+  @@selected = 0
+  @@quick_bar = Array.new(9) {nil}
+  @@inventory = []
+  @@gold = 0
 
-    @@equipped = {
-      head: nil,
-      torso: nil,
-      left_hand: nil,
-      right_hand: nil,
-      ring1: nil,
-      ring2: nil,
-      ring3: nil,
-      ring4: nil,
-      waist: nil,
-      leggings: nil,
-      feet: nil
-    }
-    @@bonus_stats = {
-      max_health: 0,
-      max_mana: 0,
-      max_energy: 0,
-      magic_power: 0,
-      accuracy: 0,
-      defense: 0,
-      strength: 0,
-      speed: 0,
-      self_regen: 0
-    }
-    @@raw_accuracy = 90
-    @@health = 20
-    @@raw_max_health = 20
-    @@mana = 20
-    @@raw_max_mana = 20
-    @@energy = 100
-    @@raw_max_energy = 100
-    @@raw_magic_power = 0
-    @@raw_strength = 1
-    @@raw_defense = 0
-    @@raw_speed = 10
-    @@raw_self_regen = 1
+  @@equipped = {
+    head: nil,
+    torso: nil,
+    left_hand: nil,
+    right_hand: nil,
+    ring1: nil,
+    ring2: nil,
+    ring3: nil,
+    ring4: nil,
+    waist: nil,
+    leggings: nil,
+    feet: nil
+  }
+  @@bonus_stats = {
+    max_health: 0,
+    max_mana: 0,
+    max_energy: 0,
+    magic_power: 0,
+    accuracy: 0,
+    defense: 0,
+    strength: 0,
+    speed: 0,
+    self_regen: 0
+  }
+  @@raw_accuracy = 90
+  @@health = 20
+  @@raw_max_health = 20
+  @@mana = 20
+  @@raw_max_mana = 20
+  @@energy = 100
+  @@raw_max_energy = 100
+  @@raw_magic_power = 0
+  @@raw_strength = 1
+  @@raw_defense = 0
+  @@raw_speed = 10
+  @@raw_self_regen = 1
+  @@live = true
 
-    @@visible = true
-    @@autopickup = true
-    @@last_hit_by = nil
+  @@visible = true
+  @@autopickup = true
+  @@last_hit_by = nil
 
-  def self.coords
-    {x: Player.x, y: Player.y}
-  end
+  def self.name; "me"; end
+  def self.coords; {x: Player.x, y: Player.y}; end
 
   def self.verify_stats
-    Player.seen[Player.depth].uniq!
-    if self.health <= 0
+    if self.health <= 0 && @@live == true
+      @@live = false
       Log.add("You have been slaughtered by #{last_hit_by}.")
       Game.draw
       Game.end
@@ -164,17 +164,19 @@ class Player
     when $key_down_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
+        $spawn_creatures = true
         Log.add "You go down the stairs..."
         tick = true
       end
     when $key_up_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
+        $spawn_creatures = true
         Log.add "You go up the stairs..."
         tick = true
       end
       # ----------------------------------------------------CHEATS ----------------------------
-    when "H"
+    when "h"
       heal
       tick = true
     when "S"
@@ -198,7 +200,6 @@ class Player
       Game.draw
     when "P"
       Game.pause
-      # Or pause?
     when "RETURN"
       tick = true
       blow_walls

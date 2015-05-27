@@ -28,7 +28,7 @@ class Settings
       when $key_move_up_left.capitalize then scroll_up_left(10)
       when $key_move_down_right.capitalize then scroll_down_right(10)
       when $key_move_down_left.capitalize then scroll_down_left(10)
-      when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll)
+      when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
       when $key_confirm then confirm_selection if @@select
       when "ESCAPE"
         tick = false
@@ -57,6 +57,15 @@ class Settings
     when $key_open_equipment
       $gamemode = $gamemode.toggle("equipment", 'play')
       $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+    when $key_read_more
+      if @@scroll_horz
+        $gamemode = $gamemode.toggle("read_more", 'map')
+        $gamemode == 'map' ? (@@scroll = @@select; @@select = nil) : (@@select = @@scroll)
+        Settings.show
+      else
+        $gamemode = $gamemode.toggle("read_more", 'play')
+        $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      end
     when $key_inspect_surroundings
       $gamemode = $gamemode.toggle("map", 'play')
       $screen_shot = nil
@@ -73,14 +82,15 @@ class Settings
   end
 
   def self.clear_settings; @@scroll = nil; @@scroll_horz = nil; @@select = nil; @@selectable = nil; @@selection_objects = nil; end
-  def self.scroll_up(amount=1); @@select ? (@@select -= amount) : (@@scroll -= amount); end
-  def self.scroll_left(amount=1); @@scroll_horz -= amount if @@scroll_horz; end
-  def self.scroll_right(amount=1); @@scroll_horz += amount if @@scroll_horz; end
-  def self.scroll_down(amount=1); @@select ? (@@select += amount) : (@@scroll += amount); end
-  def self.scroll_up_right(amount=1); @@scroll -= amount if @@select; @@scroll_horz += amount if @@scroll_horz; end
-  def self.scroll_up_left(amount=1); @@scroll -= amount if @@select; @@scroll_horz -= amount if @@scroll_horz; end
-  def self.scroll_down_right(amount=1); @@scroll += amount if @@select; @@scroll_horz += amount if @@scroll_horz; end
-  def self.scroll_down_left(amount=1); @@scroll += amount if @@select; @@scroll_horz -= amount if @@scroll_horz; end
+  def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
+  def self.scroll_left(amount=1); move_coord(-amount,0); end
+  def self.scroll_right(amount=1); move_coord(amount,0); end
+  def self.scroll_down(amount=1); (@@select && @@selectable) ? (@@select += amount) : move_coord(0,amount); end
+  def self.scroll_up_right(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(amount,-amount); end
+  def self.scroll_up_left(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(-amount,-amount); end
+  def self.scroll_down_right(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(amount,amount); end
+  def self.scroll_down_left(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(-amount,amount); end
+  def self.move_coord(x,y); @@scroll += y if @@scroll; @@scroll_horz += x if @@scroll_horz; end
 
   def self.show
     if generate_settings
@@ -114,6 +124,7 @@ class Settings
       when 'inventory' then build_inventory
       when 'key_bindings' then build_key_bindings
       when 'equipment' then build_equipment_menu
+      when 'read_more' then build_read_more_menu
       when 'equip_head' then build_inventory_by('head')
       when 'equip_torso' then build_inventory_by('torso')
       when 'equip_left_hand' then build_inventory_by('left_hand')
@@ -133,7 +144,7 @@ class Settings
   def self.build_menu(lines=0)
     $settings = Array.new(@@game_height) {""}
     max = lines.count - @@game_height + 4
-    if @@select
+    if @@select && @@selectable
       screen = @@scroll + @@game_height - 5
       @@select = @@select > screen ? @@scroll : @@select
       @@select = @@select < @@scroll ? screen : @@select
@@ -159,11 +170,13 @@ class Settings
 
   def self.build_help_menu
     @@title = "Help"
+    @@selectable = true
     word_wrap(help_menu_text.split("\n"))
   end
 
   def self.build_log_menu
     @@title = "Logs"
+    @@selectable = false
     lines = Log.all.reverse
     @@scroll ||= lines.count - @@game_height + 4
     lines
@@ -192,6 +205,12 @@ class Settings
     @@title = "Key Binding Menu"
     @@selectable = true
     []
+  end
+
+  def self.build_read_more_menu
+    @@title = 'Read More'
+    @@selectable = false
+    word_wrap($previous_message.split("\n"))
   end
   # Player.inventory << Items['Excalibur']
 
@@ -282,7 +301,8 @@ class Settings
     sections.each do |text|
       line = ""
       text.split(' ').each do |word|
-        if line.length + word.length < @@game_width*2 - 2
+        game_length = @@selectable ? @@game_width*2 - 7 : @@game_width*2 - 2
+        if line.length + word.length < game_length
           line += " #{word}"
         else
           lines << line

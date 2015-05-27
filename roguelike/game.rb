@@ -9,7 +9,8 @@ class Game
 
   def self.start
     Items.generate
-    $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
+    $message = "Welcome! Press '#{$key_open_help}' at any\ntime to view how to play. This makes the message much longer so that I can test the overflow properties."
+    $previous_message = ''
     $gamemode = "play"
     $spawn_creatures = true
     $screen_shot = nil
@@ -139,8 +140,12 @@ class Game
     print "-#{message_title}"
     half_way_mark.times {print "--"}
     if $message.length > 0
-      print " #{$message[0..VIEWPORT_WIDTH*2]}"
+      print " #{$message[0..(VIEWPORT_WIDTH*2 - 7)].gsub("\n", " ")}"
+      if $message.length > (VIEWPORT_WIDTH*2 - 7)
+        print "...(#{$key_read_more})"
+      end
       # Give option to read more?
+      $previous_message = $message.clone
       $message = ""
     end
     puts
@@ -403,7 +408,7 @@ class Game
   def self.find_currently_visible(x_offset, y_offset)
     visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
     visible.each do |in_sight|
-      Player.seen[Player.depth] << in_sight
+      Player.seen[Player.depth] << in_sight unless Player.seen[Player.depth].include?(in_sight)
         # This makes the current visibility white.
       if Dungeon.current[in_sight[:y]][in_sight[:x]] == "  "
         $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = ". "
@@ -509,7 +514,7 @@ class Game
       if stack.count == 0
         "This is #{response}."
       else
-        case stack.count
+        str = case stack.count
         when 1
           case stack.first[:instance].class.to_s
           when "Class" then "I am standing on #{response}."
@@ -536,6 +541,7 @@ class Game
             "There is a stack of #{stack.first[:instance].name.articlize} and other things."
           end
         end
+        "#{str}\n#{VIEWPORT_WIDTH.times.map{'  '}.join}#{stack.map {|i|"\n" + i[:instance].name.capitalize}.join}"
       end
     else
       "I don't know what this is."

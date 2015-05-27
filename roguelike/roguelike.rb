@@ -1,11 +1,7 @@
 # TODO
 =begin
-Expand 'stack' to more info in Explore- list all items in the stack
-Show inventory
-press 's' to bring up 'select'
-hit 's' again to choose
-hit 'esc' to deactivate select
-'Select' cursor in relevant menus
+Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
+
 'select' inventory
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
@@ -52,6 +48,6 @@ while(true)
       Game.draw
       sleep 0.03
     end
-    sleep 0.07
+    # sleep 0.07
   end
 end

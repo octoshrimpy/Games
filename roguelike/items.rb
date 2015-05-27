@@ -43,7 +43,8 @@ class Items
         bonus_health: 50,
         bonus_mana: 50,
         bonus_strength: 10,
-        bonus_defense: 0
+        bonus_defense: 0,
+        bonus_self_regen: 10
       })
     ]
   end
