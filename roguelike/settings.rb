@@ -197,7 +197,9 @@ class Settings
       end
     end
     lines = ['None']
-    @@selection_objects.each { |i| lines << i.name }
+    # Game.input true
+    # binding.pry
+    @@selection_objects.each { |item| lines << item_specs(item, Player.equipped[slot.to_sym]) }
     lines
   end
 
@@ -212,7 +214,6 @@ class Settings
     @@selectable = false
     word_wrap($previous_message.split("\n"))
   end
-  # Player.inventory << Items['Excalibur']
 
   def self.build_equipment_menu
     lines = []
@@ -220,24 +221,47 @@ class Settings
     @@title = 'Equipment'
     lines << ''
     %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
-      humanize_slot = case slot
-      when 'head' then "Head"
-      when 'torso' then "Torso"
-      when 'left_hand' then "Left Hand"
-      when 'right_hand' then "Right Hand"
-      when 'ring1' then "Ring 1"
-      when 'ring2' then "Ring 2"
-      when 'ring3' then "Ring 3"
-      when 'ring4' then "Ring 4"
-      when 'waist' then "Waist"
-      when 'leggings' then "Leggings"
-      when 'feet' then "Feet"
-      else 'Dunno'
-      end
-      space = (20 - humanize_slot.length).times.map{' '}.join
-      lines << "#{humanize_slot}:#{space}#{Player.equipped[slot.to_sym] ? Player.equipped[slot.to_sym].name : 'Empty'}"
+      slot_name = humanize_slot(slot)
+      space = (20 - slot_name.length).times.map{' '}.join
+      lines << "#{slot_name}:#{space}#{Player.equipped[slot.to_sym] ? item_specs(Player.equipped[slot.to_sym]) : 'Empty'}"
     end
     lines
+  end
+
+  def self.item_specs(item, compared_to=nil)
+    stats = {
+      bonus_health: 'HP',
+      bonus_mana: 'MANA',
+      bonus_energy: 'NRG',
+      bonus_strength: 'STR',
+      bonus_magic_power: 'MP',
+      bonus_defense: 'DEF',
+      bonus_speed: 'SPD',
+      bonus_accuracy: 'ACC',
+      bonus_self_regen: 'REGEN'
+    }
+    specs = ""
+    stats.each do |stat, abbreviation|
+      change = compared_to ? (item.method(stat).call.to_i - compared_to.method(stat).call.to_i) : item.method(stat).call.to_i
+      specs << "#{abbreviation}#{change > 0 ? '+' + change.to_s : change} " if change != 0
+    end
+    "#{item.name}: #{specs}"
+  end
+
+  def self.humanize_slot(slot)
+    case slot
+    when 'head' then "Head"
+    when 'torso' then "Torso"
+    when 'left_hand' then "Left Hand"
+    when 'right_hand' then "Right Hand"
+    when 'ring1' then "Ring 1"
+    when 'ring2' then "Ring 2"
+    when 'ring3' then "Ring 3"
+    when 'ring4' then "Ring 4"
+    when 'waist' then "Waist"
+    when 'leggings' then "Leggings"
+    when 'feet' then "Feet"
+    end
   end
 
   def self.confirm_selection
@@ -249,8 +273,6 @@ class Settings
 
   def self.select_selection
     equip_item if $gamemode[0..4] == 'equip'
-    # Game.input true
-    # binding.pry
   end
 
   def self.equip_item
@@ -312,6 +334,27 @@ class Settings
       lines << line
     end
     lines
+  end
+
+  def self.explain_item_text(item)
+%(
+Name: #{item.name.or}
+Weight: #{item.weight.or}
+Slot: #{humanize_slot(item.equipment_slot).or}
+
+Range: #{item.range.or}
+
+Bonus Stats:
+ Health: #{item.bonus_health.or}
+ Mana: #{item.bonus_mana.or}
+ Energy: #{item.bonus_energy.or}
+ Strength: #{item.bonus_strength.or}
+ Magic Power: #{item.bonus_magic_power.or}
+ Defense: #{item.bonus_defense.or}
+ Speed: #{item.bonus_speed.or}
+ Accuracy: #{item.bonus_accuracy.or}
+ Regeneration: #{item.bonus_self_regen.or}
+)
   end
 
   def self.help_menu_text

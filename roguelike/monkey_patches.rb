@@ -1,3 +1,4 @@
+# require './monkey_patches.rb'
 class Object
   def deep_clone
     Marshal.load(Marshal.dump(self))
@@ -5,6 +6,10 @@ class Object
 
   def toggle(arg1, arg2)
     self == arg1 ? arg2 : arg1
+  end
+
+  def or(nah='N/A')
+    self == nil ? nah : self
   end
 end
 

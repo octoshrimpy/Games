@@ -1,7 +1,6 @@
 class MeleeWeapon
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
-  attr_accessor :equipment_slot
 
   def initialize(defaults)
     defaults.each do |key, value|

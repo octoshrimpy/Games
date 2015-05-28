@@ -17,18 +17,18 @@ class Items
   def self.equipment; all.select {|i| i.class == Equipment }; end
 
       # MeleeWeapon.new({
-      #   name:,
-      #   icon:,
-      #   equipment_slot:,
-      #   color:,
-      #   weight:,
-      #   bonus_strength:,
-      #   bonus_defense:,
-      #   bonus_accuracy:,
-      #   bonus_speed:,
-      #   bonus_health:,
-      #   bonus_mana:,
-      #   bonus_energy:,
+      #   name: '',
+      #   icon: '',
+      #   equipment_slot: :,
+      #   color: :,
+      #   weight: ,
+      #   bonus_strength: ,
+      #   bonus_defense: ,
+      #   bonus_accuracy: ,
+      #   bonus_speed: ,
+      #   bonus_health: ,
+      #   bonus_mana: ,
+      #   bonus_energy: ,
       #   bonus_self_regen:
       # })
       # Two-handed??
@@ -43,8 +43,16 @@ class Items
         bonus_health: 50,
         bonus_mana: 50,
         bonus_strength: 10,
-        bonus_defense: 0,
         bonus_self_regen: 10
+      }),
+      MeleeWeapon.new({
+        name: 'Short Sword',
+        icon: '†',
+        equipment_slot: :right_hand,
+        weight: 4,
+        bonus_strength: 1,
+        bonus_defense: 1,
+        bonus_speed: 2
       })
     ]
   end

@@ -3,9 +3,15 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 
 'select' inventory
+show comparison of bonus stats between currently equipped and new in the equipped page in inventory,
+show stats in inventory
+projectile weapons
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
+
+Have skills for different types of weapons
+Incorporate two handed weapons
 
 
 
