@@ -249,7 +249,7 @@ class Creature
     moves = []
     dist = 100
     possible_moves.each do |move|
-      distance_to = Visible.distance_between(move, @destination)
+      distance_to = Math.distance_between(move, @destination)
       if distance_to < dist
         moves = []
         dist = distance_to
@@ -289,12 +289,12 @@ class Creature
     possible = []
     if move_to
       move_to.each do |spot|
-        distance = Visible.distance_between(spot, Player.coords)
+        distance = Math.distance_between(spot, Player.coords)
         if distance < shortest_distance
           shortest_distance = distance
           possible = []
         end
-        if Visible.distance_between(spot, Player.coords) == shortest_distance
+        if Math.distance_between(spot, Player.coords) == shortest_distance
           possible << spot
         end
       end
