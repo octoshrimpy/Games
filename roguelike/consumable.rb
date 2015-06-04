@@ -12,8 +12,9 @@ class Consumable
 
   def consume
     Log.add "You have consumed #{name}."
-    Player.inventory.delete(self)
-    eval(special_effect)
+    if Player.inventory.delete(self)
+      eval(special_effect)
+    end
   end
 
   def show

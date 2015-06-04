@@ -73,6 +73,15 @@ class Player
       Game.draw
       Game.end
     end
+    self.invisibility_ticks = 0 if self.invisibility_ticks < 0
+    self.health = max_health if self.health > max_health
+    self.mana = 0 if self.mana < 0
+    self.mana = max_mana if self.mana > max_mana
+    self.energy = 0 if self.energy < 0
+    self.energy = max_energy if self.energy > max_energy
+  end
+
+  def self.tick
     if Player.invisibility_ticks > 0
       if Player.visible
         Log.add "You have become invisible."
@@ -83,12 +92,6 @@ class Player
       Log.add "You have become visible." unless Player.visible
       Player.visible = true
     end
-    self.invisibility_ticks = 0 if self.invisibility_ticks < 0
-    self.health = max_health if self.health > max_health
-    self.mana = 0 if self.mana < 0
-    self.mana = max_mana if self.mana > max_mana
-    self.energy = 0 if self.energy < 0
-    self.energy = max_energy if self.energy > max_energy
   end
 
   def self.hurt(damage=1, src="You got hurt by an unknown source.")
@@ -210,7 +213,7 @@ class Player
     when "i"
       Player.visibility(10)
       Game.draw
-    when "RETURN"
+    when "DELETE", "BACKSPACE"
       tick = true
       blow_walls
       Log.add "The walls around you are blown away."
@@ -310,6 +313,24 @@ class Player
     bonus
   end
 
+  def self.give(item_name)
+    if item = Items[item_name]
+      Player.inventory << item
+      item
+    end
+  end
+
+  def self.equip(item, slot=nil)
+    slot ||= item.equipment_slot if item
+    if Player.equipped[slot]
+      Player.inventory << Player.equipped[slot]
+      Player.equipped[slot] = nil
+    end
+    if item
+      Player.inventory.delete(item)
+      Player.equipped[slot] = item
+    end
+  end
 
   def self.visibility(amount)
     self.invisibility_ticks += amount

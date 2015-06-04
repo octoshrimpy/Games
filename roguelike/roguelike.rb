@@ -73,6 +73,7 @@ while(true)
     $milli_tick = Time.now.to_f
     Settings.receive(input)
     if Player.try_action(input)
+      Player.tick
       Game.run_time(Player.speed)
 
       Game.draw

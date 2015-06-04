@@ -30,7 +30,7 @@ class Settings
       when $key_move_down_right.capitalize then scroll_down_right(10)
       when $key_move_down_left.capitalize then scroll_down_left(10)
       when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
-      when $key_confirm then confirm_selection if @@select
+      when $key_confirm then tick = confirm_selection if @@select
       when "P" then Game.pause
       when "ESCAPE"
         tick = false
@@ -203,7 +203,7 @@ class Settings
       end
     end
     lines = ['None']
-    @@selection_objects.each { |item| lines << item_specs(item, Player.equipped[slot.to_sym]) }
+    @@selection_objects.each { |item| lines << "#{item.name}: #{item_specs(item, Player.equipped[slot.to_sym])}" }
     lines
   end
 
@@ -227,7 +227,7 @@ class Settings
     %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
       slot_name = humanize_slot(slot)
       space = (20 - slot_name.length).times.map{' '}.join
-      lines << "#{slot_name}:#{space}#{Player.equipped[slot.to_sym] ? item_specs(Player.equipped[slot.to_sym]) : 'Empty'}"
+      lines << "#{slot_name}:#{space}#{Player.equipped[slot.to_sym] ? "#{Player.equipped[slot.to_sym].name}: #{item_specs(Player.equipped[slot.to_sym])}" : 'Empty'}"
     end
     lines
   end
@@ -240,6 +240,11 @@ class Settings
     lines << 'Use/Consume'
     lines << 'Throw'
     lines << 'Drop'
+    if @@selected_item.respond_to?(:equipment_slot)
+      slot = @@selected_item.equipment_slot
+      specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
+      lines << "Equip - #{humanize_slot(@@selected_item.equipment_slot)}: #{specs}"
+    end
     lines << ''
     lines
   end
@@ -261,11 +266,11 @@ class Settings
       change = compared_to ? (item.method(stat).call.to_i - compared_to.method(stat).call.to_i) : item.method(stat).call.to_i
       specs << "#{abbreviation}#{change > 0 ? '+' + change.to_s : change} " if change != 0
     end
-    "#{item.name}: #{specs}"
+    specs
   end
 
   def self.humanize_slot(slot)
-    case slot
+    case slot.to_s
     when 'head' then "Head"
     when 'torso' then "Torso"
     when 'left_hand' then "Left Hand"
@@ -294,24 +299,24 @@ class Settings
 
   def self.do_item_option
     case @@select
-    when 1
+    when 1 # User/consume
       @@selected_item.consume
+    when 2 # Throw
+    when 3 # Drop
+    when 4
+      Player.equip(@@selected_item) if @@selected_item.respond_to?(:equipment_slot)
     end
-    clear_settings
     $gamemode = 'play'
+    Game.draw
+    clear_settings
+    false
   end
 
   def self.equip_item
     slot = $gamemode[6..$gamemode.length].to_sym
     item = @@select == 0 ? nil : @@selection_objects[@@select - 1]
-    if Player.equipped[slot]
-      Player.inventory << Player.equipped[slot]
-      Player.equipped[slot] = nil
-    end
-    if item
-      Player.inventory.delete(item)
-      Player.equipped[slot] = item
-    end
+    Player.equip(item, slot)
+    show
   end
 
   def self.redirect_selection
