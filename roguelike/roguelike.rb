@@ -10,7 +10,9 @@ projectile weapons
 refactor heal/hurt sources to objects instaed of strings
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
 
-Have skills for different types of weapons
+item_options menu- also add an equip. Automatically equip item and show +/- stats.
+
+Have skill levels for different types of weapons
 Incorporate two handed weapons
 
 after selecting throw, should redraw screen with message.

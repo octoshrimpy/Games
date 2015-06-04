@@ -17,6 +17,15 @@ class Items
   def self.equipment; all.select {|i| i.class == Equipment }; end
   def self.consumable; all.select {|i| i.class == Consumable }; end
 
+  def self.equippable
+    [
+      melee +
+      ranged +
+      magic +
+      equipment
+    ]
+  end
+
       # MeleeWeapon.new({
       #   name: '',
       #   icon: '',
