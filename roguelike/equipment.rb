@@ -24,4 +24,15 @@ class Equipment
     self.y = nil
     self.depth = nil
   end
+
+  def duplicate
+    item = self.clone
+    item.save!
+    item
+  end
+
+  def save!
+    $items.delete(self)
+    $items << self
+  end
 end

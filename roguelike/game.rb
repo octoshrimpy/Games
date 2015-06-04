@@ -22,6 +22,7 @@ class Game
     $dungeon = []
     $fps = []
     $tick = 1
+    $visible_calculations = 0
     Log.new
     Log.add "Welcome to the game!"
     make_dungeon
@@ -34,8 +35,9 @@ class Game
       end if Creature.all
       $tick += 1
     end
-    $level = Game.update_level
+    Player.invisibility_ticks -= 1
     Player.verify_stats
+    $level = Game.update_level
     $time += 1
   end
 
@@ -174,13 +176,15 @@ class Game
     $fps.shift while $fps.length > 50
     avg_fps = $fps.inject(:+).to_f / $fps.size
     puts "Time: #{$time}"
-    puts "Player: #{Player.visible ? 'visible' : 'invisible'}"
+    puts "Player: #{Player.visible ? 'visible' : 'invisible for ' + (Player.invisibility_ticks - 1).to_s}"
     puts "Ticks: #{$tick}"
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
     puts "Depth: #{Player.depth}"
     puts "Creatures left: #{Creature.count if Creature.all}"
     puts "My location: (#{Player.x}, #{Player.y})"
+    puts "Vision Calculations: #{$visible_calculations}"
+    $visible_calculations = 0
     print "Creature locations: "
     Creature.all.each do |creature|
       print " (#{creature.x}, #{creature.y}) "

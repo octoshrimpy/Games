@@ -15,6 +15,7 @@ class Items
   def self.ranged; all.select {|i| i.class == RangedWeapon }; end
   def self.magic; all.select {|i| i.class == MagicWeapon }; end
   def self.equipment; all.select {|i| i.class == Equipment }; end
+  def self.consumable; all.select {|i| i.class == Consumable }; end
 
       # MeleeWeapon.new({
       #   name: '',
@@ -46,13 +47,11 @@ class Items
         bonus_self_regen: 10
       }),
       MeleeWeapon.new({
-        name: 'Short Sword',
+        name: 'Rusty Dagger',
         icon: '†',
         equipment_slot: :right_hand,
         weight: 4,
-        bonus_strength: 1,
-        bonus_defense: 1,
-        bonus_speed: 2
+        bonus_strength: 1
       })
     ]
   end

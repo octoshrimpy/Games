@@ -3,6 +3,7 @@ class Settings
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
   @@title = ""
   @@select = nil
+  @@selected_item = nil
   @@scroll = nil
   @@scroll_horz = nil
   @@selectable = nil
@@ -30,6 +31,7 @@ class Settings
       when $key_move_down_left.capitalize then scroll_down_left(10)
       when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
       when $key_confirm then confirm_selection if @@select
+      when "P" then Game.pause
       when "ESCAPE"
         tick = false
         $gamemode = "play"
@@ -81,7 +83,7 @@ class Settings
     end
   end
 
-  def self.clear_settings; @@scroll = nil; @@scroll_horz = nil; @@select = nil; @@selectable = nil; @@selection_objects = nil; end
+  def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selectable, @@selection_objects = [] end
   def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
   def self.scroll_left(amount=1); move_coord(-amount,0); end
   def self.scroll_right(amount=1); move_coord(amount,0); end
@@ -122,6 +124,7 @@ class Settings
       when 'help' then build_help_menu
       when 'logs' then build_log_menu
       when 'inventory' then build_inventory
+      when 'item_options' then build_inventory_options_menu
       when 'key_bindings' then build_key_bindings
       when 'equipment' then build_equipment_menu
       when 'read_more' then build_read_more_menu
@@ -136,6 +139,7 @@ class Settings
       when 'equip_waist' then build_inventory_by('waist')
       when 'equip_leggings' then build_inventory_by('leggings')
       when 'equip_feet' then build_inventory_by('feet')
+      else []
       end
       build_menu(lines)
     end
@@ -164,7 +168,7 @@ class Settings
       end.override_background_with(:white).override_foreground_with(:black)
     end
     below_count = lines.count - @@scroll - @@game_height + 4
-    bottom = "v #{below_count > 0 ? below_count : 0} v #{@@select ? ('Select-' + @@select.to_s) : ''}"
+    bottom = "v #{below_count > 0 ? below_count : 0} v"
     $settings[@@game_height - 2] = "#{'  '*(@@game_width/2 - bottom.length/2)}#{bottom}"
   end
 
@@ -183,6 +187,7 @@ class Settings
   end
 
   def self.build_inventory
+    @@selected_item = nil
     @@title = "Inventory"
     @@selectable = true
     Player.inventory.map { |i| i.name }
@@ -197,8 +202,6 @@ class Settings
       end
     end
     lines = ['None']
-    # Game.input true
-    # binding.pry
     @@selection_objects.each { |item| lines << item_specs(item, Player.equipped[slot.to_sym]) }
     lines
   end
@@ -225,6 +228,18 @@ class Settings
       space = (20 - slot_name.length).times.map{' '}.join
       lines << "#{slot_name}:#{space}#{Player.equipped[slot.to_sym] ? item_specs(Player.equipped[slot.to_sym]) : 'Empty'}"
     end
+    lines
+  end
+
+  def self.build_inventory_options_menu
+    lines = []
+    @@title = "What would you like to do with #{@@selected_item.name}?"
+    @@selectable = true
+    lines << ''
+    lines << 'Use/Consume'
+    lines << 'Throw'
+    lines << 'Drop'
+    lines << ''
     lines
   end
 
@@ -265,14 +280,24 @@ class Settings
   end
 
   def self.confirm_selection
-    selects = %w( equip_head equip_torso equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
-    menus = %w( equipment )
+    selects = %w( item_options equip_head equip_torso equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
+    menus = %w( equipment inventory )
     select_selection if selects.include?($gamemode)
     redirect_selection if menus.include?($gamemode)
   end
 
   def self.select_selection
     equip_item if $gamemode[0..4] == 'equip'
+    do_item_option if $gamemode == 'item_options'
+  end
+
+  def self.do_item_option
+    case @@select
+    when 1
+      @@selected_item.consume
+    end
+    clear_settings
+    $gamemode = 'play'
   end
 
   def self.equip_item
@@ -293,12 +318,18 @@ class Settings
     when 'equipment'
       mode = equip
       mode ? mode : $gamemode
+    when 'inventory'
+      grab_inventory ? 'item_options' : $gamemode
     else $gamemode
     end
     unless $gamemode == new_gamemode
       clear_settings
       $gamemode = new_gamemode
     end
+  end
+
+  def self.grab_inventory
+    @@selected_item = Player.inventory[@@select]
   end
 
   def self.equip

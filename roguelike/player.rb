@@ -4,7 +4,8 @@ class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
-                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power
+                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
+                   :invisibility_ticks
 
   @@x = 0
   @@y = 0
@@ -56,6 +57,7 @@ class Player
   @@raw_speed = 10
   @@raw_self_regen = 1
   @@live = true
+  @@invisibility_ticks = 0
 
   @@visible = true
   @@autopickup = true
@@ -71,6 +73,17 @@ class Player
       Game.draw
       Game.end
     end
+    if Player.invisibility_ticks > 0
+      if Player.visible
+        Log.add "You have become invisible."
+        Player.visibility(1)
+      end
+      Player.visible = false
+    else
+      Log.add "You have become visible." unless Player.visible
+      Player.visible = true
+    end
+    self.invisibility_ticks = 0 if self.invisibility_ticks < 0
     self.health = max_health if self.health > max_health
     self.mana = 0 if self.mana < 0
     self.mana = max_mana if self.mana > max_mana
@@ -195,11 +208,8 @@ class Player
       Log.add "Cheat activated: Full vision."
       Game.draw
     when "i"
-      Player.toggle_visibility
-      Log.add "You've become #{Player.visible ? 'visible' : 'invisible'}."
+      Player.visibility(10)
       Game.draw
-    when "P"
-      Game.pause
     when "RETURN"
       tick = true
       blow_walls
@@ -301,8 +311,8 @@ class Player
   end
 
 
-  def self.toggle_visibility
-    self.visible = !self.visible
+  def self.visibility(amount)
+    self.invisibility_ticks += amount
   end
 
   def self.blow_walls
