@@ -2,15 +2,14 @@
 =begin
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
-Create consumable items (food to restore energy)
 
-'select' inventory
+Gold still randomly spawns in walls...
+Because the walls don't get put in until after the gold...?
+
 projectile weapons
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
-
-item_options menu- also add an equip. Automatically equip item and show +/- stats.
 
 Have skill levels for different types of weapons
 Incorporate two handed weapons
@@ -26,6 +25,8 @@ Create a fallback for all items. What do they do when used/consumed?
 
 
 =end
+
+# Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
 require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
@@ -55,6 +56,7 @@ Game.start
 bread = Consumable.new({
   weight: 1,
   name: "Bread of Invisibility",
+  restoration: 10,
   icon: '`',
   x: 10,
   y: 10,

@@ -143,10 +143,7 @@ class Game
     half_way_mark.times {print "--"}
     if $message.length > 0
       print " #{$message[0..(VIEWPORT_WIDTH*2 - 7)].gsub("\n", " ")}"
-      if $message.length > (VIEWPORT_WIDTH*2 - 7)
-        print "...(#{$key_read_more})"
-      end
-      # Give option to read more?
+      print "...(#{$key_read_more})" if $message.length > (VIEWPORT_WIDTH*2 - 7)
       $previous_message = $message.clone
       $message = ""
     end
@@ -296,20 +293,6 @@ class Game
 
     $dungeon[Player.depth] = dungeon.to_array
 
-    populate_dungeon
-
-    Player.x = dungeon.left.abs + 1
-    Player.y = dungeon.top.abs + 1
-
-    $world[Player.depth] ||= {}
-    $world[Player.depth][:up] ||= []
-    $world[Player.depth][:down] ||= []
-    layer_offset = {
-      x: (offset[:x] + player_coords[:x] - Player.x),
-      y: (offset[:y] + player_coords[:y] - Player.y)
-    }
-    $world[Player.depth][:offset] = layer_offset
-
     $height = Dungeon.current.length
     $width = Dungeon.current.first.length
 
@@ -336,6 +319,20 @@ class Game
       Dungeon.current[x][$width] = "▒ "
     end
 
+    populate_dungeon
+
+    Player.x = dungeon.left.abs + 1
+    Player.y = dungeon.top.abs + 1
+
+    $world[Player.depth] ||= {}
+    $world[Player.depth][:up] ||= []
+    $world[Player.depth][:down] ||= []
+    layer_offset = {
+      x: (offset[:x] + player_coords[:x] - Player.x),
+      y: (offset[:y] + player_coords[:y] - Player.y)
+    }
+    $world[Player.depth][:offset] = layer_offset
+
     $level = update_level
   end
 
@@ -358,13 +355,14 @@ class Game
     end
     Dungeon.current.each_with_index do |y, ypos|
       y.each_with_index do |x, xpos|
-        if rand(100) == 0 && !(Dungeon.current[ypos][xpos].is_unbreakable?)
+        unless Dungeon.current[ypos][xpos].is_unbreakable? || rand(100) > 0
           Gold.new({x: xpos, y: ypos, value: rand(1..3)})
+          Game.input true; binding.pry if ypos == 0
           Dungeon.current[ypos][xpos] = "  "
         end
       end
     end
-    sword = Items["Excalibur"]
+    sword = Items["Rusty Dagger"]
     sword.depth = 1
     sword.x = 20
     sword.y = 20
@@ -424,7 +422,7 @@ class Game
         if gold.x == in_sight[:x] && gold.y == in_sight[:y]
           $level[gold.y - y_offset][gold.x - x_offset] = Gold.show
         end
-      end
+      end if Gold.all
       Items.on_board.each do |item|
         if item.coords
           if item.x == in_sight[:x] && item.y == in_sight[:y]

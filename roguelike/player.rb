@@ -97,26 +97,26 @@ class Player
   def self.hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
-    Log.add(src)
+    Log.add(src) if src
     ratio = (health / raw_max_health.to_f) * 100.00
     Log.add "You are critically low on health." if ratio < 20
   end
 
   def self.heal(regenerate=1, src="You got healed by an unknown source.")
     self.health += regenerate
-    Log.add(src)
+    Log.add(src) if src
   end
 
   def self.drain(deplete=1, src="You lost mana from an unknown source.")
     self.mana -= deplete
-    Log.add(src)
+    Log.add(src) if src
     ratio = (mana / raw_max_mana.to_f) * 100.00
     Log.add "You are critically low on mana." if ratio < 20
   end
 
   def self.restore(gain=1, src="You restored mana from an unknown source.")
     self.mana += gain
-    Log.add(src)
+    Log.add(src) if src
   end
 
   def self.weaken(deplete=1, src=nil)
@@ -272,7 +272,7 @@ class Player
         gold_piece.destroy
         picked_up += 1
       end
-    end
+    end if Gold.all
     Items.on_board.each do |item|
       if item.coords == coords
         self.inventory << item

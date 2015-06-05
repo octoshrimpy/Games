@@ -300,7 +300,7 @@ class Settings
   def self.do_item_option
     case @@select
     when 1 # User/consume
-      @@selected_item.consume
+      @@selected_item.consume if @@selected_item.respond_to?(:consume)
     when 2 # Throw
     when 3 # Drop
     when 4
