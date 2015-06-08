@@ -37,8 +37,12 @@ class Game
     end
     Player.invisibility_ticks -= 1
     Player.verify_stats
-    $level = Game.update_level
     $time += 1
+  end
+
+  def self.redraw
+    $level = Game.update_level
+    Game.draw
   end
 
   def self.pause

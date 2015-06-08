@@ -3,10 +3,8 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
 
-Gold still randomly spawns in walls...
-Because the walls don't get put in until after the gold...?
-
 projectile weapons
+stackable items should stack
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
@@ -23,10 +21,15 @@ Allow player to select items from the drop menu in order to pick them up manuall
 settings #238/239 drop and throw items
 Create a fallback for all items. What do they do when used/consumed?
 
+REST
+User can 'rest' for a certain amount of time or until hp is restored.
+Rest breaks if energy is below critical
+Rest breaks if an enemy sees the player
 
 =end
 
 # Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
+
 require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
@@ -56,16 +59,23 @@ Game.start
 bread = Consumable.new({
   weight: 1,
   name: "Bread of Invisibility",
+  usage_verb: 'consumed',
   restoration: 10,
   icon: '`',
   x: 10,
   y: 10,
   depth: 1,
-  special_effect: "Player.visibility(10)"
+  execution_script: "Player.visibility(10)"
 })
 bread.x = Player.x + 1
 bread.y = Player.y + 1
 Dungeon.current[Player.y + 1][Player.x + 1] = "  "
+Player.inventory << Consumable.new({
+  weight: 1,
+  name: "Scroll of Unstable Teleportation",
+  icon: '%',
+  execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
+})
 system 'clear' or system 'cls'
 Game.draw
 
@@ -78,7 +88,7 @@ while(true)
       Player.tick
       Game.run_time(Player.speed)
 
-      Game.draw
+      Game.redraw
       sleep 0.03
     end
     # sleep 0.07

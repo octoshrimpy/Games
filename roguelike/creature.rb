@@ -196,7 +196,7 @@ class Creature
   end
 
   def spawn
-    coord = Dungeon.current.search_for("  ").sample
+    coord = Dungeon.find_open_spaces.sample
     @x = coord[:x]
     @y = coord[:y]
     $npcs[Player.depth] ||= []

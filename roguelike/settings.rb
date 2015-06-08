@@ -31,8 +31,7 @@ class Settings
       when $key_move_down_left.capitalize then scroll_down_left(10)
       when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
       when $key_confirm then tick = confirm_selection if @@select
-      when "P" then Game.pause
-      when "ESCAPE"
+      when $key_exit_menu
         tick = false
         $gamemode = "play"
         clear_settings
@@ -80,6 +79,10 @@ class Settings
         @@scroll_horz = Player.x
         Game.show
       end
+    when "P" then Game.pause
+    when $key_sleep
+      $message = multi_line_message('sleep')
+      $gamemode = "query_sleep"
     end
   end
 
@@ -110,7 +113,8 @@ class Settings
   end
 
   def self.generate_settings
-    if $gamemode == "map"
+    case
+    when $gamemode == 'map'
       max = $width
       @@scroll_horz = @@scroll_horz > max ? max : @@scroll_horz
       @@scroll_horz = @@scroll_horz > 0 ? @@scroll_horz : 0
@@ -118,6 +122,9 @@ class Settings
       @@scroll = @@scroll > max ? max : @@scroll
       @@scroll = @@scroll > 0 ? @@scroll : 0
       Game.show({x: @@scroll_horz, y: @@scroll})
+      false
+    when $gamemode[0..4] == 'query'
+      Game.draw
       false
     else
       lines = case $gamemode
@@ -371,6 +378,13 @@ class Settings
       lines << line
     end
     lines
+  end
+
+  def self.multi_line_message(type)
+%(
+How long would you like to sleep for? Press '#{$key_read_more}' for options. #{30.times.map {' '}.join}
+Hi.
+)
   end
 
   def self.explain_item_text(item)

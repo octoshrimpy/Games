@@ -65,6 +65,7 @@ class Player
 
   def self.name; "me"; end
   def self.coords; {x: Player.x, y: Player.y}; end
+  def self.coords=(coord); {x: Player.x = coord[:x], y: Player.y = coord[:y]}; end
 
   def self.verify_stats
     if self.health <= 0 && @@live == true
@@ -192,16 +193,13 @@ class Player
         tick = true
       end
       # ----------------------------------------------------CHEATS ----------------------------
-    when "h"
-      heal
-      tick = true
-    when "S"
+    when "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       print "\n\rDown: "
       Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
       puts
-    when "R"
+    when "V"
       Dungeon.current.each_with_index do |row, y|
         row.each_with_index do |col, x|
           seen[depth] << {x: x, y: y}
@@ -329,6 +327,7 @@ class Player
     if item
       Player.inventory.delete(item)
       Player.equipped[slot] = item
+      Log.add "Equipped #{item.name}."
     end
   end
 

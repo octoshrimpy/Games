@@ -19,6 +19,10 @@ class Dungeon
     current[coord[:y]][coord[:x]]
   end
 
+  def self.find_open_spaces
+    current.search_for("  ")
+  end
+
   def build(size)
     arena = Arena.new
     create_dungeon(arena, size)
