@@ -38,6 +38,7 @@ require './log.rb'
 
 require './gold.rb'
 require './items.rb'
+require './item.rb'
 require './consumable.rb'
 require './equipment.rb'
 require './melee_weapon.rb'

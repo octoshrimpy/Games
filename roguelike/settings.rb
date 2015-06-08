@@ -312,7 +312,7 @@ class Settings
     lines << 'Use/Consume'
     lines << 'Throw'
     lines << 'Drop'
-    if @@selected_item.respond_to?(:equipment_slot)
+    if @@selected_item.equipment_slot
       slot = @@selected_item.equipment_slot
       specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
       lines << "Equip - #{humanize_slot(@@selected_item.equipment_slot)}: #{specs}"
@@ -376,7 +376,7 @@ class Settings
     when 1 # Throw
     when 2 # Drop
     when 3
-      Player.equip(@@selected_item) if @@selected_item.respond_to?(:equipment_slot)
+      Player.equip(@@selected_item) if @@selected_item.equipment_slot
     end
     $gamemode = 'play'
     Game.redraw
