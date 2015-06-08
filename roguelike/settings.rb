@@ -35,7 +35,7 @@ class Settings
         tick = false
         $gamemode = "play"
         clear_settings
-        Game.draw
+        Game.redraw
       else
         tick = false
       end
@@ -45,19 +45,19 @@ class Settings
     case input
     when $key_open_help
       $gamemode = $gamemode.toggle("help", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_logs
       $gamemode = $gamemode.toggle("logs", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_keybindings
       $gamemode = $gamemode.toggle("key_bindings", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_inventory
       $gamemode = $gamemode.toggle("inventory", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_equipment
       $gamemode = $gamemode.toggle("equipment", 'play')
-      $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_read_more
       if @@scroll_horz
         $gamemode = $gamemode.toggle("read_more", 'map')
@@ -65,14 +65,13 @@ class Settings
         Settings.show
       else
         $gamemode = $gamemode.toggle("read_more", 'play')
-        $gamemode == 'play' ? (Game.draw; clear_settings) : Settings.show
+        $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
       end
     when $key_inspect_surroundings
       $gamemode = $gamemode.toggle("map", 'play')
       $screen_shot = nil
       if $gamemode == 'play'
-        $level = Game.update_level
-        Game.draw
+        Game.redraw
         clear_settings
       else
         @@scroll = Player.y
@@ -81,8 +80,71 @@ class Settings
       end
     when "P" then Game.pause
     when $key_sleep
-      $message = multi_line_message('sleep')
       $gamemode = "query_sleep"
+      Settings.show
+      Game.input true
+      while $gamemode == "query_sleep"
+        puts "Enter how long you want to rest for."
+        query = gets.chomp.downcase
+        mode, amount = query.split(' ')
+        if mode.to_i.to_s == mode
+          puts "Sleep for #{mode} ticks. Correct? ('y' to confirm. Anything else to deny.)"
+          if gets.chomp.downcase.split.join == 'y'
+            $sleep_condition = "$time >= #{$time + mode.to_i}"
+            Log.add 'You have begun resting.'
+            $gamemode = 'sleep'
+          end
+        elsif %w( h m ).include?(mode)
+          case mode
+          when 'h'
+            if amount.to_i > Player.max_health || amount == nil
+              puts "Sleep until health is full. Correct? ('y' to confirm. Anything else to deny.)"
+              if gets.chomp.downcase.split.join == 'y'
+                $sleep_condition = "Player.health == Player.max_health"
+                Log.add 'You have begun resting.'
+                $gamemode = 'sleep'
+              end
+            elsif amount.to_i < Player.max_health
+              $gamemode = 'play'
+            else
+              puts "Sleep until health has reached #{amount}. Correct? ('y' to confirm. Anything else to deny.)"
+              if gets.chomp.downcase.split.join == 'y'
+                $sleep_condition = "Player.health == #{amount.to_i}"
+                Log.add 'You have begun resting.'
+                $gamemode = 'sleep'
+              end
+            end
+          when 'm'
+            if amount.to_i > Player.max_mana || amount == nil
+              puts "Sleep until mana is full. Correct? ('y' to confirm. Anything else to deny.)"
+              if gets.chomp.downcase.split.join == 'y'
+                $sleep_condition = "Player.mana == Player.max_mana"
+                Log.add 'You have begun resting.'
+                $gamemode = 'sleep'
+              end
+            elsif amount.to_i < Player.max_mana
+              $gamemode = 'play'
+            else
+              puts "Sleep until mana has reached #{amount}. Correct? ('y' to confirm. Anything else to deny.)"
+              if gets.chomp.downcase.split.join == 'y'
+                $sleep_condition = "Player.mana == #{amount.to_i}"
+                Log.add 'You have begun resting.'
+                $gamemode = 'sleep'
+              end
+            end
+          else
+          end
+          # if gets.chomp.downcase.split.join == 'y'
+          #   $sleep_condition = "$time >= #{$time + mode.to_i}"
+          #   $gamemode = 'sleep'
+          # end
+        elsif mode == 'x'
+          $gamemode = 'play'
+        else
+          puts "Sorry. Invalid input. Please try again."
+        end
+      end
+      Game.redraw
     end
   end
 
@@ -123,9 +185,8 @@ class Settings
       @@scroll = @@scroll > 0 ? @@scroll : 0
       Game.show({x: @@scroll_horz, y: @@scroll})
       false
-    when $gamemode[0..4] == 'query'
-      Game.draw
-      false
+    when $gamemode == 'query_sleep'
+      build_menu( build_sleep_prompt_menu )
     else
       lines = case $gamemode
       when 'help' then build_help_menu
@@ -152,7 +213,7 @@ class Settings
     end
   end
 
-  def self.build_menu(lines=0)
+  def self.build_menu(lines=[])
     $settings = Array.new(@@game_height) {""}
     max = lines.count - @@game_height + 4
     if @@select && @@selectable
@@ -179,10 +240,16 @@ class Settings
     $settings[@@game_height - 2] = "#{'  '*(@@game_width/2 - bottom.length/2)}#{bottom}"
   end
 
+  def self.build_sleep_prompt_menu
+    @@title = "How long would you like to rest for?"
+    @@selectable = false
+    word_wrap( multi_line_message('sleep') )
+  end
+
   def self.build_help_menu
     @@title = "Help"
     @@selectable = true
-    word_wrap(help_menu_text.split("\n"))
+    word_wrap(help_menu_text)
   end
 
   def self.build_log_menu
@@ -197,7 +264,7 @@ class Settings
     @@selected_item = nil
     @@title = "Inventory"
     @@selectable = true
-    Player.inventory.map { |i| i.name }
+    Player.inventory.map { |i| "#{i.icon} #{i.name}" }
   end
 
   def self.build_inventory_by(slot)
@@ -223,14 +290,13 @@ class Settings
   def self.build_read_more_menu
     @@title = 'Read More'
     @@selectable = false
-    word_wrap($previous_message.split("\n"))
+    word_wrap($previous_message)
   end
 
   def self.build_equipment_menu
     lines = []
     @@selectable = true
     @@title = 'Equipment'
-    lines << ''
     %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
       slot_name = humanize_slot(slot)
       space = (20 - slot_name.length).times.map{' '}.join
@@ -243,7 +309,6 @@ class Settings
     lines = []
     @@title = "What would you like to do with #{@@selected_item.name}?"
     @@selectable = true
-    lines << ''
     lines << 'Use/Consume'
     lines << 'Throw'
     lines << 'Drop'
@@ -306,15 +371,15 @@ class Settings
 
   def self.do_item_option
     case @@select
-    when 1 # User/consume
+    when 0 # User/consume
       @@selected_item.consume if @@selected_item.respond_to?(:consume)
-    when 2 # Throw
-    when 3 # Drop
-    when 4
+    when 1 # Throw
+    when 2 # Drop
+    when 3
       Player.equip(@@selected_item) if @@selected_item.respond_to?(:equipment_slot)
     end
     $gamemode = 'play'
-    Game.draw
+    Game.redraw
     clear_settings
     false
   end
@@ -347,24 +412,24 @@ class Settings
 
   def self.equip
     case @@select
-    when 1 then 'equip_head'
-    when 2 then 'equip_torso'
-    when 3 then 'equip_left_hand'
-    when 4 then 'equip_right_hand'
-    when 5 then 'equip_ring1'
-    when 6 then 'equip_ring2'
-    when 7 then 'equip_ring3'
-    when 8 then 'equip_ring4'
-    when 9 then 'equip_waist'
-    when 10 then 'equip_leggings'
-    when 11 then 'equip_feet'
+    when 0 then 'equip_head'
+    when 1 then 'equip_torso'
+    when 2 then 'equip_left_hand'
+    when 3 then 'equip_right_hand'
+    when 4 then 'equip_ring1'
+    when 5 then 'equip_ring2'
+    when 6 then 'equip_ring3'
+    when 7 then 'equip_ring4'
+    when 8 then 'equip_waist'
+    when 9 then 'equip_leggings'
+    when 10 then 'equip_feet'
     else false
     end
   end
 
   def self.word_wrap(sections)
     lines = []
-    sections.each do |text|
+    sections.split("\n").each do |text|
       line = ""
       text.split(' ').each do |word|
         game_length = @@selectable ? @@game_width*2 - 7 : @@game_width*2 - 2
@@ -381,30 +446,44 @@ class Settings
   end
 
   def self.multi_line_message(type)
+    case type
+    when 'sleep'
 %(
-How long would you like to sleep for? Press '#{$key_read_more}' for options. #{30.times.map {' '}.join}
-Hi.
+Type a number, and then hit enter to sleep for that many moves.
+
+Or- enter a letter to sleep until that specific attribute has reached max.
+Additionally, you can follow that key with a number to sleep until that number reaches the specified amount.
+Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep.
+You will automatically awaken early if there is danger nearby.
+
+h - Health
+m - Mana
+
+Type 'x' then hit enter to cancel.
 )
+    else
+      "Something is bad."
+    end
   end
 
   def self.explain_item_text(item)
 %(
-Name: #{item.name.or}
-Weight: #{item.weight.or}
-Slot: #{humanize_slot(item.equipment_slot).or}
+Name: #{item.name.or('N/A')}
+Weight: #{item.weight.or('N/A')}
+Slot: #{humanize_slot(item.equipment_slot).or('N/A')}
 
-Range: #{item.range.or}
+Range: #{item.range.or('N/A')}
 
 Bonus Stats:
- Health: #{item.bonus_health.or}
- Mana: #{item.bonus_mana.or}
- Energy: #{item.bonus_energy.or}
- Strength: #{item.bonus_strength.or}
- Magic Power: #{item.bonus_magic_power.or}
- Defense: #{item.bonus_defense.or}
- Speed: #{item.bonus_speed.or}
- Accuracy: #{item.bonus_accuracy.or}
- Regeneration: #{item.bonus_self_regen.or}
+ Health: #{item.bonus_health.or('N/A')}
+ Mana: #{item.bonus_mana.or('N/A')}
+ Energy: #{item.bonus_energy.or('N/A')}
+ Strength: #{item.bonus_strength.or('N/A')}
+ Magic Power: #{item.bonus_magic_power.or('N/A')}
+ Defense: #{item.bonus_defense.or('N/A')}
+ Speed: #{item.bonus_speed.or('N/A')}
+ Accuracy: #{item.bonus_accuracy.or('N/A')}
+ Regeneration: #{item.bonus_self_regen.or('N/A')}
 )
   end
 

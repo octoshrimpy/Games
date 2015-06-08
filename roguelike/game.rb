@@ -23,6 +23,7 @@ class Game
     $fps = []
     $tick = 1
     $visible_calculations = 0
+    $sleep_condition = ''
     Log.new
     Log.add "Welcome to the game!"
     make_dungeon

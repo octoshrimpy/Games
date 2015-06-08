@@ -3,28 +3,26 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
 
+Configure defense of player and creatures to reduce damage taken.
+change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
+
 projectile weapons
 stackable items should stack
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
-change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
 
+Allow Player to level up and increase stats
 Have skill levels for different types of weapons
 Incorporate two handed weapons
 
+settings #238/239 drop and throw items
+Create a fallback for all items. What do they do when used/consumed?
 after selecting throw, should redraw screen with message.
 Message = "Select direction to throw or * to choose coord"
 do that.
 
 Allow player to select items from the drop menu in order to pick them up manually
 
-settings #238/239 drop and throw items
-Create a fallback for all items. What do they do when used/consumed?
-
-REST
-User can 'rest' for a certain amount of time or until hp is restored.
-Rest breaks if energy is below critical
-Rest breaks if an enemy sees the player
 
 =end
 
@@ -60,7 +58,7 @@ bread = Consumable.new({
   weight: 1,
   name: "Bread of Invisibility",
   usage_verb: 'consumed',
-  restoration: 10,
+  restore_energy: 10,
   icon: '`',
   x: 10,
   y: 10,
@@ -80,17 +78,28 @@ system 'clear' or system 'cls'
 Game.draw
 
 while(true)
-  input = Input.read_single_key
-  if input
-    $milli_tick = Time.now.to_f
-    Settings.receive(input)
-    if Player.try_action(input)
+  if $gamemode != 'sleep'
+    input = Input.read_single_key
+    if input
+      $milli_tick = Time.now.to_f
+      Settings.receive(input)
+      if Player.try_action(input)
+        Player.tick
+        Game.run_time(Player.speed)
+
+        Game.redraw
+        sleep 0.03
+      end
+      # sleep 0.07
+    end
+  else
+    if eval($sleep_condition)
+      Log.add "You have awoken."
+      $gamemode = 'play'
+      Game.redraw
+    else
       Player.tick
       Game.run_time(Player.speed)
-
-      Game.redraw
-      sleep 0.03
     end
-    # sleep 0.07
   end
 end

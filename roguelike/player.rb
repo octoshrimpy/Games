@@ -1,11 +1,9 @@
-# TODO Configure defense of player and creatures to reduce damage taken.
-
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks
+                   :invisibility_ticks, :sleeping
 
   @@x = 0
   @@y = 0
@@ -60,6 +58,7 @@ class Player
   @@invisibility_ticks = 0
 
   @@visible = true
+  @@sleeping = false
   @@autopickup = true
   @@last_hit_by = nil
 
@@ -71,7 +70,7 @@ class Player
     if self.health <= 0 && @@live == true
       @@live = false
       Log.add("You have been slaughtered by #{last_hit_by}.")
-      Game.draw
+      Game.redraw
       Game.end
     end
     self.invisibility_ticks = 0 if self.invisibility_ticks < 0
@@ -83,6 +82,18 @@ class Player
   end
 
   def self.tick
+    self.selected = 0
+    loss = (rand(10) == 0 ? 1 : 0)
+    self.energy -= loss
+    Log.add "I'm starving." if loss > 0 && energy <= 0
+    hp_gain = (rand(5) == 0 ? self_regen : 0)
+    mana_gain = (rand(3) == 0 ? self_regen : 0)
+    if energy > 0
+      self.health += hp_gain
+      self.mana += mana_gain
+    else
+      $sleep_condition = 'true'
+    end
     if Player.invisibility_ticks > 0
       if Player.visible
         Log.add "You have become invisible."
@@ -98,6 +109,7 @@ class Player
   def self.hurt(damage=1, src="You got hurt by an unknown source.")
     # Reflect if getting dangerously low on stats
     self.health -= damage
+    $sleep_condition = 'true'
     Log.add(src) if src
     ratio = (health / raw_max_health.to_f) * 100.00
     Log.add "You are critically low on health." if ratio < 20
@@ -244,18 +256,7 @@ class Player
         tick = false
       end
     end
-    if tick
-      self.selected = 0
-      gain = (rand(10) == 0 ? 1 : 0)
-      self.energy -= gain
-      hp_gain = (rand(5) == 0 ? self_regen : 0)
-      mana_gain = (rand(3) == 0 ? self_regen : 0)
-      if energy > 0
-        self.health += hp_gain
-        self.mana += mana_gain
-      else
-      end
-    end
+    Player.tick if tick
     pickup_items('auto') if autopickup
     tick
   end

@@ -263,7 +263,12 @@ class Creature
 
   def player_in_range?
     return false unless Player.visible
-    Visible.in_range(10, self.coords, Player.coords)
+    in_range = Visible.in_range(10, self.coords, Player.coords)
+    if in_range && $gamemode == 'sleep'
+      $sleep_condition = 'true'
+      $message = "I hear a sound nearby."
+    end
+    in_range
   end
 
   def possible_moves
