@@ -15,7 +15,7 @@ class Snake
     @boardx = 20
     @empty_cell = ". "
     @snake = "O "
-    @food_cell = "x "
+    @food_cell = " "
     @wall = "Q "
     @life = []
     @running = true

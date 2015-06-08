@@ -39,19 +39,19 @@ class Tetris
       random_num = rand(7)
       @live_type = case random_num
       when 0
-        "I "
+        "\e[36mI \e[0m"
       when 1
-        "L "
+        "\e[33mL \e[0m"
       when 2
-        "J "
+        "\e[34mJ \e[0m"
       when 3
-        "O "
+        "\e[93mO \e[0m"
       when 4
-        "S "
+        "\e[32mS \e[0m"
       when 5
-        "Z "
+        "\e[31mZ \e[0m"
       when 6
-        "T "
+        "\e[35mT \e[0m"
       end
       buildPiece(@pieces[random_num])
       @falling = true
@@ -173,13 +173,13 @@ class Tetris
       new_matrix << [stabilize[0] - offset_y , stabilize[1] - offset_x]
     end
     new_matrix = case @live_type
-    when "I "
+    when "\e[36mI \e[0m"
       if new_matrix[1] == [1,0]
         [[1,-1],[1,0],[1,1],[1,2]]
       else
         [[1,1],[0,1],[2,1],[3,1]]
       end
-    when "L "
+    when "\e[33mL \e[0m"
       if new_matrix[0] == [0, 2] #[[0, 2], [1, 2], [1, 0], [1, 1]] Left
         [[0,1],[1,1],[2,1],[2,2]]
       elsif new_matrix[2] == [2, 0] #[[0, 0], [1, 0], [2, 0], [2, 1]] Up
@@ -189,7 +189,7 @@ class Tetris
       else #[[0, 0], [0, 1], [1, 1], [2, 1]]
         [[1,1],[1,0],[1,2],[0,2]]
       end
-    when "J "
+    when "\e[34mJ \e[0m"
       if new_matrix[1] == [0, 1] #[[0, 0], [0, 1], [1, 0], [2, 0]]
         [[2,1],[1,-1],[1,0],[1,1]] #Left
       elsif new_matrix[0] == [0, 2] #[[0, 2], [0, 0], [0, 1], [1, 2]]
@@ -199,19 +199,19 @@ class Tetris
       else
         [[0,1],[1,1],[2,1],[0,2]] #Down
       end
-    when "S "
+    when "\e[32mS \e[0m"
       if new_matrix[0] == [0, 0] #[[0, 0], [1, 0], [1, 1], [2, 1]]
         [[1,0],[1,1],[2,0],[2,-1]]
       else #[[0, 1], [0, 2], [1, 1], [1, 0]]
         [[-1, 1], [0, 1], [0, 2], [1, 2]]
       end
-    when "Z "
+    when "\e[31mZ \e[0m"
       if new_matrix[0] == [0, 1] #[[0, 1], [1, 1], [1, 0], [2, 0]]
         [[1,0], [1,1], [2,1], [2,2]]
       else
         [[0,1],[-1,1],[0,0],[1,0]]
       end
-    when "T "
+    when "\e[35mT \e[0m"
       if new_matrix.last == [1, 2] #[[0, 1], [1, 0], [1, 1], [1, 2]]
         [[1,1],[0,1],[1,2],[2,1]]
       elsif new_matrix[1] == [1,0] #[[0, 0], [1, 0], [1, 1], [2, 0]]
