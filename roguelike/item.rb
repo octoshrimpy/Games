@@ -1,11 +1,12 @@
 module Item
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
 
   def initialize(defaults)
     defaults.each do |key, value|
       instance_variable_set("@#{key}", value)
     end
+    self.stack_size ||= 1
     $items << self
   end
 

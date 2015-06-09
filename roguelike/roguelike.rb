@@ -3,11 +3,13 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
 
+stackable items should stack
+projectile weapons
+Save data
+
 Configure defense of player and creatures to reduce damage taken.
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
 
-projectile weapons
-stackable items should stack
 'select' to change hotkeys
 refactor heal/hurt sources to objects instaed of strings
 
@@ -16,6 +18,7 @@ Have skill levels for different types of weapons
 Incorporate two handed weapons
 
 settings #238/239 drop and throw items
+drop one or drop all
 Create a fallback for all items. What do they do when used/consumed?
 after selecting throw, should redraw screen with message.
 Message = "Select direction to throw or * to choose coord"
@@ -59,6 +62,7 @@ bread = Consumable.new({
   name: "Bread of Invisibility",
   usage_verb: 'consumed',
   restore_energy: 10,
+  stack_size: 50,
   icon: '`',
   x: 10,
   y: 10,
@@ -67,10 +71,12 @@ bread = Consumable.new({
 })
 bread.x = Player.x + 1
 bread.y = Player.y + 1
+bread2 = bread.duplicate
 Dungeon.current[Player.y + 1][Player.x + 1] = "  "
 Player.inventory << Consumable.new({
   weight: 1,
   name: "Scroll of Unstable Teleportation",
+  stack_size: 10,
   icon: '%',
   execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
 })

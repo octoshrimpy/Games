@@ -312,6 +312,18 @@ class Player
     bonus
   end
 
+  def self.inventory_by_stacks
+    self.inventory.group_by { |item| "#{item.name}" }
+  end
+
+  def self.equippable_inventory
+    self.inventory.select do |i|
+      if i.respond_to?(:equipment_slot)
+        i.equipment_slot == slot.to_sym
+      end
+    end
+  end
+
   def self.give(item_name)
     if item = Item[item_name]
       Player.inventory << item

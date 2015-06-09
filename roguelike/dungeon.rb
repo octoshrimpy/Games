@@ -32,7 +32,7 @@ class Dungeon
 
   def create_dungeon(arena, walk_length, have_stairs = true, walker = Walker.new)
 
-    while(walk_length>0)
+    while walk_length > 0
       walk_length -=1
 
       # Cut out a bit of tunnel where I am.
@@ -40,13 +40,13 @@ class Dungeon
       walker.wander
 
       # Bosh down a room occasionally.
-      if(walk_length%80==0)
+      if walk_length % 80 == 0
         create_room(arena, walker)
       end
 
       # Spawn off a child now and then. Split the remaining walk_length
       # with it. Only one of us gets the stairs though.
-      if(walk_length%20==0)
+      if walk_length % 20 == 0
         child_walk_length = rand(walk_length)
         walk_length -= child_walk_length
         if child_walk_length > walk_length
@@ -59,7 +59,7 @@ class Dungeon
     end
 
     # Put in the down stairs, if I have them.
-    if(have_stairs)
+    if have_stairs
       arena[*(walker.position)] = @down_stairs
     end
   end

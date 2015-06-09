@@ -264,18 +264,25 @@ class Settings
     @@selected_item = nil
     @@title = "Inventory"
     @@selectable = true
-    Player.inventory.map { |i| "#{i.icon} #{i.name}" }
+    Player.inventory_by_stacks.map do |name, items|
+      title = "#{items.count}x   #{items.first.icon} #{name}"
+
+      weight_numeric = items.inject(0) { |sum, item| sum + item.weight}
+      identifier = weight_numeric == 1 ? 'lb' : 'lbs'
+      weight = "#{weight_numeric} #{identifier}"
+
+      line_width = @@game_width*2 - 20
+      spacer = (line_width - title.length).times.map {' '}.join
+
+      "#{title} #{spacer} #{weight}"
+    end
   end
 
   def self.build_inventory_by(slot)
     @@title = 'Select item to replace with.'
     @@selectable = true
     equippable = Item.equippable
-    @@selection_objects = Player.inventory.select do |i|
-      if i.respond_to?(:equipment_slot)
-        i.equipment_slot == slot.to_sym
-      end
-    end
+    @@selection_objects = Player.equippable_inventory
     lines = ['None']
     @@selection_objects.each { |item| lines << "#{item.name}: #{item_specs(item, Player.equipped[slot.to_sym])}" }
     lines
@@ -407,7 +414,7 @@ class Settings
   end
 
   def self.grab_inventory
-    @@selected_item = Player.inventory[@@select]
+    @@selected_item = Player.inventory_by_stacks.to_a[@@select][1][0]
   end
 
   def self.equip
