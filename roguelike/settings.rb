@@ -270,7 +270,7 @@ class Settings
   def self.build_inventory_by(slot)
     @@title = 'Select item to replace with.'
     @@selectable = true
-    equippable = Items.equippable
+    equippable = Item.equippable
     @@selection_objects = Player.inventory.select do |i|
       if i.respond_to?(:equipment_slot)
         i.equipment_slot == slot.to_sym

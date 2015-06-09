@@ -8,7 +8,7 @@ class Game
   VIEWPORT_HEIGHT = 21
 
   def self.start
-    Items.generate
+    Item.generate
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
     $gamemode = "play"
@@ -367,7 +367,7 @@ class Game
         end
       end
     end
-    sword = Items["Rusty Dagger"]
+    sword = Item["Rusty Dagger"]
     sword.depth = 1
     sword.x = 20
     sword.y = 20
@@ -428,7 +428,7 @@ class Game
           $level[gold.y - y_offset][gold.x - x_offset] = Gold.show
         end
       end if Gold.all
-      Items.on_board.each do |item|
+      Item.on_board.each do |item|
         if item.coords
           if item.x == in_sight[:x] && item.y == in_sight[:y]
             $level[item.y - y_offset][item.x - x_offset] = item.show
@@ -476,7 +476,7 @@ class Game
           $screen_shot_objects << {instance: gold, x: gold.x, y: gold.y}
         end
       end
-      Items.on_board.each do |item|
+      Item.on_board.each do |item|
         if item.coords
           if item.x == in_sight[:x] && item.y == in_sight[:y]
             $screen_shot_objects << {instance: item, x: item.x, y: item.y}

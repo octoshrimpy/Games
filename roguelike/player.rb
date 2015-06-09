@@ -272,7 +272,7 @@ class Player
         picked_up += 1
       end
     end if Gold.all
-    Items.on_board.each do |item|
+    Item.on_board.each do |item|
       if item.coords == coords
         self.inventory << item
         item.pickup
@@ -313,7 +313,7 @@ class Player
   end
 
   def self.give(item_name)
-    if item = Items[item_name]
+    if item = Item[item_name]
       Player.inventory << item
       item
     end
