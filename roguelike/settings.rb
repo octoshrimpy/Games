@@ -262,10 +262,13 @@ class Settings
 
   def self.build_inventory
     @@selected_item = nil
-    @@title = "Inventory"
+    player_stacks = Player.inventory_by_stacks
+    inventory_weight = Player.inventory.inject(0) { |sum, item| sum + item.weight }
+    @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{inventory_weight}lbs"
     @@selectable = true
-    Player.inventory_by_stacks.map do |name, items|
-      title = "#{items.count}x   #{items.first.icon} #{name}"
+    [''] + player_stacks.map do |name, items|
+      count = items.count < 10 ? " #{items.count}" : items.count
+      title = "#{count}x   #{items.first.icon} #{name}"
 
       weight_numeric = items.inject(0) { |sum, item| sum + item.weight}
       identifier = weight_numeric == 1 ? 'lb' : 'lbs'
@@ -414,7 +417,9 @@ class Settings
   end
 
   def self.grab_inventory
-    @@selected_item = Player.inventory_by_stacks.to_a[@@select][1][0]
+    if Player.inventory_by_stacks.to_a[@@select - 1] && @@select - 1 >= 0
+      @@selected_item = Player.inventory_by_stacks.to_a[@@select - 1][1][0]
+    end
   end
 
   def self.equip

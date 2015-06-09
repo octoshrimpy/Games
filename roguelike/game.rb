@@ -8,6 +8,8 @@ class Game
   VIEWPORT_HEIGHT = 21
 
   def self.start
+    $seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join
+    srand($seed.to_i)
     Item.generate
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''

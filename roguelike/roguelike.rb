@@ -3,9 +3,11 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
 
-stackable items should stack
 projectile weapons
 Save data
+
+Fix creatures continsuously trying to get to the same point
+Somehow creatures still follow when Player is invisible.
 
 Configure defense of player and creatures to reduce damage taken.
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
@@ -25,6 +27,19 @@ Message = "Select direction to throw or * to choose coord"
 do that.
 
 Allow player to select items from the drop menu in order to pick them up manually
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+
+Saving data -
+
+Assign a seed value
+Use that value for everything in the game
+
+At startup, request user to select a load file or to create a new one.
+
+This should save all variables.
+Save something like this:
+"$dungeon=#{$dungeon}"
 
 
 =end
@@ -55,6 +70,7 @@ require './settings.rb'
 require './dungeon.rb'
 require './visible.rb'
 
+
 Game.start
 
 bread = Consumable.new({
@@ -62,7 +78,7 @@ bread = Consumable.new({
   name: "Bread of Invisibility",
   usage_verb: 'consumed',
   restore_energy: 10,
-  stack_size: 50,
+  stack_size: 10,
   icon: '`',
   x: 10,
   y: 10,
@@ -71,7 +87,7 @@ bread = Consumable.new({
 })
 bread.x = Player.x + 1
 bread.y = Player.y + 1
-bread2 = bread.duplicate
+100.times { bread.duplicate }
 Dungeon.current[Player.y + 1][Player.x + 1] = "  "
 Player.inventory << Consumable.new({
   weight: 1,

@@ -219,7 +219,7 @@ class Creature
   def move(type="check")
     @destination = nil if @destination == coords
     if player_in_range?
-      @destination = Player.coords
+      @destination = Player.coords.clone
       # Eventually give me scared AI to run away from Player
     else
       @destination ||= case rand(6)

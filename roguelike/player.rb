@@ -3,7 +3,7 @@ class Player
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks, :sleeping
+                   :invisibility_ticks, :sleeping, :inventory_size
 
   @@x = 0
   @@y = 0
@@ -16,6 +16,8 @@ class Player
   @@selected = 0
   @@quick_bar = Array.new(9) {nil}
   @@inventory = []
+  @@inventory_size = 10
+
   @@gold = 0
 
   @@equipped = {
@@ -275,9 +277,14 @@ class Player
     Item.on_board.each do |item|
       if item.coords == coords
         self.inventory << item
-        item.pickup
-        Log.add "Picked up #{item.name}"
-        picked_up += 1
+        if Player.inventory_by_stacks.count > Player.inventory_size
+          Log.add "My inventory is full. I can't pick this up."
+          self.inventory.delete(item)
+        else
+          item.pickup
+          Log.add "Picked up #{item.name}"
+          picked_up += 1
+        end
       end
     end
     self.pickup_items('do_again') if picked_up > 0
@@ -313,7 +320,27 @@ class Player
   end
 
   def self.inventory_by_stacks
-    self.inventory.group_by { |item| "#{item.name}" }
+    # self.inventory.group_by { |item| "#{item.name}" }
+    stacks = {}
+    self.inventory.map do |item|
+      stacks[item.name] ||= []
+      item_out_of_place = true
+      i = 2
+      while item_out_of_place
+        if stacks[item.name].length < item.stack_size
+          stacks[item.name] << item
+          item_out_of_place = false
+        else
+          stacks["#{item.name} (#{i})"] ||= []
+          if stacks["#{item.name} (#{i})"].length < item.stack_size
+            stacks["#{item.name} (#{i})"] << item
+            item_out_of_place = false
+          end
+          i += 1
+        end
+      end
+    end
+    stacks
   end
 
   def self.equippable_inventory
