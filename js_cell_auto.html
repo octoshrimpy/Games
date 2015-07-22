@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cellular Automaton</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<style>
+  .cell-container {
+    width: 400px;
+    margin: 0 auto;
+  }
+  .cell {
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    float: left;
+    margin: 0;
+  }
+
+  .type-dead { background: white; }
+  .type-passive { background: darkgrey; }
+  .type-fade { background: red; }
+  .type-live { background: yellow; }
+</style>
+</head>
+<body>
+  <div class="cell-container"></div>
+  <button id="step" type="button" name="button">Step</button>
+  <input type="checkbox" class="forever" name="name" value="">
+  <button id="reset" type="button" name="button">Reset</button>
+</body>
+<script>
+  select = 'live';
+  $('#step').click(function() {step()});
+  $('#reset').click(function() {initialize(10)});
+  initialize = function(pixel_size) {
+    $('.cell-container').html('')
+    for(i=0;i<1296;i++) {
+      $('.cell-container').append('<div id="' + i + '" data-neighbors=0 class="cell type-dead" style="width:' + pixel_size + 'px;height:' + pixel_size + 'px;"></div>');
+    }
+    board_width_px = $('.cell-container').width();
+    cell_width = $('.cell').first().width() + 1;
+    board_width_cells = Math.floor(board_width_px / cell_width);
+    setCoords()
+  }
+
+  setCoords = function() {
+    var cells = $('.cell');
+    cells.each(function() {
+      var cid = parseInt($(this).attr('id'));
+      $(this).attr('data-' + 'x', cid % board_width_cells);
+      $(this).attr('data-' + 'y', Math.floor(cid / board_width_cells));
+    })
+  }
+
+  idCell = function(cid) {
+    return $('.cell#' + cid);
+  }
+
+  coordCell = function(x, y) {
+    return $('.cell[data-x=' + x + '][data-y=' + y + ']');
+  }
+
+  liveNeighbors = function(cell) {
+    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y');
+    var neighbors = [];
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        neighbor = coordCell(cx + x, cy + y)
+        if (!(x == 0 && y == 0) && neighbor.hasClass('type-live')) { neighbors.push(neighbor) };
+      }
+    }
+    return neighbors
+  }
+
+  allNeighbors = function(cell) {
+    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y'), neighbors = [];
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        var neighbor = coordCell(cx + x, cy + y);
+        if (!((x == 0 && y == 0) || neighbor.hasClass('type-dead'))) { $.merge(neighbors, neighbor) };
+      }
+    }
+    return neighbors
+  }
+
+  step = function(callback) {
+    var neighbor_cells = findNeighborsOfLive(), possible_active_cells = [];
+    $.merge(possible_active_cells, neighbor_cells);
+    $.merge(possible_active_cells, findLive());
+    $.merge(possible_active_cells, findFade());
+    possible_active_cells = $.unique(possible_active_cells);
+
+    countNeighbors(neighbor_cells);
+    computeNextForm(possible_active_cells);
+    checkForever()
+  }
+
+  findNeighborsOfLive = function() {
+    neighbors = []
+    findLive().each(function() {
+      $.merge(neighbors, allNeighbors($(this)));
+    })
+    return neighbors
+  }
+
+  checkForever = function() {
+    if ($('.forever').is(':checked')) {
+      setTimeout(step, 20);
+    };
+  }
+
+  computeNextForm = function(cells) {
+    cells = cells || $('.cell:not(.type-dead)');
+    $(cells.concat(findFade())).each(function() {
+      cell = $(this);
+      switch (true) {
+        case (cell.hasClass('type-passive')):
+        if ((cell.attr('data-neighbors') == "1" || cell.attr('data-neighbors') == "2")) { changeCell(this, 'live'); };
+        break;
+
+        case (cell.hasClass('type-fade')):
+        changeCell(this, 'passive')
+        break;
+
+        case (cell.hasClass('type-live')):
+        changeCell(this, 'fade')
+        break;
+
+        default:
+        return 0
+      }
+    })
+  }
+
+  findLive = function() { return $('.cell-container').find('.type-live') };
+  findDead = function() { return $('.cell-container').find('.type-dead') };
+  findPassive = function() { return $('.cell-container').find('.type-passive') };
+  findFade = function() { return $('.cell-container').find('.type-fade') };
+
+  totalNeighbors = function() {
+    var count = 0;
+    $('.cell').each(function() {
+      count += liveNeighbors($(this)).length
+    })
+    return count
+  }
+
+  countNeighbors = function(cells) {
+    cells = cells || $('.cell:not(.type-dead)');
+    $(cells).each(function() {
+      var count = liveNeighbors($(this)).length;
+      $(this).attr('data-neighbors', count);
+    })
+  }
+
+  clearNeighbors = function() {
+    $('.cell').each(function() {
+      $(this).attr('data-neighbors', 0);
+    })
+  }
+
+  changeCell = function(cell, to) {
+    var old_class = $(cell).attr('class').split(" "),
+      new_class = [];
+
+    for(var i=0;i<old_class.length;i++){
+      r = old_class[i].search(/type-+/);
+      if(r)new_class[new_class.length] = old_class[i];
+    }
+    $(cell).removeClass().addClass(new_class.join(" ") + " type-" + to);
+    $(cell).attr('data-neighbors', 0)
+  }
+
+  highN = function(cid) {
+    $(allNeighbors(idCell(cid))).each(function() {
+      changeCell(this, 'live')
+    })
+  }
+
+  initialize(10);
+
+  $(document).on('mousedown', '.cell', function(e) {
+    if (e.which == 1) {
+      if ($(this).hasClass('type-dead')) {
+        select = 'passive';
+      } else if ($(this).hasClass('type-passive')) {
+        select = 'live';
+      } else if ($(this).hasClass('type-live')) {
+        select = 'fade';
+      } else if ($(this).hasClass('type-fade')) {
+        select = 'dead';
+      }
+    }
+  });
+
+  $(document).on('mouseover mousedown', '.cell', function(e) {
+    if (e.which == 1) {
+      changeCell(this, select);
+    }
+    if (e.which == 2) {
+      changeCell(this, 'dead')
+    }
+    if (e.which == 3) {
+      console.log($(this).attr('id'));
+    }
+    e.preventDefault();
+  });
+</script>
+</html>
+
+
+<!--
+# Empty → Empty
+# Conductor → Electron head if exactly one or two of the neighbouring cells are electron heads, or remains Conductor otherwise.
+# Electron head → Electron tail
+# Electron tail → Conductor
+
+# Dead
+# Passive
+# Live
+# Fade
+-->
