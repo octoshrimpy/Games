@@ -7,6 +7,8 @@
   .cell-container {
     width: 400px;
     margin: 0 auto;
+    padding-left: 1px;
+    border-top: 1px solid black;
   }
   .cell {
     border-right: 1px solid black;
@@ -26,61 +28,36 @@
   <button id="step" type="button" name="button">Step</button>
   <input type="checkbox" class="forever" name="name" value="">
   <button id="reset" type="button" name="button">Reset</button>
+  <button id="kill" type="button" name="button">Kill</button>
+  <div class="fps-container">FPS: <span id="fps"></span></div>
 </body>
 <script>
+
+$(document).ready(function() { initialize(10, 36, 36) }); // Map: cell size(in px), cells wide, cells high
+
+// User input
+
   select = 'live';
-  $('#step').click(function() {step()});
-  $('#reset').click(function() {initialize(10)});
-  initialize = function(pixel_size) {
-    $('.cell-container').html('')
-    for(i=0;i<1296;i++) {
-      $('.cell-container').append('<div id="' + i + '" data-neighbors=0 class="cell type-dead" style="width:' + pixel_size + 'px;height:' + pixel_size + 'px;"></div>');
-    }
-    board_width_px = $('.cell-container').width();
-    cell_width = $('.cell').first().width() + 1;
-    board_width_cells = Math.floor(board_width_px / cell_width);
-    setCoords()
-  }
-
-  setCoords = function() {
-    var cells = $('.cell');
-    cells.each(function() {
-      var cid = parseInt($(this).attr('id'));
-      $(this).attr('data-' + 'x', cid % board_width_cells);
-      $(this).attr('data-' + 'y', Math.floor(cid / board_width_cells));
+  $('#step').click(function() { step() });
+  $('#reset').click(function() { initialize(10, 36, 36) });
+  $('#kill').click(function() { kill() });
+  $(document)
+    .on('mousedown', '.cell', function(e) {
+      if (e.which == 1) {
+        if ($(this).hasClass('type-dead')) { select = 'passive'; }
+        else if ($(this).hasClass('type-passive')) { select = 'live'; }
+        else if ($(this).hasClass('type-live')) { select = 'fade'; }
+        else if ($(this).hasClass('type-fade')) { select = 'dead'; };
+      }
     })
-  }
+    .on('mouseover mousedown', '.cell', function(e) {
+      if (e.which == 1) { changeCell(this, select); }
+      if (e.which == 2) { changeCell(this, 'dead') }
+      if (e.which == 3) { console.log($(this).attr('id')); }
+      e.preventDefault();
+    });
 
-  idCell = function(cid) {
-    return $('.cell#' + cid);
-  }
-
-  coordCell = function(x, y) {
-    return $('.cell[data-x=' + x + '][data-y=' + y + ']');
-  }
-
-  liveNeighbors = function(cell) {
-    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y');
-    var neighbors = [];
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        neighbor = coordCell(cx + x, cy + y)
-        if (!(x == 0 && y == 0) && neighbor.hasClass('type-live')) { neighbors.push(neighbor) };
-      }
-    }
-    return neighbors
-  }
-
-  allNeighbors = function(cell) {
-    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y'), neighbors = [];
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        var neighbor = coordCell(cx + x, cy + y);
-        if (!((x == 0 && y == 0) || neighbor.hasClass('type-dead'))) { $.merge(neighbors, neighbor) };
-      }
-    }
-    return neighbors
-  }
+// Step
 
   step = function(callback) {
     var neighbor_cells = findNeighborsOfLive(), possible_active_cells = [];
@@ -88,24 +65,16 @@
     $.merge(possible_active_cells, findLive());
     $.merge(possible_active_cells, findFade());
     possible_active_cells = $.unique(possible_active_cells);
-
+    var timer = new Date().getTime();
     countNeighbors(neighbor_cells);
     computeNextForm(possible_active_cells);
-    checkForever()
-  }
-
-  findNeighborsOfLive = function() {
-    neighbors = []
-    findLive().each(function() {
-      $.merge(neighbors, allNeighbors($(this)));
-    })
-    return neighbors
+    var fps = 1 / ((new Date().getTime() - timer)/1000.00)
+    if (fps < 200) { $('#fps').html(fps) };
+    checkForever();
   }
 
   checkForever = function() {
-    if ($('.forever').is(':checked')) {
-      setTimeout(step, 20);
-    };
+    if ($('.forever').is(':checked')) { setTimeout(step, 1) };
   }
 
   computeNextForm = function(cells) {
@@ -131,30 +100,32 @@
     })
   }
 
-  findLive = function() { return $('.cell-container').find('.type-live') };
-  findDead = function() { return $('.cell-container').find('.type-dead') };
-  findPassive = function() { return $('.cell-container').find('.type-passive') };
-  findFade = function() { return $('.cell-container').find('.type-fade') };
+// Setup
 
-  totalNeighbors = function() {
-    var count = 0;
-    $('.cell').each(function() {
-      count += liveNeighbors($(this)).length
-    })
-    return count
+  initialize = function(pixel_size, x, y) {
+    $('.cell-container').css('width', (pixel_size + 1) * x);
+    $('.cell-container').html('')
+    for(i=0;i<(x * y);i++) {
+      $('.cell-container').append('<div id="' + i + '" data-neighbors=0 class="cell type-dead" style="width:' + pixel_size + 'px;height:' + pixel_size + 'px;"></div>');
+    }
+    board_width_cells = x;
+    setCoords();
   }
 
-  countNeighbors = function(cells) {
-    cells = cells || $('.cell:not(.type-dead)');
-    $(cells).each(function() {
-      var count = liveNeighbors($(this)).length;
-      $(this).attr('data-neighbors', count);
+  setCoords = function() {
+    var cells = $('.cell');
+    cells.each(function() {
+      var cid = parseInt($(this).attr('id'));
+      $(this).attr('data-' + 'x', cid % board_width_cells);
+      $(this).attr('data-' + 'y', Math.floor(cid / board_width_cells));
     })
   }
 
-  clearNeighbors = function() {
-    $('.cell').each(function() {
-      $(this).attr('data-neighbors', 0);
+// Basic commands
+
+  kill = function() {
+    findLive().each(function() {
+      changeCell(this, 'fade');
     })
   }
 
@@ -170,40 +141,54 @@
     $(cell).attr('data-neighbors', 0)
   }
 
-  highN = function(cid) {
-    $(allNeighbors(idCell(cid))).each(function() {
-      changeCell(this, 'live')
+// Searching functions
+
+  idCell = function(cid) { return $('.cell#' + cid) };
+  coordCell = function(x, y) { return $('.cell[data-x=' + x + '][data-y=' + y + ']') };
+
+  findNeighborsOfLive = function() {
+    neighbors = []
+    findLive().each(function() {
+      $.merge(neighbors, allNeighbors($(this)));
+    })
+    return neighbors
+  }
+
+  countNeighbors = function(cells) {
+    cells = cells || $('.cell:not(.type-dead)');
+    $(cells).each(function() {
+      var count = liveNeighbors($(this)).length;
+      $(this).attr('data-neighbors', count);
     })
   }
 
-  initialize(10);
-
-  $(document).on('mousedown', '.cell', function(e) {
-    if (e.which == 1) {
-      if ($(this).hasClass('type-dead')) {
-        select = 'passive';
-      } else if ($(this).hasClass('type-passive')) {
-        select = 'live';
-      } else if ($(this).hasClass('type-live')) {
-        select = 'fade';
-      } else if ($(this).hasClass('type-fade')) {
-        select = 'dead';
+  liveNeighbors = function(cell) {
+    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y');
+    var neighbors = [];
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        neighbor = coordCell(cx + x, cy + y)
+        if (!(x == 0 && y == 0) && neighbor.hasClass('type-live')) { neighbors.push(neighbor) };
       }
     }
-  });
+    return neighbors
+  }
 
-  $(document).on('mouseover mousedown', '.cell', function(e) {
-    if (e.which == 1) {
-      changeCell(this, select);
+  allNeighbors = function(cell) {
+    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y'), neighbors = [];
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        var neighbor = coordCell(cx + x, cy + y);
+        if (!((x == 0 && y == 0) || neighbor.hasClass('type-dead'))) { $.merge(neighbors, neighbor) };
+      }
     }
-    if (e.which == 2) {
-      changeCell(this, 'dead')
-    }
-    if (e.which == 3) {
-      console.log($(this).attr('id'));
-    }
-    e.preventDefault();
-  });
+    return neighbors
+  }
+
+  findLive = function() { return $('.cell-container').find('.type-live') };
+  findDead = function() { return $('.cell-container').find('.type-dead') };
+  findPassive = function() { return $('.cell-container').find('.type-passive') };
+  findFade = function() { return $('.cell-container').find('.type-fade') };
 </script>
 </html>
 
