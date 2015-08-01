@@ -14,6 +14,7 @@ class Player
   @@seen = []
 
   @@selected = 0
+  @@skip_pick_up = false
   @@quick_bar = Array.new(9) {nil}
   @@inventory = []
   @@inventory_size = 10
@@ -45,14 +46,14 @@ class Player
     self_regen: 0
   }
   @@raw_accuracy = 90
-  @@health = 20
-  @@raw_max_health = 20
-  @@mana = 20
-  @@raw_max_mana = 20
+  @@health = 7
+  @@raw_max_health = 7
+  @@mana = 7
+  @@raw_max_mana = 7
   @@energy = 100
   @@raw_max_energy = 100
   @@raw_magic_power = 0
-  @@raw_strength = 1
+  @@raw_strength = 10
   @@raw_defense = 0
   @@raw_speed = 10
   @@raw_self_regen = 1
@@ -96,6 +97,7 @@ class Player
     else
       $sleep_condition = 'true'
     end
+    Player.invisibility_ticks -= 1
     if Player.invisibility_ticks > 0
       if Player.visible
         Log.add "You have become invisible."
@@ -106,6 +108,10 @@ class Player
       Log.add "You have become visible." unless Player.visible
       Player.visible = true
     end
+  end
+
+  def self.hit(raw_damage, source)
+    self.hurt(raw_damage - self.defense)
   end
 
   def self.hurt(damage=1, src="You got hurt by an unknown source.")
@@ -207,6 +213,8 @@ class Player
         tick = true
       end
       # ----------------------------------------------------CHEATS ----------------------------
+    when 'b'
+      shot = Projectile.new({x: Player.x + 10, y: Player.y}, Item['Excalibur'].duplicate)
     when "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
@@ -233,7 +241,7 @@ class Player
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
         is_creature = false
-        Creature.all.map do |creature|
+        Creature.current.map do |creature|
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
             is_creature = true
             if self.energy > 0
@@ -258,8 +266,11 @@ class Player
         tick = false
       end
     end
-    Player.tick if tick
-    pickup_items('auto') if autopickup
+    unless @@skip_pick_up
+      pickup_items('auto') if autopickup
+      @@skip_pick_up = false
+    end
+    @@skip_pick_up = false
     tick
   end
 
@@ -320,7 +331,6 @@ class Player
   end
 
   def self.inventory_by_stacks
-    # self.inventory.group_by { |item| "#{item.name}" }
     stacks = {}
     self.inventory.map do |item|
       stacks[item.name] ||= []
@@ -368,6 +378,20 @@ class Player
       Player.inventory.delete(item)
       Player.equipped[slot] = item
       Log.add "Equipped #{item.name}."
+    end
+  end
+
+  def self.drop(item)
+    item.x = Player.x
+    item.y = Player.y
+    item.depth = Player.depth
+    Player.inventory.delete(item)
+    @@skip_pick_up = true
+  end
+
+  def self.drop_many(items)
+    items.each do |item|
+      drop(item)
     end
   end
 

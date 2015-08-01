@@ -26,6 +26,13 @@ class Module
   end
 end
 
+class Fixnum
+  def plus_minus
+    noise = self * 0.1
+    self + rand(-noise.ceil..noise.ceil)
+  end
+end
+
 class Array
   def search_for(str)
     coords = []

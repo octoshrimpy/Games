@@ -1,5 +1,6 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :drops ,:destination, :vision, :rarity, :accuracy
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength,
+                :drops ,:destination, :vision, :rarity, :accuracy, :defense
 
   def initialize(type, color)
     @mask = "#{type} "
@@ -13,6 +14,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
@@ -26,6 +28,7 @@ class Creature
       {
         health: (2 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
@@ -42,6 +45,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
@@ -66,6 +70,7 @@ class Creature
       {
         health: (3 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + level * 0.3)).round,
@@ -79,6 +84,7 @@ class Creature
       {
         health: (2 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (3 * (1 + level * 0.3)).round,
@@ -96,6 +102,7 @@ class Creature
       {
         health: (5 * (1 + level * 0.3)).round,
         # rarity: ,
+        defense: 0,
         accuracy: 90,
         vision: 10,
         strength: (4 * (1 + level * 0.3)).round,
@@ -135,6 +142,7 @@ class Creature
     when "Z"
     end
     @health = stats[:health]
+    @defense = stats[:defense]
     @vision = stats[:vision]
     @rarity = stats[:rarity]
     @accuracy = stats[:accuracy]
@@ -150,8 +158,16 @@ class Creature
     $npcs[Player.depth].length
   end
 
-  def self.all
+  def self.current
     $npcs[Player.depth]
+  end
+
+  def self.on(level)
+    $npcs[level]
+  end
+
+  def self.all
+    $npcs.flatten
   end
 
   def destroy(src)
@@ -183,6 +199,10 @@ class Creature
 
   def coords
     {x: self.x, y: self.y}
+  end
+
+  def hit(raw_damage, source)
+    self.hurt(raw_damage - self.defense)
   end
 
   def hurt(damage=1, src="#{color(@name)} received some damage.")
@@ -275,7 +295,7 @@ class Creature
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
-          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.all.map {|m|m.coords}.include?({x: @x + x, y: @y + y})
+          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.current.map {|m|m.coords}.include?({x: @x + x, y: @y + y})
             {x: @x + x, y: @y + y}
           else
             nil

@@ -40,7 +40,6 @@ module Item
 
 
   def self.generate
-    $items = []
     melee = generate_melee_weapons
     ranged = generate_ranged_weapons
     magic = generate_magic_weapons

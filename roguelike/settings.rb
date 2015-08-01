@@ -4,6 +4,7 @@ class Settings
   @@title = ""
   @@select = nil
   @@selected_item = nil
+  @@stack = nil
   @@scroll = nil
   @@scroll_horz = nil
   @@selectable = nil
@@ -322,6 +323,7 @@ class Settings
     lines << 'Use/Consume'
     lines << 'Throw'
     lines << 'Drop'
+    lines << 'Drop Stack'
     if @@selected_item.equipment_slot
       slot = @@selected_item.equipment_slot
       specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
@@ -385,7 +387,10 @@ class Settings
       @@selected_item.consume if @@selected_item.respond_to?(:consume)
     when 1 # Throw
     when 2 # Drop
-    when 3
+      Player.drop(@@selected_item)
+    when 3 # Drop all
+      Player.drop_many(Player.inventory_by_stacks.to_a[@@stack][1])
+    when 4
       Player.equip(@@selected_item) if @@selected_item.equipment_slot
     end
     $gamemode = 'play'
@@ -419,6 +424,7 @@ class Settings
   def self.grab_inventory
     if Player.inventory_by_stacks.to_a[@@select - 1] && @@select - 1 >= 0
       @@selected_item = Player.inventory_by_stacks.to_a[@@select - 1][1][0]
+      @@stack = @@select - 1
     end
   end
 

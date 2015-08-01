@@ -10,7 +10,8 @@ class Game
   def self.start
     $seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join
     srand($seed.to_i)
-    Item.generate
+    $items = []
+    $projectiles = []
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
     $gamemode = "play"
@@ -26,6 +27,7 @@ class Game
     $tick = 1
     $visible_calculations = 0
     $sleep_condition = ''
+    Item.generate
     Log.new
     Log.add "Welcome to the game!"
     make_dungeon
@@ -33,12 +35,12 @@ class Game
 
   def self.run_time(time)
     (100 - time).times do |t|
-      Creature.all.each do |creature|
+      Creature.current.each do |creature|
         creature.move if $tick % (100 - creature.run_speed) == 0
-      end if Creature.all
+      end if Creature.current
+      Projectile.all.each { |shot| shot.tick } if $tick % (20) == 0
       $tick += 1
     end
-    Player.invisibility_ticks -= 1
     Player.verify_stats
     $time += 1
   end
@@ -134,7 +136,7 @@ class Game
   def self.draw(board=$level)
     Player.verify_stats
     system 'clear' or system 'cls'
-    if Creature.all && Creature.count == 0 && $spawn_creatures == true
+    if Creature.current && Creature.count == 0 && $spawn_creatures == true
       $spawn_creatures = false
       Log.add "You have eradicated all forms of life on this floor."
     end
@@ -185,14 +187,14 @@ class Game
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
     puts "Depth: #{Player.depth}"
-    puts "Creatures left: #{Creature.count if Creature.all}"
+    puts "Creatures left: #{Creature.count if Creature.current}"
     puts "My location: (#{Player.x}, #{Player.y})"
     puts "Vision Calculations: #{$visible_calculations}"
     $visible_calculations = 0
     print "Creature locations: "
-    Creature.all.each do |creature|
+    Creature.current.each do |creature|
       print " (#{creature.x}, #{creature.y}) "
-    end if Creature.all
+    end if Creature.current
     puts
   end
 
@@ -437,11 +439,16 @@ class Game
           end
         end
       end
-      Creature.all.each do |creature|
+      Projectile.all.each do |shot|
+        if shot.x == in_sight[:x] && shot.y == in_sight[:y]
+          $level[shot.y - y_offset][shot.x - x_offset] = shot.item.show
+        end
+      end
+      Creature.current.each do |creature|
         if creature.x == in_sight[:x] && creature.y == in_sight[:y]
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show
         end
-      end if Creature.all
+      end if Creature.current
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
   end
@@ -485,11 +492,16 @@ class Game
           end
         end
       end
-      Creature.all.each do |creature|
+      Projectile.all.each do |shot|
+        if shot.x == in_sight[:x] && shot.y == in_sight[:y]
+          $screen_shot_objects << {instance: shot.item, x: shot.x, y: shot.y}
+        end
+      end
+      Creature.current.each do |creature|
         if creature.x == in_sight[:x] && creature.y == in_sight[:y]
           $screen_shot_objects << {instance: creature, x: creature.x, y: creature.y}
         end
-      end if Creature.all
+      end if Creature.current
     end
     $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
     $screen_shot

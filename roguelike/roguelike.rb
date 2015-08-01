@@ -3,8 +3,12 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope!
 
+As soon as an item is thrown, run 'tick' once on that item so that it will visibly appear in front of the source
+
 projectile weapons
 Save data
+
+create shortcuts for the menus to quickly jump
 
 Fix creatures continsuously trying to get to the same point
 Somehow creatures still follow when Player is invisible.
@@ -57,6 +61,7 @@ require './log.rb'
 require './gold.rb'
 require './item.rb'
 require './consumable.rb'
+require './projectile.rb'
 require './equipment.rb'
 require './melee_weapon.rb'
 require './ranged_weapon.rb'

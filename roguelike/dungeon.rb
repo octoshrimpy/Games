@@ -14,9 +14,13 @@ class Dungeon
     $dungeon[Player.depth]
   end
 
-  def self.at(coord)
-    return nil unless current[coord[:y]]
-    current[coord[:y]][coord[:x]]
+  def self.at_level(depth)
+    $dungeon[depth]
+  end
+
+  def self.at(coord, depth=Player.depth)
+    return nil unless at_level(depth)[coord[:y]]
+    at_level(depth)[coord[:y]][coord[:x]]
   end
 
   def self.find_open_spaces
