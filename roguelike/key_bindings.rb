@@ -7,6 +7,7 @@ $key_move_up_right = "e"
 $key_move_down_left = "z"
 $key_move_down_right = "c"
 $key_move_nowhere = "s"
+$key_select_position = "*"
 
 $key_down_stairs = ">"
 $key_up_stairs = "<"

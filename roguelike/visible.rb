@@ -63,7 +63,7 @@ class Visible
   end
 
   def in_linear_view(x0,y0,x1,y1) #0..@radius*2
-    # Check Quadrant, do not sort unless necessary.
+    # TODO Check Quadrant, do not sort unless necessary.
     $visible_calculations += 1
     line_coords = Math.get_line(x0, y0, x1, y1).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])

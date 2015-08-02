@@ -14,22 +14,22 @@ class Settings
     unless $gamemode == 'play'
       tick = true
       case input
-      when "UP", $key_move_up then scroll_up
-      when "LEFT", $key_move_left then scroll_left
-      when "DOWN", $key_move_down then scroll_down
-      when "RIGHT", $key_move_right then scroll_right
-      when "Shift-Up", $key_move_up.capitalize then scroll_up(10)
-      when "Shift-Left", $key_move_left.capitalize then scroll_left(10)
-      when "Shift-Down", $key_move_down.capitalize then scroll_down(10)
-      when "Shift-Right", $key_move_right.capitalize then scroll_right(10)
-      when $key_move_up_right then scroll_up_right
-      when $key_move_up_left then scroll_up_left
-      when $key_move_down_right then scroll_down_right
-      when $key_move_down_left then scroll_down_left
-      when $key_move_up_right.capitalize then scroll_up_right(10)
-      when $key_move_up_left.capitalize then scroll_up_left(10)
-      when $key_move_down_right.capitalize then scroll_down_right(10)
-      when $key_move_down_left.capitalize then scroll_down_left(10)
+      when "UP", $key_move_up then $gamemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up
+      when "LEFT", $key_move_left then $gamemode == 'throw' ? (throw_item('left'); tick = false) : scroll_left
+      when "DOWN", $key_move_down then $gamemode == 'throw' ? (throw_item('down'); tick = false) : scroll_down
+      when "RIGHT", $key_move_right then $gamemode == 'throw' ? (throw_item('right'); tick = false) : scroll_right
+      when "Shift-Up", $key_move_up.capitalize then $gamemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up(10)
+      when "Shift-Left", $key_move_left.capitalize then $gamemode == 'throw' ? (throw_item('left'); tick = false) : scroll_left(10)
+      when "Shift-Down", $key_move_down.capitalize then $gamemode == 'throw' ? (throw_item('down'); tick = false) : scroll_down(10)
+      when "Shift-Right", $key_move_right.capitalize then $gamemode == 'throw' ? (throw_item('right'); tick = false) : scroll_right(10)
+      when $key_move_up_right then $gamemode == 'throw' ? (throw_item('up-right'); tick = false) : scroll_up_right
+      when $key_move_up_left then $gamemode == 'throw' ? (throw_item('up-left'); tick = false) : scroll_up_left
+      when $key_move_down_right then $gamemode == 'throw' ? (throw_item('down-right'); tick = false) : scroll_down_right
+      when $key_move_down_left then $gamemode == 'throw' ? (throw_item('down-left'); tick = false) : scroll_down_left
+      when $key_move_up_right.capitalize then $gamemode == 'throw' ? (throw_item('up-right'); tick = false) : scroll_up_right(10)
+      when $key_move_up_left.capitalize then $gamemode == 'throw' ? (throw_item('up-left'); tick = false) : scroll_up_left(10)
+      when $key_move_down_right.capitalize then $gamemode == 'throw' ? (throw_item('down-right'); tick = false) : scroll_down_right(10)
+      when $key_move_down_left.capitalize then $gamemode == 'throw' ? (throw_item('down-left'); tick = false) : scroll_down_left(10)
       when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
       when $key_confirm then tick = confirm_selection if @@select
       when $key_exit_menu
@@ -78,6 +78,17 @@ class Settings
         @@scroll = Player.y
         @@scroll_horz = Player.x
         Game.show
+      end
+    when $key_select_position
+      if $gamemode == 'throw'
+        $gamemode = 'target'
+        @@scroll_horz = Player.x
+        @@scroll = Player.y
+        Game.redraw
+      end
+    when $key_confirm
+      if $gamemode == 'target'
+        throw_item([@@scroll_horz, @@scroll])
       end
     when "P" then Game.pause
     when $key_sleep
@@ -149,6 +160,28 @@ class Settings
     end
   end
 
+  def self.throw_item(direction)
+    calc_direction = case direction
+    when 'up' then [0, -100]
+    when 'down' then [0, 100]
+    when 'left' then [-100, 0]
+    when 'right' then [100, 0]
+    when 'up-left' then [-100, -100]
+    when 'up-right' then [100, -100]
+    when 'down-left' then [-100, 100]
+    when 'down-right' then [100, 100]
+    else [direction[0] - Player.x, direction[1] - Player.y]
+    end
+    if calc_direction.is_a?(Array) && calc_direction.length == 2
+      $skip += 1
+      Player.throw_item(@@selected_item, calc_direction)
+      clear_settings
+      $gamemode = 'play'
+      Game.redraw
+    end
+    false
+  end
+
   def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selectable, @@selection_objects = [] end
   def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
   def self.scroll_left(amount=1); move_coord(-amount,0); end
@@ -177,7 +210,7 @@ class Settings
 
   def self.generate_settings
     case
-    when $gamemode == 'map'
+    when $gamemode == 'map', $gamemode == 'target'
       max = $width
       @@scroll_horz = @@scroll_horz > max ? max : @@scroll_horz
       @@scroll_horz = @@scroll_horz > 0 ? @@scroll_horz : 0
@@ -386,6 +419,10 @@ class Settings
     when 0 # User/consume
       @@selected_item.consume if @@selected_item.respond_to?(:consume)
     when 1 # Throw
+      $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+      $gamemode = 'throw'
+      @@selectable = false
+      Game.redraw
     when 2 # Drop
       Player.drop(@@selected_item)
     when 3 # Drop all
@@ -393,9 +430,11 @@ class Settings
     when 4
       Player.equip(@@selected_item) if @@selected_item.equipment_slot
     end
-    $gamemode = 'play'
-    Game.redraw
-    clear_settings
+    unless $gamemode == 'throw'
+      $gamemode = 'play'
+      Game.redraw
+      clear_settings
+    end
     false
   end
 

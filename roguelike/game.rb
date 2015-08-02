@@ -25,6 +25,7 @@ class Game
     $dungeon = []
     $fps = []
     $tick = 1
+    $skip = 0
     $visible_calculations = 0
     $sleep_condition = ''
     Item.generate
@@ -182,6 +183,7 @@ class Game
     $fps.shift while $fps.length > 50
     avg_fps = $fps.inject(:+).to_f / $fps.size
     puts "Time: #{$time}"
+    puts "Game Mode: #{$gamemode}"
     puts "Player: #{Player.visible ? 'visible' : 'invisible for ' + (Player.invisibility_ticks - 1).to_s}"
     puts "Ticks: #{$tick}"
     puts "FPS: #{fps}"

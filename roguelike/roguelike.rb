@@ -110,12 +110,15 @@ while(true)
     if input
       $milli_tick = Time.now.to_f
       Settings.receive(input)
-      if Player.try_action(input)
+      if $skip == 0 && Player.try_action(input)
         Player.tick
         Game.run_time(Player.speed)
 
         Game.redraw
         sleep 0.03
+      else
+        $skip -= 1
+        $skip = $skip < 0 ? 0 : $skip
       end
       # sleep 0.07
     end

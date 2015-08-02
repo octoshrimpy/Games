@@ -3,7 +3,7 @@ class Player
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks, :sleeping, :inventory_size
+                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for
 
   @@x = 0
   @@y = 0
@@ -64,6 +64,7 @@ class Player
   @@sleeping = false
   @@autopickup = true
   @@last_hit_by = nil
+  @@stunned_for = 0
 
   def self.name; "me"; end
   def self.coords; {x: Player.x, y: Player.y}; end
@@ -160,6 +161,7 @@ class Player
 
   def self.try_action(input)
     return false unless $gamemode == 'play'
+    return true unless @@stunned_for == 0
     x_dest = 0
     y_dest = 0
     tick = false
@@ -213,8 +215,6 @@ class Player
         tick = true
       end
       # ----------------------------------------------------CHEATS ----------------------------
-    when 'b'
-      shot = Projectile.new({x: Player.x + 10, y: Player.y}, Item['Excalibur'].duplicate)
     when "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
@@ -229,9 +229,6 @@ class Player
       end
       seen.uniq!
       Log.add "Cheat activated: Full vision."
-      Game.draw
-    when "i"
-      Player.visibility(10)
       Game.draw
     when "DELETE", "BACKSPACE"
       tick = true
@@ -266,10 +263,7 @@ class Player
         tick = false
       end
     end
-    unless @@skip_pick_up
-      pickup_items('auto') if autopickup
-      @@skip_pick_up = false
-    end
+    pickup_items('auto') if autopickup && !(@@skip_pick_up)
     @@skip_pick_up = false
     tick
   end
@@ -377,8 +371,20 @@ class Player
     if item
       Player.inventory.delete(item)
       Player.equipped[slot] = item
-      Log.add "Equipped #{item.name}."
     end
+  end
+
+  def self.throw_item(item, direction_coords)
+    Player.inventory.delete(item)
+
+    str = Player.raw_strength
+    x, y = direction_coords
+    x = x > str ? str : x
+    y = y > str ? str : y
+    x = x < -str ? -str : x
+    y = y < -str ? -str : y
+
+    Projectile.new({x: Player.x + x, y: Player.y + y}, item)
   end
 
   def self.drop(item)
