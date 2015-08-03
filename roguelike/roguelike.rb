@@ -5,6 +5,8 @@ Make more efficient- If Player is in hallway, do we check for every single block
 
 As soon as an item is thrown, run 'tick' once on that item so that it will visibly appear in front of the source
 
+Add a menu to show the character stats (including bonuses from armor/weapons/potions)
+
 projectile weapons
 Save data
 
@@ -92,7 +94,7 @@ bread = Consumable.new({
 })
 bread.x = Player.x + 1
 bread.y = Player.y + 1
-100.times { bread.duplicate }
+10.times { bread.duplicate }
 Dungeon.current[Player.y + 1][Player.x + 1] = "  "
 Player.inventory << Consumable.new({
   weight: 1,
