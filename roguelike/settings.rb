@@ -80,15 +80,17 @@ class Settings
         Game.show
       end
     when $key_select_position
+      $screen_shot = nil
       if $gamemode == 'throw'
         $gamemode = 'target'
         @@scroll_horz = Player.x
         @@scroll = Player.y
-        Game.redraw
+        Game.show
       end
     when $key_confirm
       if $gamemode == 'target'
         throw_item([@@scroll_horz, @@scroll])
+        clear_settings
       end
     when "P" then Game.pause
     when $key_sleep

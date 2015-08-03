@@ -96,8 +96,6 @@ class Game
     x_offset = x_offset > ($width - VIEWPORT_WIDTH + 1) ? ($width - VIEWPORT_WIDTH + 1) : x_offset
     y_offset = y_offset > ($height - VIEWPORT_HEIGHT) ? ($height - VIEWPORT_HEIGHT) : y_offset
 
-    $screen_shot_visible_coords
-
     get_screen_shot.each_with_index do |row, y|
       row.each_with_index do |pixel, x|
         in_x = (x >= x_offset) && (x < x_offset + VIEWPORT_WIDTH)
