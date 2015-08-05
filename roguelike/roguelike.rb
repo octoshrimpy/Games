@@ -1,36 +1,43 @@
 # TODO
 =begin
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
-^^ nope!
+^^ nope! I hope?
 
 As soon as an item is thrown, run 'tick' once on that item so that it will visibly appear in front of the source
 
+magic and spells!!
+
+Character Experience/levels
+Scaling for enemies
+Enemy special abilities?
+
+Equip and use Hot keys
+'select' to change hotkeys
+
+'Stack' logs: "Picked up Bread x10" "Picked up Gold x30" "Dropped Bread x5"
+
+
+In menus where 'selectable' select should default on at the first option. Hitting 's' should also confirm.
+
 Add a menu to show the character stats (including bonuses from armor/weapons/potions)
 
-projectile weapons
 Save data
 
 create shortcuts for the menus to quickly jump
 
-Fix creatures continsuously trying to get to the same point
-Somehow creatures still follow when Player is invisible.
+Fixed? Fix creatures continsuously trying to get to the same point
+Fixed? Somehow creatures still follow when Player is invisible.
 
 Configure defense of player and creatures to reduce damage taken.
 change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
 
-'select' to change hotkeys
-refactor heal/hurt sources to objects instaed of strings
+refactor heal/hurt sources to objects instead of strings
 
 Allow Player to level up and increase stats
 Have skill levels for different types of weapons
 Incorporate two handed weapons
 
-settings #238/239 drop and throw items
-drop one or drop all
 Create a fallback for all items. What do they do when used/consumed?
-after selecting throw, should redraw screen with message.
-Message = "Select direction to throw or * to choose coord"
-do that.
 
 Allow player to select items from the drop menu in order to pick them up manually
 
@@ -49,7 +56,7 @@ Save something like this:
 
 
 =end
-
+# How many lines?
 # Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
 
 require 'pry-remote' # TODO Remove this!
@@ -94,7 +101,7 @@ bread = Consumable.new({
 })
 bread.x = Player.x + 1
 bread.y = Player.y + 1
-10.times { bread.duplicate }
+100.times { bread.duplicate }
 Dungeon.current[Player.y + 1][Player.x + 1] = "  "
 Player.inventory << Consumable.new({
   weight: 1,
@@ -103,6 +110,7 @@ Player.inventory << Consumable.new({
   icon: '%',
   execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
 })
+Player.inventory << Item['Excalibur']
 system 'clear' or system 'cls'
 Game.draw
 

@@ -230,10 +230,6 @@ class Player
       seen.uniq!
       Log.add "Cheat activated: Full vision."
       Game.draw
-    when "DELETE", "BACKSPACE"
-      tick = true
-      blow_walls
-      Log.add "The walls around you are blown away."
     end
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
@@ -269,31 +265,35 @@ class Player
   end
 
   def self.pickup_items(method="key_press")
-    picked_up = 0
-    Gold.all.each do |gold_piece|
-      if gold_piece.coords == Player.coords
-        increase = gold_piece.value
-        Player.gold += increase
-        Log.add("Gained #{increase} gold! (#{Player.gold})")
-        gold_piece.destroy
-        picked_up += 1
-      end
-    end if Gold.all
-    Item.on_board.each do |item|
-      if item.coords == coords
+    picked_up_something = false
+    increase = 0
+    Gold.all.select {|g| g.coords == coords}.each do |gold_piece|
+      increase += gold_piece.value
+      Player.gold += gold_piece.value
+      gold_piece.destroy
+      picked_up_something = true
+    end
+    Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
+    Item.on_board.select { |i| i.coords == coords }.group_by {|i| i.name }.each do |item_name, items|
+      items_picked_up = []
+      items.each do |item|
         self.inventory << item
         if Player.inventory_by_stacks.count > Player.inventory_size
-          Log.add "My inventory is full. I can't pick this up."
           self.inventory.delete(item)
         else
           item.pickup
-          Log.add "Picked up #{item.name}"
-          picked_up += 1
+          picked_up_something = true
+          items_picked_up << item
         end
       end
+      if items_picked_up.count > 0
+        Log.add "Picked up #{item_name}#{items_picked_up.count > 1 ? " x#{items_picked_up.count}" : ''}."
+      else
+        Log.add "My inventory is full. I can't pick this up."
+      end
     end
-    self.pickup_items('do_again') if picked_up > 0
-    Log.add("Nothing to pick up.") if picked_up == 0 && method == 'key_press'
+    self.pickup_items('do_again') if picked_up_something
+    Log.add("Nothing to pick up.") if !(picked_up_something) && method == 'key_press'
   end
 
   def self.strength; raw_strength + bonuses[:strength].to_i; end
@@ -347,7 +347,7 @@ class Player
     stacks
   end
 
-  def self.equippable_inventory
+  def self.equippable_inventory(slot)
     self.inventory.select do |i|
       if i.respond_to?(:equipment_slot)
         i.equipment_slot == slot.to_sym
@@ -384,10 +384,16 @@ class Player
     x = x < -str ? -str : x
     y = y < -str ? -str : y
 
+    if x == 0 && y == 0
+      Log.add "Dropped #{item.name}."
+    else
+      Log.add "Threw #{item.name}."
+    end
     Projectile.new({x: Player.x + x, y: Player.y + y}, item)
   end
 
-  def self.drop(item)
+  def self.drop(item, show_log=true)
+    Log.add "Dropped #{item.name}." if show_log
     item.x = Player.x
     item.y = Player.y
     item.depth = Player.depth
@@ -396,8 +402,9 @@ class Player
   end
 
   def self.drop_many(items)
+    Log.add "Dropped #{items.first.name} x#{items.count}."
     items.each do |item|
-      drop(item)
+      drop(item, false)
     end
   end
 

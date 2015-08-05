@@ -24,6 +24,7 @@ $key_read_more = "r"
 $key_pickup_items = "SPACE"
 $key_confirm = "RETURN"
 $key_exit_menu = "ESCAPE"
+$key_back_menu = "BACKSPACE"
 
 $key_ = ""
 $key_ = ""

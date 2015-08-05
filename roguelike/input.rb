@@ -46,9 +46,9 @@ class Input
     when "\177"
       "BACKSPACE"
     when "\004"
-      "DELETE"
+      "BACKSPACE"
     when "\e[3~"
-      "DELETE"
+      "BACKSPACE"
     when "\u0003"
       "CONTROL-C"
       Game.end

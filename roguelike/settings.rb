@@ -30,8 +30,9 @@ class Settings
       when $key_move_up_left.capitalize then $gamemode == 'throw' ? (throw_item('up-left'); tick = false) : scroll_up_left(10)
       when $key_move_down_right.capitalize then $gamemode == 'throw' ? (throw_item('down-right'); tick = false) : scroll_down_right(10)
       when $key_move_down_left.capitalize then $gamemode == 'throw' ? (throw_item('down-left'); tick = false) : scroll_down_left(10)
-      when $key_move_nowhere then @@select = @@select.toggle(nil, @@scroll) if @@selectable
-      when $key_confirm then tick = confirm_selection if @@select
+      when $key_move_nowhere, $key_confirm then tick = confirm_selection if @@select
+      when $key_back_menu
+        menu_back
       when $key_exit_menu
         tick = false
         $gamemode = "play"
@@ -87,7 +88,7 @@ class Settings
         @@scroll = Player.y
         Game.show
       end
-    when $key_confirm
+    when $key_confirm, $key_move_nowhere
       if $gamemode == 'target'
         throw_item([@@scroll_horz, @@scroll])
         clear_settings
@@ -195,6 +196,32 @@ class Settings
   def self.scroll_down_left(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(-amount,amount); end
   def self.move_coord(x,y); @@scroll += y if @@scroll; @@scroll_horz += x if @@scroll_horz; end
 
+  def self.menu_back
+    @@select = 1
+    $gamemode = case $gamemode
+    when 'help' then 'play'
+    when 'logs' then 'play'
+    when 'inventory' then 'play'
+    when 'item_options' then 'inventory'
+    when 'key_bindings' then 'play'
+    when 'equipment' then 'play'
+    when 'map' then 'play'
+    when 'read_more' then 'map'
+    when 'equip_head' then 'equipment'
+    when 'equip_torso' then 'equipment'
+    when 'equip_left_hand' then 'equipment'
+    when 'equip_right_hand' then 'equipment'
+    when 'equip_ring1' then 'equipment'
+    when 'equip_ring2' then 'equipment'
+    when 'equip_ring3' then 'equipment'
+    when 'equip_ring4' then 'equipment'
+    when 'equip_waist' then 'equipment'
+    when 'equip_leggings' then 'equipment'
+    when 'equip_feet' then 'equipment'
+    else 'play'
+    end
+  end
+
   def self.show
     if generate_settings
       system 'clear' or system 'cls'
@@ -257,6 +284,7 @@ class Settings
       @@select = @@select > screen ? @@scroll : @@select
       @@select = @@select < @@scroll ? screen : @@select
     end
+    @@select ||= 1 if @@selectable
     @@scroll ||= 0
     @@scroll = @@scroll > max ? max : @@scroll
     @@scroll = @@scroll > 0 ? @@scroll : 0
@@ -284,7 +312,7 @@ class Settings
 
   def self.build_help_menu
     @@title = "Help"
-    @@selectable = true
+    @@selectable = false
     word_wrap(help_menu_text)
   end
 
@@ -321,8 +349,8 @@ class Settings
     @@title = 'Select item to replace with.'
     @@selectable = true
     equippable = Item.equippable
-    @@selection_objects = Player.equippable_inventory
-    lines = ['None']
+    @@selection_objects = Player.equippable_inventory(slot)
+    lines = ['', 'None']
     @@selection_objects.each { |item| lines << "#{item.name}: #{item_specs(item, Player.equipped[slot.to_sym])}" }
     lines
   end
@@ -340,7 +368,7 @@ class Settings
   end
 
   def self.build_equipment_menu
-    lines = []
+    lines = ['']
     @@selectable = true
     @@title = 'Equipment'
     %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
@@ -352,7 +380,7 @@ class Settings
   end
 
   def self.build_inventory_options_menu
-    lines = []
+    lines = ['']
     @@title = "What would you like to do with #{@@selected_item.name}?"
     @@selectable = true
     lines << 'Use/Consume'
@@ -417,7 +445,7 @@ class Settings
   end
 
   def self.do_item_option
-    case @@select
+    case @@select - 1
     when 0 # User/consume
       @@selected_item.consume if @@selected_item.respond_to?(:consume)
     when 1 # Throw
@@ -470,7 +498,7 @@ class Settings
   end
 
   def self.equip
-    case @@select
+    case @@select - 1
     when 0 then 'equip_head'
     when 1 then 'equip_torso'
     when 2 then 'equip_left_hand'
