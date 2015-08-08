@@ -29,8 +29,8 @@ class Visible
       line_coords = Math.get_line(coords_from[:x], coords_from[:y], coords_to[:x], coords_to[:y])
       line = line_coords.map {|coords| Dungeon.current[coords[:y]][coords[:x]]}
       blocks_in_line = line.map {|e| e.is_solid? ? true : nil}
-      blocks_in_line.compact.count == 0
       $visible_calculations += 1
+      blocks_in_line.compact.count == 0
     else
       false
     end

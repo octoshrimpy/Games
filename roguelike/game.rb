@@ -34,6 +34,14 @@ class Game
     make_dungeon
   end
 
+  def self.tick
+    Player.tick
+    Game.run_time(Player.speed)
+
+    Game.redraw
+    sleep 0.03
+  end
+
   def self.run_time(time)
     (100 - time).times do |t|
       Creature.current.each do |creature|
@@ -193,7 +201,8 @@ class Game
     $visible_calculations = 0
     print "Creature locations: "
     Creature.current.each do |creature|
-      print " (#{creature.x}, #{creature.y}) "
+      color_modifier = creature.player_in_range? ? "\e[31m" : ''
+      print " #{color_modifier}(#{creature.x}, #{creature.y})\e[0m "
     end if Creature.current
     puts
   end

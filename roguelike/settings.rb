@@ -33,13 +33,18 @@ class Settings
       when $key_move_nowhere, $key_confirm then tick = confirm_selection if @@select
       when $key_back_menu
         menu_back
+        tick = false
       when $key_exit_menu
         tick = false
         $gamemode = "play"
         clear_settings
         Game.redraw
       else
-        tick = false
+        if input == input.to_i.to_s && @@selectable && @@select
+          @@select = input.to_i
+        else
+          tick = false
+        end
       end
       show if tick
     end
@@ -220,10 +225,11 @@ class Settings
     when 'equip_feet' then 'equipment'
     else 'play'
     end
+    Settings.show
   end
 
   def self.show
-    if generate_settings
+    if $gamemode != 'play' && generate_settings
       system 'clear' or system 'cls'
       Game.input(true)
       @@game_height.times do |y|
@@ -233,7 +239,11 @@ class Settings
         print "|".color(:black, :white)
         puts "\r|#{$settings[y]}".color(:black, :white)
       end
+      puts $gamemode
+      puts @@select
       Game.input(false)
+    else
+      Game.redraw
     end
   end
 
@@ -327,21 +337,21 @@ class Settings
   def self.build_inventory
     @@selected_item = nil
     player_stacks = Player.inventory_by_stacks
-    inventory_weight = Player.inventory.inject(0) { |sum, item| sum + item.weight }
+    inventory_weight = Player.inventory.inject(0) { |sum, item| sum + item.weight }.round(3)
     @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{inventory_weight}lbs"
     @@selectable = true
     [''] + player_stacks.map do |name, items|
       count = items.count < 10 ? " #{items.count}" : items.count
       title = "#{count}x   #{items.first.icon} #{name}"
 
-      weight_numeric = items.inject(0) { |sum, item| sum + item.weight}
+      weight_numeric = items.inject(0) { |sum, item| sum + item.weight}.round(3)
       identifier = weight_numeric == 1 ? 'lb' : 'lbs'
       weight = "#{weight_numeric} #{identifier}"
 
       line_width = @@game_width*2 - 20
       spacer = (line_width - title.length).times.map {' '}.join
 
-      "#{title} #{spacer} #{weight}"
+      "#{title} #{spacer} #{weight[0..9]}"
     end
   end
 
@@ -445,32 +455,45 @@ class Settings
   end
 
   def self.do_item_option
+    tick = false
     case @@select - 1
     when 0 # User/consume
-      @@selected_item.consume if @@selected_item.respond_to?(:consume)
+      if @@selected_item.respond_to?(:consume)
+        @@selected_item.consume
+        tick = true
+      end
     when 1 # Throw
       $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
       $gamemode = 'throw'
       @@selectable = false
-      Game.redraw
+      tick = true
     when 2 # Drop
       Player.drop(@@selected_item)
+      tick = true
     when 3 # Drop all
       Player.drop_many(Player.inventory_by_stacks.to_a[@@stack][1])
+      tick = true
     when 4
-      Player.equip(@@selected_item) if @@selected_item.equipment_slot
+      if @@selected_item.equipment_slot
+        Player.equip(@@selected_item)
+        tick = true
+      end
     end
     unless $gamemode == 'throw'
       $gamemode = 'play'
-      Game.redraw
       clear_settings
     end
-    false
+    if tick
+      Game.tick
+    else
+      Settings.show
+    end
+    true
   end
 
   def self.equip_item
     slot = $gamemode[6..$gamemode.length].to_sym
-    item = @@select == 0 ? nil : @@selection_objects[@@select - 1]
+    item = @@select < 2 ? nil : @@selection_objects[@@select - 2]
     Player.equip(item, slot)
     show
   end

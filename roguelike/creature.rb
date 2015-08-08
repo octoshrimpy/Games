@@ -237,15 +237,12 @@ class Creature
   end
 
   def move(type="check")
-    @destination = nil if @destination == coords
+    @destination = nil if @destination == coords || rand(10) == 0
     if player_in_range?
       @destination = Player.coords.clone
-      # Eventually give me scared AI to run away from Player
+      # TODO Eventually give me scared AI to run away from Player
     else
-      @destination ||= case rand(6)
-      when 0 then nil
-      else random_open_space
-      end
+      @destination ||= random_open_space
     end
 
     move_to = @destination ? move_to_target : self.coords
