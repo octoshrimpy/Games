@@ -14,7 +14,8 @@ class Settings
     unless $gamemode == 'play'
       tick = true
       case input
-      when "UP", $key_move_up then $gamemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up
+      when ("1".."9") then $gamemode == 'query_quickbar' ? assign_quickbar(input) : (@@selectable && @@select ? @@select = input.to_i : tick = false)
+      when "UP", $key_move_up then $gmemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up
       when "LEFT", $key_move_left then $gamemode == 'throw' ? (throw_item('left'); tick = false) : scroll_left
       when "DOWN", $key_move_down then $gamemode == 'throw' ? (throw_item('down'); tick = false) : scroll_down
       when "RIGHT", $key_move_right then $gamemode == 'throw' ? (throw_item('right'); tick = false) : scroll_right
@@ -40,11 +41,7 @@ class Settings
         clear_settings
         Game.redraw
       else
-        if input == input.to_i.to_s && @@selectable && @@select
-          @@select = input.to_i
-        else
-          tick = false
-        end
+        tick = false
       end
       show if tick
     end
@@ -173,6 +170,14 @@ class Settings
       Dungeon.current.each_with_index { |col, x| puts col.join(" ") }
       Game.input(false)
     end
+  end
+
+  def self.assign_quickbar(input)
+    Player.quickbar[input.to_i - 1] = @@selected_item.name
+    clear_settings
+    $skip = 1
+    $gamemode = 'play'
+    Game.tick
   end
 
   def self.throw_item(direction)
@@ -408,6 +413,8 @@ class Settings
       slot = @@selected_item.equipment_slot
       specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
       lines << "Equip - #{humanize_slot(@@selected_item.equipment_slot)}: #{specs}"
+    else
+      lines << "Assign to Quick Bar"
     end
     lines << ''
     lines
@@ -462,39 +469,38 @@ class Settings
   end
 
   def self.do_item_option
-    tick = false
+    tick = true
+    clear = true
+    play = true
+    show_settings = false
+
     case @@select - 1
     when 0 # User/consume
-      if @@selected_item.respond_to?(:consume)
-        @@selected_item.consume
-        tick = true
-      end
+      @@selected_item.use!
     when 1 # Throw
       $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
       $gamemode = 'throw'
       @@selectable = false
-      tick = true
+      clear = false; play = false
     when 2 # Drop
       Player.drop(@@selected_item)
-      tick = true
     when 3 # Drop all
       Player.drop_many(Player.inventory_by_stacks.to_a[@@stack][1])
-      tick = true
     when 4
       if @@selected_item.equipment_slot
         Player.equip(@@selected_item)
-        tick = true
+      else
+        $message = "Enter the number to assign #{@@selected_item.name} to."
+        $gamemode = 'query_quickbar'
+        tick = false; play = false; clear = false
+        Game.redraw
       end
     end
-    unless $gamemode == 'throw'
-      $gamemode = 'play'
-      clear_settings
-    end
-    if tick
-      Game.tick
-    else
-      Settings.show
-    end
+    $gamemode = 'play' if play
+    clear_settings if clear
+    Game.tick if tick
+    Settings.show if show_settings
+
     true
   end
 

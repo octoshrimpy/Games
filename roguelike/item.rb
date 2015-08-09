@@ -10,6 +10,17 @@ module Item
     $items << self
   end
 
+  def use!
+    if self.equipment_slot
+      Player.equip(self)
+    elsif self.respond_to?(:consume)
+      self.consume
+    else
+      Log.add "Couldn't do anything with #{self.name}."
+    end
+    self
+  end
+
   def show
     @color ||= :white
     "#{icon} ".color(color)
@@ -48,6 +59,7 @@ module Item
   def self.all; $items; end
   def self.count; all.count; end
   def self.[](name); item = all.select {|i| i.name == name }.first.dup; $items << item; item; end
+  def self.by_name(name); item = all.select {|i| i.name == name }.first; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
   def self.melee; all.select {|i| i.class == MeleeWeapon }; end
   def self.ranged; all.select {|i| i.class == RangedWeapon }; end

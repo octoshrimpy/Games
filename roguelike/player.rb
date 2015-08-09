@@ -1,6 +1,6 @@
 class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
-                   :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quick_bar, :energy,
+                   :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quickbar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
                    :invisibility_ticks, :sleeping, :inventory_size, :stunned_for
@@ -15,7 +15,7 @@ class Player
 
   @@selected = 0
   @@skip_pick_up = false
-  @@quick_bar = Array.new(9) {nil}
+  @@quickbar = Array.new(9) {nil}
   @@inventory = []
   @@inventory_size = 10
 
@@ -166,6 +166,7 @@ class Player
     y_dest = 0
     tick = false
     case input
+    when ("1".."9") then use_quickbar(input.to_i - 1)
       # Movement
     when "UP", $key_move_up
       tick = true
@@ -214,7 +215,7 @@ class Player
         Log.add "You go up the stairs..."
         tick = true
       end
-      # ----------------------------------------------------CHEATS ----------------------------
+      # --------------------------------------------------- CHEATS ----------------------------
     when "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
@@ -230,6 +231,7 @@ class Player
       seen.uniq!
       Log.add "Cheat activated: Full vision."
       Game.draw
+      # --------------------------------------------------- / CHEATS ---------------------------
     end
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
@@ -262,6 +264,17 @@ class Player
     pickup_items('auto') if autopickup && !(@@skip_pick_up)
     @@skip_pick_up = false
     tick
+  end
+
+  def self.use_quickbar(input)
+    item = item_in_inventory_by_name(quickbar[input])
+    if item
+      item.use!
+    else
+      error = quickbar[input] ? "I don't have any #{quickbar[input]}." : "Nothing is assigned to that slot."
+      Log.add(error)
+      Game.redraw
+    end
   end
 
   def self.pickup_items(method="key_press")
@@ -347,6 +360,10 @@ class Player
     stacks
   end
 
+  def self.item_in_inventory_by_name(name)
+    self.inventory.select { |item| item.name == name }.first
+  end
+
   def self.equippable_inventory(slot)
     self.inventory.select do |i|
       if i.respond_to?(:equipment_slot)
@@ -371,6 +388,7 @@ class Player
     if item
       Player.inventory.delete(item)
       Player.equipped[slot] = item
+      Log.add "Equipped #{item.name}."
     end
   end
 
