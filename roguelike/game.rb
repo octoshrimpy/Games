@@ -303,7 +303,7 @@ class Game
 
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
     until (dungeon_up ||= false) && (dungeon_down ||= false)
-      dungeon = Dungeon.new.build(300)
+      dungeon = Dungeon.new.build(500)
       flat_dungeon = dungeon.to_array.flatten
       dungeon_up = flat_dungeon.include?("< ") ? true : false
       dungeon_down = flat_dungeon.include?("> ") ? true : false
@@ -380,10 +380,11 @@ class Game
         end
       end
     end
+    coord = Dungeon.find_open_spaces.sample
     sword = Item["Rusty Dagger"]
     sword.depth = 1
-    sword.x = 20
-    sword.y = 20
+    sword.x = coord[:x]
+    sword.y = coord[:y]
     Dungeon.current[20][20] = "  "
   end
 

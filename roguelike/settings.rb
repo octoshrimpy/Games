@@ -99,10 +99,11 @@ class Settings
         clear_settings
       end
     when "P" then Game.pause
+    when "\"" then show_full_map = true
     when $key_sleep
       $gamemode = "query_sleep"
       Settings.show
-      Game.input true
+      Game.input(true)
       while $gamemode == "query_sleep"
         puts "Enter how long you want to rest for."
         query = gets.chomp.downcase
@@ -165,6 +166,12 @@ class Settings
         end
       end
       Game.redraw
+    end
+    if show_full_map
+      Game.input(true)
+      system 'clear' or system 'cls'
+      Dungeon.current.each_with_index { |col, x| puts col.join(" ") }
+      Game.input(false)
     end
   end
 
@@ -243,7 +250,7 @@ class Settings
       puts @@select
       Game.input(false)
     else
-      Game.redraw
+      Game.redraw unless $gamemode == 'map'
     end
   end
 

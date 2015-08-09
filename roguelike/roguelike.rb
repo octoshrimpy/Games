@@ -76,29 +76,7 @@ require './visible.rb'
 
 Game.start
 
-bread = Consumable.new({
-  weight: 0.1,
-  name: "Bread of Invisibility",
-  usage_verb: 'consumed',
-  restore_energy: 10,
-  stack_size: 10,
-  icon: '`',
-  x: 10,
-  y: 10,
-  depth: 1,
-  execution_script: "Player.visibility(10)"
-})
-bread.x = Player.x + 1
-bread.y = Player.y + 1
-10.times { bread.duplicate }
-Dungeon.current[Player.y + 1][Player.x + 1] = "  "
-Player.inventory << Consumable.new({
-  weight: 1,
-  name: "Scroll of Unstable Teleportation",
-  stack_size: 10,
-  icon: '%',
-  execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
-})
+Player.inventory << Item['Scroll of Unstable Teleportation']
 system 'clear' or system 'cls'
 Game.draw
 
@@ -114,7 +92,6 @@ while(true)
         $skip -= 1
         $skip = $skip < 0 ? 0 : $skip
       end
-      # sleep 0.07
     end
   else
     if eval($sleep_condition)

@@ -37,9 +37,8 @@ module Item
     $items << self
   end
 
-
-
   def self.generate
+    consumable = Consumable.generate
     melee = generate_melee_weapons
     ranged = generate_ranged_weapons
     magic = generate_magic_weapons
@@ -48,7 +47,7 @@ module Item
 
   def self.all; $items; end
   def self.count; all.count; end
-  def self.[](name); all.select {|i| i.name == name }.first; end
+  def self.[](name); item = all.select {|i| i.name == name }.first.dup; $items << item; item; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
   def self.melee; all.select {|i| i.class == MeleeWeapon }; end
   def self.ranged; all.select {|i| i.class == RangedWeapon }; end

@@ -8,6 +8,8 @@ class Dungeon
     @solid_wall = ""
     @up_stairs = '< '
     @down_stairs = '> '
+    @distance_between_rooms = 100
+    @split_every = 20
   end
 
   def self.current
@@ -44,13 +46,13 @@ class Dungeon
       walker.wander
 
       # Bosh down a room occasionally.
-      if walk_length % 80 == 0
+      if walk_length % @distance_between_rooms == 0
         create_room(arena, walker)
       end
 
       # Spawn off a child now and then. Split the remaining walk_length
       # with it. Only one of us gets the stairs though.
-      if walk_length % 20 == 0
+      if walk_length % @split_every == 0
         child_walk_length = rand(walk_length)
         walk_length -= child_walk_length
         if child_walk_length > walk_length

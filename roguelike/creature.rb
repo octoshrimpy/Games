@@ -1,39 +1,39 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength,
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :depth,
                 :drops ,:destination, :vision, :rarity, :accuracy, :defense
 
   def initialize(type, color)
     @mask = "#{type} "
     @color = color
     @destination = nil
-    level = Player.depth
-    drops = %w( g )
+    @depth = Player.depth
+    drops = %w( g b )
     amount = rand(5)
     stats = case type
     when "a"
       {
-        health: (3 * (1 + level * 0.3)).round,
+        health: (3 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + level * 0.3)).round,
-        attack_speed: (4 * (1 + level * 0.3)).round,
-        run_speed: (10 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + @depth * 0.3)).round,
+        attack_speed: (4 * (1 + @depth * 0.3)).round,
+        run_speed: (10 * (1 + @depth * 0.3)).round,
         verbs: %w( bit clawed cut ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Ant"
       }
     when "b"
       {
-        health: (2 * (1 + level * 0.3)).round,
+        health: (2 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + level * 0.3)).round,
-        attack_speed: (4 * (1 + level * 0.3)).round,
-        run_speed: (12 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + @depth * 0.3)).round,
+        attack_speed: (4 * (1 + @depth * 0.3)).round,
+        run_speed: (12 * (1 + @depth * 0.3)).round,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Bat"
@@ -43,14 +43,14 @@ class Creature
     when "e"
     when "f"
       {
-        health: (3 * (1 + level * 0.3)).round,
+        health: (3 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + level * 0.3)).round,
-        attack_speed: (4 * (1 + level * 0.3)).round,
-        run_speed: (15 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + @depth * 0.3)).round,
+        attack_speed: (4 * (1 + @depth * 0.3)).round,
+        run_speed: (15 * (1 + @depth * 0.3)).round,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Possessed Fox"
@@ -68,28 +68,28 @@ class Creature
     when "q"
     when "r"
       {
-        health: (3 * (1 + level * 0.3)).round,
+        health: (3 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + level * 0.3)).round,
-        attack_speed: (4 * (1 + level * 0.3)).round,
-        run_speed: (15 * (1 + level * 0.3)).round,
+        strength: (1 * (1 + @depth * 0.3)).round,
+        attack_speed: (4 * (1 + @depth * 0.3)).round,
+        run_speed: (15 * (1 + @depth * 0.3)).round,
         verbs: %w( bit clawed slammed tore\ at shredded ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Rat"
       }
     when "s"
       {
-        health: (2 * (1 + level * 0.3)).round,
+        health: (2 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (3 * (1 + level * 0.3)).round,
-        attack_speed: (5 * (1 + level * 0.3)).round,
-        run_speed: (3 * (1 + level * 0.3)).round,
+        strength: (3 * (1 + @depth * 0.3)).round,
+        attack_speed: (5 * (1 + @depth * 0.3)).round,
+        run_speed: (3 * (1 + @depth * 0.3)).round,
         verbs: %w( bit struck whipped choked ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Snake"
@@ -100,14 +100,14 @@ class Creature
     when "w"
     when "x"
       {
-        health: (5 * (1 + level * 0.3)).round,
+        health: (5 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (4 * (1 + level * 0.3)).round,
-        attack_speed: (5 * (1 + level * 0.3)).round,
-        run_speed: (3 * (1 + level * 0.3)).round,
+        strength: (4 * (1 + @depth * 0.3)).round,
+        attack_speed: (5 * (1 + @depth * 0.3)).round,
+        run_speed: (3 * (1 + @depth * 0.3)).round,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Unknown Beast"
@@ -188,10 +188,14 @@ class Creature
     self.drops.each do |d|
       d[1].to_i.times do
         spot = drop_locations.sample
-        case d[0]
-        when "g" then Gold.new({x: spot[:x], y: spot[:y], value: rand(1..3)})
+        item = case d[0]
+        when "g" then Gold.new({value: rand(1..3)})
+        when 'b' then Item['Bread Scrap']
         else "o "
         end
+        item.x = spot[:x]
+        item.y = spot[:y]
+        item.depth = self.depth
       end
     end
     $npcs[Player.depth].delete(self)

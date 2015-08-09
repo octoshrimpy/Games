@@ -1,10 +1,11 @@
 class Gold
-  attr_accessor :value, :x, :y, :coords
+  attr_accessor :value, :x, :y, :coords, :depth
 
   def initialize(attributes)
     @x = attributes[:x]
     @y = attributes[:y]
     @value = attributes[:value]
+    @depth = Player.depth
     $drops[Player.depth] ||= []
     $drops[Player.depth] << self
   end
