@@ -12,31 +12,29 @@ class Settings
 
   def self.receive(input)
     unless $gamemode == 'play'
-      tick = true
+      tick = false
       case input
-      when ("1".."9") then $gamemode == 'query_quickbar' ? assign_quickbar(input) : (@@selectable && @@select ? @@select = input.to_i : tick = false)
-      when "UP", $key_move_up then $gmemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up
-      when "LEFT", $key_move_left then $gamemode == 'throw' ? (throw_item('left'); tick = false) : scroll_left
-      when "DOWN", $key_move_down then $gamemode == 'throw' ? (throw_item('down'); tick = false) : scroll_down
-      when "RIGHT", $key_move_right then $gamemode == 'throw' ? (throw_item('right'); tick = false) : scroll_right
-      when "Shift-Up", $key_move_up.capitalize then $gamemode == 'throw' ? (throw_item('up'); tick = false) : scroll_up(10)
-      when "Shift-Left", $key_move_left.capitalize then $gamemode == 'throw' ? (throw_item('left'); tick = false) : scroll_left(10)
-      when "Shift-Down", $key_move_down.capitalize then $gamemode == 'throw' ? (throw_item('down'); tick = false) : scroll_down(10)
-      when "Shift-Right", $key_move_right.capitalize then $gamemode == 'throw' ? (throw_item('right'); tick = false) : scroll_right(10)
-      when $key_move_up_right then $gamemode == 'throw' ? (throw_item('up-right'); tick = false) : scroll_up_right
-      when $key_move_up_left then $gamemode == 'throw' ? (throw_item('up-left'); tick = false) : scroll_up_left
-      when $key_move_down_right then $gamemode == 'throw' ? (throw_item('down-right'); tick = false) : scroll_down_right
-      when $key_move_down_left then $gamemode == 'throw' ? (throw_item('down-left'); tick = false) : scroll_down_left
-      when $key_move_up_right.capitalize then $gamemode == 'throw' ? (throw_item('up-right'); tick = false) : scroll_up_right(10)
-      when $key_move_up_left.capitalize then $gamemode == 'throw' ? (throw_item('up-left'); tick = false) : scroll_up_left(10)
-      when $key_move_down_right.capitalize then $gamemode == 'throw' ? (throw_item('down-right'); tick = false) : scroll_down_right(10)
-      when $key_move_down_left.capitalize then $gamemode == 'throw' ? (throw_item('down-left'); tick = false) : scroll_down_left(10)
-      when $key_move_nowhere, $key_confirm then tick = confirm_selection if @@select
+      when ("1".."9") then $gamemode == 'query_quickbar' ? (assign_quickbar(input); tick = true) : (@@select = input.to_i if @@selectable && @@select)
+      when "UP", $key_move_up then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up; tick = true)
+      when "LEFT", $key_move_left then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left; tick = true)
+      when "DOWN", $key_move_down then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down; tick = true)
+      when "RIGHT", $key_move_right then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right; tick = true)
+      when "Shift-Up", $key_move_up.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up(10); tick = true)
+      when "Shift-Left", $key_move_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left(10); tick = true)
+      when "Shift-Down", $key_move_down.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down(10); tick = true)
+      when "Shift-Right", $key_move_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right(10); tick = true)
+      when $key_move_up_right then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right; tick = true)
+      when $key_move_up_left then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left; tick = true)
+      when $key_move_down_right then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right; tick = true)
+      when $key_move_down_left then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left; tick = true)
+      when $key_move_up_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right(10); tick = true)
+      when $key_move_up_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left(10); tick = true)
+      when $key_move_down_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
+      when $key_move_down_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
+      when $key_move_nowhere, $key_confirm then (tick = confirm_selection if @@select)
       when $key_back_menu
         menu_back
-        tick = false
       when $key_exit_menu
-        tick = false
         $gamemode = "play"
         clear_settings
         Game.redraw
@@ -84,15 +82,25 @@ class Settings
       end
     when $key_select_position
       $screen_shot = nil
-      if $gamemode == 'throw'
-        $gamemode = 'target'
+      if $gamemode == 'direct_throw'
         @@scroll_horz = Player.x
         @@scroll = Player.y
+        $gamemode = 'target_throw'
+        Game.show
+      end
+      if $gamemode == 'direct_flash'
+        @@scroll_horz = Player.x
+        @@scroll = Player.y
+        $gamemode = 'target_flash'
         Game.show
       end
     when $key_confirm, $key_move_nowhere
-      if $gamemode == 'target'
-        throw_item([@@scroll_horz, @@scroll])
+      if $gamemode == 'target_throw'
+        do_in_direction([@@scroll_horz, @@scroll], 100, method(:throw!))
+        clear_settings
+      end
+      if $gamemode == 'target_flash'
+        do_in_direction([@@scroll_horz, @@scroll], 5, method(:flash!))
         clear_settings
       end
     when "P" then Game.pause
@@ -180,26 +188,42 @@ class Settings
     Game.tick
   end
 
-  def self.throw_item(direction)
+  def self.direct_target(direction)
+    do_in_direction(direction, 100, method(:throw!)) if $gamemode == 'direct_throw'
+    do_in_direction(direction, 5, method(:flash!)) if $gamemode == 'direct_flash'
+  end
+
+  def self.do_in_direction(direction, distance, callback)
     calc_direction = case direction
-    when 'up' then [0, -100]
-    when 'down' then [0, 100]
-    when 'left' then [-100, 0]
-    when 'right' then [100, 0]
-    when 'up-left' then [-100, -100]
-    when 'up-right' then [100, -100]
-    when 'down-left' then [-100, 100]
-    when 'down-right' then [100, 100]
+    when 'up' then [0, -distance]
+    when 'down' then [0, distance]
+    when 'left' then [-distance, 0]
+    when 'right' then [distance, 0]
+    when 'up-left' then [-distance, -distance]
+    when 'up-right' then [distance, -distance]
+    when 'down-left' then [-distance, distance]
+    when 'down-right' then [distance, distance]
     else [direction[0] - Player.x, direction[1] - Player.y]
     end
     if calc_direction.is_a?(Array) && calc_direction.length == 2
       $skip += 1
-      Player.throw_item(@@selected_item, calc_direction)
+      callback.call(calc_direction)
       clear_settings
       $gamemode = 'play'
       Game.redraw
     end
     false
+  end
+
+  def self.flash!(coord)
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    if Dungeon.at(coords) == "  "
+      Player.coords = coords
+    end
+  end
+
+  def self.throw!(coord)
+    Player.throw_item(@@selected_item, coord)
   end
 
   def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selectable, @@selection_objects = [] end
@@ -255,13 +279,13 @@ class Settings
       puts @@select
       Game.input(false)
     else
-      Game.redraw unless $gamemode == 'map'
+      Game.redraw unless $gamemode == 'map' || $gamemode[0..5] == 'target'
     end
   end
 
   def self.generate_settings
     case
-    when $gamemode == 'map', $gamemode == 'target'
+    when $gamemode == 'map', $gamemode[0..5] == 'target'
       max = $width
       @@scroll_horz = @@scroll_horz > max ? max : @@scroll_horz
       @@scroll_horz = @@scroll_horz > 0 ? @@scroll_horz : 0
@@ -476,10 +500,12 @@ class Settings
 
     case @@select - 1
     when 0 # User/consume
+      hold_gamemode = $gamemode.dup
       @@selected_item.use!
+      tick = false; play = false unless hold_gamemode == $gamemode
     when 1 # Throw
       $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
-      $gamemode = 'throw'
+      $gamemode = 'direct_throw'
       @@selectable = false
       clear = false; play = false
     when 2 # Drop

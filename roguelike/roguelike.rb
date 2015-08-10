@@ -75,6 +75,7 @@ require './visible.rb'
 Game.start
 
 Player.inventory << Item['Scroll of Unstable Teleportation']
+50.times { Player.inventory << Item['Scroll of Flash'] }
 system 'clear' or system 'cls'
 Game.draw
 

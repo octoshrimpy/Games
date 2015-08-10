@@ -20,7 +20,7 @@ class Consumable
   end
 
   def self.generate
-    Consumable.new({
+    new({
       weight: 0.1,
       name: "Bread of Invisibility",
       usage_verb: 'consumed',
@@ -29,7 +29,7 @@ class Consumable
       icon: '`',
       execution_script: "Player.visibility(10)"
     })
-    Consumable.new({
+    new({
       weight: 0.1,
       name: "Bread Scrap",
       usage_verb: 'consumed',
@@ -37,12 +37,20 @@ class Consumable
       stack_size: 10,
       icon: '`'
     })
-    Consumable.new({
-      weight: 1,
+    new({
+      weight: 0.1,
       name: "Scroll of Unstable Teleportation",
       stack_size: 10,
       icon: '%',
       execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
+    })
+    new({
+      weight: 0.1,
+      name: "Scroll of Flash",
+      stack_size: 10,
+      icon: '%',
+      color: :yellow,
+      execution_script: "$gamemode = 'direct_flash'; $message = \"Click the direction you would like to flash. '#{$key_select_position}' to choose coordinate.\""
     })
   end
 end
