@@ -140,6 +140,15 @@ class String
 end
 
 module Math
+
+  def self.greater_of(*args)
+    args.sort.last
+  end
+
+  def self.less_of(*args)
+    args.sort.first
+  end
+
   def self.get_line(x0,y0,x1,y1)
     points = []
     steep = ((y1-y0).abs) > ((x1-x0).abs)

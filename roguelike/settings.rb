@@ -197,7 +197,7 @@ class Settings
     when 'up-right' then [distance, -distance]
     when 'down-left' then [-distance, distance]
     when 'down-right' then [distance, distance]
-    else [direction[0] - Player.x, direction[1] - Player.y]
+    else [Math.less_of(direction[0] - Player.x, distance), Math.less_of(direction[1] - Player.y, distance)]
     end
     if calc_direction.is_a?(Array) && calc_direction.length == 2
       $skip += 1
@@ -213,6 +213,8 @@ class Settings
     coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
     if Dungeon.at(coords) == "  "
       Player.coords = coords
+    else
+      Log.add "Flash failed. There is a wall there."
     end
   end
 
