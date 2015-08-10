@@ -245,7 +245,8 @@ class Game
     when 19
       " 1 2 3 4 5 6 7 8 9"
     when 20
-
+      print " "
+      Player.quickbar.map { |name| name ? "#{Item.by_name(name).show}\e[100;30m" : "  "}.join("")
     end
     puts "\e[100;37m"
   end
