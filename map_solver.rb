@@ -131,6 +131,7 @@ def at(coord)
 end
 
 def map_valid?
+  return false unless @map.is_a? Array
   @map.flatten.include?(START) &&
     @map.flatten.include?(FINISH) &&
     @map.map {|row| row.length}.uniq.length == 1
@@ -165,7 +166,7 @@ X--XXXX--XXXXXXX--X--X--XXXX--X--XXXX--X--X--X
 X--X--------------X--X-----X--X--------X-----X
 X--XXXX--XXXXXXXXXX--XXXX--X--XXXXXXX--XXXXXXX
 X--------X-----------X-----X--X-----X--X-----X
-XXXXXXXXXX--XXXXXXXXXX--XXXX--XXXX--X--X--X--X
+XXXXXXXXXX--XXXXXXXXXX--XXXX--XXXX--X--XX-X--X
 X--------------------X--------------X-----X--F
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX".split("\n").map{|row|row.split('')}
 start_time = Time.now.to_f
