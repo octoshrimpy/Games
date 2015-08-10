@@ -5,6 +5,10 @@ Make more efficient- If Player is in hallway, do we check for every single block
 
 magic and spells!!
 
+add descriptions for items
+
+Set max for distances
+
 Character Experience/levels
 Scaling for enemies
 Enemy special abilities?

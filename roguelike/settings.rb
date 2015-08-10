@@ -82,16 +82,10 @@ class Settings
       end
     when $key_select_position
       $screen_shot = nil
-      if $gamemode == 'direct_throw'
+      if $gamemode[0..5] == 'direct'
         @@scroll_horz = Player.x
         @@scroll = Player.y
-        $gamemode = 'target_throw'
-        Game.show
-      end
-      if $gamemode == 'direct_flash'
-        @@scroll_horz = Player.x
-        @@scroll = Player.y
-        $gamemode = 'target_flash'
+        $gamemode[0..5] = 'target'
         Game.show
       end
     when $key_confirm, $key_move_nowhere
