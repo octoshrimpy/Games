@@ -37,158 +37,179 @@ $(document).ready(function() { initialize(10, 36, 36) }); // Map: cell size(in p
 
 // User input
 
-  select = 'live';
-  $('#step').click(function() { step() });
-  $('#reset').click(function() { initialize(10, 36, 36) });
-  $('#kill').click(function() { kill() });
-  $(document)
-    .on('mousedown', '.cell', function(e) {
-      if (e.which == 1) {
-        if ($(this).hasClass('type-dead')) { select = 'passive'; }
-        else if ($(this).hasClass('type-passive')) { select = 'live'; }
-        else if ($(this).hasClass('type-live')) { select = 'fade'; }
-        else if ($(this).hasClass('type-fade')) { select = 'dead'; };
-      }
-    })
-    .on('mouseover mousedown', '.cell', function(e) {
-      if (e.which == 1) { changeCell(this, select); }
-      if (e.which == 2) { changeCell(this, 'dead') }
-      if (e.which == 3) { console.log($(this).attr('id')); }
-      e.preventDefault();
-    });
-
-// Step
-
-  step = function(callback) {
-    var neighbor_cells = findNeighborsOfLive(), possible_active_cells = [];
-    $.merge(possible_active_cells, neighbor_cells);
-    $.merge(possible_active_cells, findLive());
-    $.merge(possible_active_cells, findFade());
-    possible_active_cells = $.unique(possible_active_cells);
-    var timer = new Date().getTime();
-    countNeighbors(neighbor_cells);
-    computeNextForm(possible_active_cells);
-    var fps = 1 / ((new Date().getTime() - timer)/1000.00)
-    if (fps < 200) { $('#fps').html(fps) };
-    checkForever();
-  }
-
-  checkForever = function() {
-    if ($('.forever').is(':checked')) { setTimeout(step, 1) };
-  }
-
-  computeNextForm = function(cells) {
-    cells = cells || $('.cell:not(.type-dead)');
-    $(cells.concat(findFade())).each(function() {
-      cell = $(this);
-      switch (true) {
-        case (cell.hasClass('type-passive')):
-        if ((cell.attr('data-neighbors') == "1" || cell.attr('data-neighbors') == "2")) { changeCell(this, 'live'); };
-        break;
-
-        case (cell.hasClass('type-fade')):
-        changeCell(this, 'passive')
-        break;
-
-        case (cell.hasClass('type-live')):
-        changeCell(this, 'fade')
-        break;
-
-        default:
-        return 0
-      }
-    })
-  }
+select = 'live';
+$('#step').click(function() { window.requestAnimationFrame(step) });
+$('#reset').click(function() { initialize(10, 36, 36) });
+$('#kill').click(function() { kill() });
+$(document)
+  .on('mousedown', '.cell', function(e) {
+    if (e.which == 1) {
+      if ($(this).hasClass('type-dead')) { select = 'passive'; }
+      else if ($(this).hasClass('type-passive')) { select = 'live'; }
+      else if ($(this).hasClass('type-live')) { select = 'fade'; }
+      else if ($(this).hasClass('type-fade')) { select = 'dead'; };
+    }
+  })
+  .on('mouseover mousedown', '.cell', function(e) {
+    if (e.which == 1) {
+      changeCell(this, select);
+      if (select == 'live') { live_cell_coords.push(getCoord(this)) };
+      if (select == 'fade') { fade_cell_coords.push(getCoord(this)) };
+    }
+    if (e.which == 2) { changeCell(this, 'dead') }
+    if (e.which == 3) { console.log($(this).attr('id')); }
+    e.preventDefault();
+  });
 
 // Setup
 
-  initialize = function(pixel_size, x, y) {
-    $('.cell-container').css('width', (pixel_size + 1) * x);
-    $('.cell-container').html('')
-    for(i=0;i<(x * y);i++) {
-      $('.cell-container').append('<div id="' + i + '" data-neighbors=0 class="cell type-dead" style="width:' + pixel_size + 'px;height:' + pixel_size + 'px;"></div>');
-    }
-    board_width_cells = x;
-    setCoords();
+initialize = function(pixel_size, x, y) {
+  $('.cell-container').css('width', (pixel_size + 1) * x);
+  $('.cell-container').html('')
+  for(i=0;i<(x * y);i++) {
+    $('.cell-container').append('<div id="' + i + '" class="cell type-dead" style="width:' + pixel_size + 'px;height:' + pixel_size + 'px;"></div>');
   }
+  live_cell_coords = [];
+  fade_cell_coords = [];
+  board_width_cells = x;
+  board_height_cells = y;
+  setCoords();
+}
 
-  setCoords = function() {
-    var cells = $('.cell');
-    cells.each(function() {
-      var cid = parseInt($(this).attr('id'));
-      $(this).attr('data-' + 'x', cid % board_width_cells);
-      $(this).attr('data-' + 'y', Math.floor(cid / board_width_cells));
-    })
+setCoords = function() {
+  var cells = $('.cell');
+  cells.each(function() {
+    var cid = parseInt($(this).attr('id'));
+    $(this).attr('data-' + 'x', cid % board_width_cells);
+    $(this).attr('data-' + 'y', Math.floor(cid / board_width_cells));
+  })
+}
+
+
+// Step
+
+step = function() {
+  var timer = new Date().getTime();
+  computeNextForm(findPossibleActive());
+  renderNewFrame();
+  // var end_time = new Date().getTime() - timer,
+  //   goal_fps = (1000/60),
+  //   delay_rate = (end_time < 16 ? (goal_fps - end_time) : end_time),
+  //   fps = 1 / (delay_rate/1000.00);
+  // $('#fps').html(fps);
+  var delay_rate = 1;
+  checkForever(delay_rate);
+}
+
+checkForever = function(delay_rate) {
+  if ($('.forever').is(':checked')) { setTimeout(step, delay_rate) };
+}
+
+
+idCell = function(cid) { return $('.cell#' + cid) };
+coordCell = function(coord) { return $('.cell[data-x=' + coord[0] + '][data-y=' + coord[1] + ']') };
+getCoord = function(cell) { return [$(cell).data('x'), $(cell).data('y')] };
+
+findPossibleActive = function() {
+  var neighbors = [];
+  $(live_cell_coords).each(function() {
+    for (var x = -1; x <= 1; x++) {
+      for (var y = -1; y <= 1; y++) {
+        var cx = this[0], cy = this[1],
+          not_origin = !(x == 0 && y == 0),
+          not_negative = (cx + x >= 0 && cy + y >= 0),
+          not_over_bound = (cx + x < board_width_cells && cy + y < board_height_cells),
+          not_dead = !(coordCell([cx + x, cy + y]).hasClass('type-dead'));
+        if (not_negative && not_origin && not_over_bound && not_dead) { neighbors.push([cx + x, cy + y])};
+      }
+    }
+  });
+  return neighbors
+}
+
+showPossibleCells = function() {
+  $(possible_active_cells).each(function() {
+    console.log(coordCell(this));
+  })
+}
+
+indexOfArray = function(arr, md_array) {
+  for (i=0;i<md_array.length;i++) {
+    if (arr == md_array[i].toString()) { return i; break; };
   }
+  return -1;
+}
+
+computeNextForm = function(possible_active_cells) {
+  var live_next = [], not_allowed = [];
+  $.merge(not_allowed, live_cell_coords);
+  $.merge(not_allowed, fade_cell_coords);
+  count_instances = {}
+  $(possible_active_cells).each(function() {
+    if (count_instances[this]) {
+      count_instances[this] += 1
+    } else {
+      count_instances[this] = 1
+    }
+  });
+
+  $('.type-fade').removeClass('type-fade').addClass('type-passive'); // Render
+  $('.type-live').removeClass('type-live').addClass('type-fade'); // Render
+  $.each(count_instances, function(coord, count) {
+    str_coord = coord.split(",");
+    coord = [parseInt(str_coord[0]), parseInt(str_coord[1])]
+    if ((count == 1 || count == 2) && (indexOfArray(coord, not_allowed) == -1)) {
+      live_next.push(coord);
+      changeCell(coordCell(coord), 'live'); // Render
+    }
+  })
+  fade_cell_coords = live_cell_coords;
+  live_cell_coords = live_next;
+  live_next = [];
+  return live_cell_coords
+}
+
+renderNewFrame = function() {
+  // $('.type-fade').removeClass('type-fade').addClass('type-passive');
+  // $('.type-live').removeClass('type-live').addClass('type-fade');
+  // each live_cell_coords
+  // changeCell(coordCell(coord), 'live')
+}
 
 // Basic commands
 
-  kill = function() {
-    findLive().each(function() {
-      changeCell(this, 'fade');
-    })
+kill = function() {
+  live_cell_coords = [];
+  changeCell(this, 'fade');
+}
+
+changeCell = function(cell, to) {
+  var old_class = $(cell).attr('class').split(" "),
+    new_class = [];
+
+  for(var i=0;i<old_class.length;i++){
+    r = old_class[i].search(/type-+/);
+    if(r)new_class[new_class.length] = old_class[i];
   }
+  $(cell).removeClass().addClass(new_class.join(" ") + " type-" + to);
+  return cell
+}
 
-  changeCell = function(cell, to) {
-    var old_class = $(cell).attr('class').split(" "),
-      new_class = [];
+updateState = function(coord) {
+  var index = -1, cell = coordCell(coord), classes = $(cell).attr('class').split(' ');
 
-    for(var i=0;i<old_class.length;i++){
-      r = old_class[i].search(/type-+/);
-      if(r)new_class[new_class.length] = old_class[i];
-    }
-    $(cell).removeClass().addClass(new_class.join(" ") + " type-" + to);
-    $(cell).attr('data-neighbors', 0)
-  }
+  index = live_cell_coords.indexOf(coord);
+  if (index > -1) { live_cell_coords.splice(index, 1) };
+  index = fade_cell_coords.indexOf(coord);
+  if (index > -1) { fade_cell_coords.splice(index, 1) };
 
-// Searching functions
+  var current_class = $.grep(classes, function(v, i){
+       return v.indexOf('type-') === 0;
+   }).join();
 
-  idCell = function(cid) { return $('.cell#' + cid) };
-  coordCell = function(x, y) { return $('.cell[data-x=' + x + '][data-y=' + y + ']') };
-
-  findNeighborsOfLive = function() {
-    neighbors = []
-    findLive().each(function() {
-      $.merge(neighbors, allNeighbors($(this)));
-    })
-    return neighbors
-  }
-
-  countNeighbors = function(cells) {
-    cells = cells || $('.cell:not(.type-dead)');
-    $(cells).each(function() {
-      var count = liveNeighbors($(this)).length;
-      $(this).attr('data-neighbors', count);
-    })
-  }
-
-  liveNeighbors = function(cell) {
-    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y');
-    var neighbors = [];
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        neighbor = coordCell(cx + x, cy + y)
-        if (!(x == 0 && y == 0) && neighbor.hasClass('type-live')) { neighbors.push(neighbor) };
-      }
-    }
-    return neighbors
-  }
-
-  allNeighbors = function(cell) {
-    var cid = parseInt(cell.attr('id')), cx = cell.data('x'), cy = cell.data('y'), neighbors = [];
-    for (var x = -1; x <= 1; x++) {
-      for (var y = -1; y <= 1; y++) {
-        var neighbor = coordCell(cx + x, cy + y);
-        if (!((x == 0 && y == 0) || neighbor.hasClass('type-dead'))) { $.merge(neighbors, neighbor) };
-      }
-    }
-    return neighbors
-  }
-
-  findLive = function() { return $('.cell-container').find('.type-live') };
-  findDead = function() { return $('.cell-container').find('.type-dead') };
-  findPassive = function() { return $('.cell-container').find('.type-passive') };
-  findFade = function() { return $('.cell-container').find('.type-fade') };
+  if (current_class == 'type-live') { live_cell_coords.push(coord) };
+  if (current_class == 'type-fade') { fade_cell_coords.push(coord) };
+}
 </script>
 </html>
 
