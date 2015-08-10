@@ -3,19 +3,11 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope! I hope?
 
-should be able to assign items to hot keys.
-Hotkey items should not be tied to a specific item. For example, If assigned to food, should continue to use that food while applicable
-(If no more of that item exists, should drop from hotbar? Or just show error?)
-Hotbar items should call use/consume on the specifed item
-
 magic and spells!!
 
 Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
-
-Equip and use Hot keys
-'select' to change hotkeys
 
 Add a menu to show the character stats (including bonuses from armor/weapons/potions)
 
@@ -48,10 +40,11 @@ This should save all variables.
 Save something like this:
 "$dungeon=#{$dungeon}"
 
+How many lines?
+>> run in irb.
+Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
 
 =end
-# How many lines?
-# Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
 
 require 'pry-remote' # TODO Remove this!
 
