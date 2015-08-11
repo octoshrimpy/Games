@@ -14,7 +14,7 @@ class Settings
     unless $gamemode == 'play'
       tick = false
       case input
-      when ("1".."9") then $gamemode == 'query_quickbar' ? (assign_quickbar(input); tick = true) : (@@select = input.to_i if @@selectable && @@select)
+      when ("1".."9") then $gamemode == 'query_quickbar' ? (assign_quickbar(input); tick = true) : (@@select = input.to_i; tick = true if @@selectable && @@select)
       when "UP", $key_move_up then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up; tick = true)
       when "LEFT", $key_move_left then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left; tick = true)
       when "DOWN", $key_move_down then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down; tick = true)
@@ -200,7 +200,7 @@ class Settings
     else [Math.less_of(direction[0] - Player.x, distance), Math.less_of(direction[1] - Player.y, distance)]
     end
     if calc_direction.is_a?(Array) && calc_direction.length == 2
-      $skip += 1
+      $skip = 1
       callback.call(calc_direction)
       clear_settings
       $gamemode = 'play'
@@ -213,6 +213,7 @@ class Settings
     coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
     if Dungeon.at(coords) == "  "
       Player.coords = coords
+      Game.tick
     else
       Log.add "Flash failed. There is a wall there."
     end

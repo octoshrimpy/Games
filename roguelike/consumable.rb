@@ -5,14 +5,13 @@ class Consumable
   attr_accessor :execution_script
 
   def consume
-    Log.add "You have #{usage_verb || 'used'} #{name}."
     if Player.inventory.delete(self)
+      Log.add "You have #{usage_verb || 'used'} #{name}."
       Player.energize(self.restore_energy.to_i, nil)
       Player.restore(self.restore_mana.to_i, nil)
       Player.heal(self.restore_health.to_i, nil)
       if execution_script
         Game.redraw
-        sleep 0.3
         eval(execution_script)
       end
       Game.redraw
@@ -42,7 +41,7 @@ class Consumable
       name: "Scroll of Unstable Teleportation",
       stack_size: 10,
       icon: '%',
-      execution_script: "Player.coords = Dungeon.find_open_spaces.sample"
+      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces.sample; Game.tick"
     })
     new({
       weight: 0.1,

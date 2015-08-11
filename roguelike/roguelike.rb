@@ -9,6 +9,8 @@ add descriptions for items
 
 Set max for distances
 
+Tick after scrolling using numbers
+
 Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
