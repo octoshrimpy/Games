@@ -6,10 +6,10 @@ class Projectile
     self.x ||= source.x
     self.y ||= source.y
     self.depth ||= source.depth
-    self.power ||= source.strength
     self.destination_x = destination[:x]
     self.destination_y = destination[:y]
     self.item = item
+    self.power ||= Math.greater_of((x - destination_x).abs, (y - destination_y).abs)
 
     $projectiles << self
   end
@@ -32,7 +32,7 @@ class Projectile
         collided_with = Player
       else
         Creature.on(depth).each do |creature|
-          if next_spot == creature.coords
+          if next_spot == creature.coords && source != creature
             stop = true
             collided_with = creature
           end
@@ -41,7 +41,7 @@ class Projectile
     end
     if stop
       if collided_with
-        collided_with.hit(power * item.weight, self)
+        collided_with.hit(item.collided_damage(power), self)
         self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, depth if self.item
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item

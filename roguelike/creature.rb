@@ -209,8 +209,8 @@ class Creature
     self.hurt(raw_damage - self.defense)
   end
 
-  def hurt(damage=1, src="#{color(@name)} received #{damage} damage.")
-    @health -= damage
+  def hurt(damage=1, src="#{color(@name)} received #{damage.round} damage.")
+    @health -= damage.round
     Log.add(src)
     self.destroy(src) if @health <= 0
   end

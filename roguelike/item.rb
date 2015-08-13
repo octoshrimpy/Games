@@ -1,5 +1,5 @@
 module Item
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
 
   def initialize(defaults)
@@ -13,12 +13,18 @@ module Item
   def use!
     if self.equipment_slot
       Player.equip(self)
+    elsif self.class == RangedWeapon
+      self.fire!
     elsif self.respond_to?(:consume)
       self.consume
     else
       Log.add "Couldn't do anything with #{self.name}."
     end
     self
+  end
+
+  def collided_damage(power)
+    
   end
 
   def show

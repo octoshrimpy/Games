@@ -209,6 +209,20 @@ class Settings
     false
   end
 
+  def self.ready_throw(item)
+    @@selected_item = item
+    $gamemode = 'direct_throw'
+    $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+    Game.redraw
+  end
+
+  def self.ready_shoot(src, item)
+    @@selected_item = item
+    $gamemode = 'direct_shoot'
+    $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+    Game.redraw
+  end
+
   def self.flash!(coord)
     coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
     if Dungeon.at(coords) == "  "
@@ -370,8 +384,7 @@ class Settings
   def self.build_inventory
     @@selected_item = nil
     player_stacks = Player.inventory_by_stacks
-    inventory_weight = Player.inventory.inject(0) { |sum, item| sum + item.weight }.round(3)
-    @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{inventory_weight}lbs"
+    @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{Player.inventory_weight}lbs"
     @@selectable = true
     [''] + player_stacks.map do |name, items|
       count = items.count < 10 ? " #{items.count}" : items.count
@@ -413,7 +426,7 @@ class Settings
   def self.build_equipment_menu
     lines = ['']
     @@selectable = true
-    @@title = 'Equipment'
+    @@title = "Equipment #{15.times.map{' '}.join}Weight: #{Player.equipped_weight}"
     %w( head torso left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
       slot_name = humanize_slot(slot)
       space = (20 - slot_name.length).times.map{' '}.join
@@ -451,7 +464,8 @@ class Settings
       bonus_defense: 'DEF',
       bonus_speed: 'SPD',
       bonus_accuracy: 'ACC',
-      bonus_self_regen: 'REGEN'
+      bonus_self_regen: 'REGEN',
+      weight: 'WEIGHT'
     }
     specs = ""
     stats.each do |stat, abbreviation|

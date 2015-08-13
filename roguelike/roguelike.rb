@@ -7,13 +7,21 @@ magic and spells!!
 
 add descriptions for items
 
-Set max for distances
-
-Tick after scrolling using numbers
+item modifiers / special abilities
 
 Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
+
+Every 10 levels, spawn a BOSS. Render the map a little differently?
+
+Build the town to buy/sell stuff.
+
+Refactor map generation to allow for different types and specifications
+
+Enemy spawning rarity. Some monsters are more common than others, depending on the floor
+
+Use different amounts of energy for different actions. Standing still? VERY little. Walking, a bit. Attacking, a lot.
 
 Add a menu to show the character stats (including bonuses from armor/weapons/potions)
 

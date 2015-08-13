@@ -337,6 +337,14 @@ class Player
     bonus
   end
 
+  def self.has(item)
+    if item.is_a? String
+      Player.inventory.map(&:name).include?(item)
+    else
+      Player.inventory.include?(item)
+    end
+  end
+
   def self.inventory_by_stacks
     stacks = {}
     self.inventory.map do |item|
@@ -370,6 +378,14 @@ class Player
         i.equipment_slot == slot.to_sym
       end
     end
+  end
+
+  def self.inventory_weight
+    Player.inventory.inject(0) { |sum, item| sum + item.weight }.round(3)
+  end
+
+  def self.equipped_weight
+    Player.equipped.inject(0) { |sum, item| sum + (item[1] ? item[1].weight : 0) }.round(3)
   end
 
   def self.give(item_name)

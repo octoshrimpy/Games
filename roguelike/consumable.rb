@@ -20,8 +20,8 @@ class Consumable
 
   def self.generate
     new({
-      weight: 0.1,
       name: "Bread of Invisibility",
+      weight: 0.1,
       usage_verb: 'consumed',
       restore_energy: 10,
       stack_size: 10,
@@ -29,23 +29,23 @@ class Consumable
       execution_script: "Player.visibility(10)"
     })
     new({
-      weight: 0.1,
       name: "Bread Scrap",
+      weight: 0.1,
       usage_verb: 'consumed',
       restore_energy: 2,
       stack_size: 10,
       icon: '`'
     })
     new({
-      weight: 0.1,
       name: "Scroll of Unstable Teleportation",
+      weight: 0.1,
       stack_size: 10,
       icon: '%',
       execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces.sample; Game.tick"
     })
     new({
-      weight: 0.1,
       name: "Scroll of Flash",
+      weight: 0.1,
       stack_size: 10,
       icon: '%',
       color: :yellow,
