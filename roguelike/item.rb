@@ -1,16 +1,34 @@
 module Item
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
 
   def initialize(defaults)
     defaults.each do |key, value|
       instance_variable_set("@#{key}", value)
     end
+    self.usable_after_death ||= false
     self.stack_size ||= 1
     $items << self
   end
 
+  def destroy
+    Player.inventory.delete(self)
+    $items.delete(self)
+    true
+  end
+
+  def should_destroy(collided_with)
+    cast_object = case
+    when collided_with.class == Creature then 'C'
+    when collided_with.class == String then collided_with.is_solid? ? 'S' : 's'
+    when collided_with.class == Player then 'P'
+    else 'o'
+    end
+    (destroy_on_collision_with.split('') + ['a']).include?(cast_object)
+  end
+
   def use!
+    return false if $gameover && !(usable_after_death)
     if self.equipment_slot
       Player.equip(self)
     elsif self.class == RangedWeapon
@@ -24,7 +42,7 @@ module Item
   end
 
   def collided_damage(power)
-    
+    5
   end
 
   def show
@@ -55,11 +73,11 @@ module Item
   end
 
   def self.generate
-    consumable = Consumable.generate
-    melee = generate_melee_weapons
-    ranged = generate_ranged_weapons
-    magic = generate_magic_weapons
-    equipment = generate_equipment
+     Consumable.generate
+     generate_melee_weapons
+     generate_ranged_weapons
+     generate_magic_weapons
+     generate_equipment
   end
 
   def self.all; $items; end
@@ -99,26 +117,24 @@ module Item
       # })
       # Two-handed??
   def self.generate_melee_weapons
-    [
-      MeleeWeapon.new({
-        name: 'Excalibur',
-        icon: '†',
-        equipment_slot: :right_hand,
-        color: :light_yellow,
-        weight: 12,
-        bonus_health: 50,
-        bonus_mana: 50,
-        bonus_strength: 10,
-        bonus_self_regen: 10
-      }),
-      MeleeWeapon.new({
-        name: 'Rusty Dagger',
-        icon: '†',
-        equipment_slot: :right_hand,
-        weight: 4,
-        bonus_strength: 1
-      })
-    ]
+    MeleeWeapon.new({
+      name: 'Excalibur',
+      icon: '†',
+      equipment_slot: :right_hand,
+      color: :light_yellow,
+      weight: 12,
+      bonus_health: 50,
+      bonus_mana: 50,
+      bonus_strength: 10,
+      bonus_self_regen: 10
+    })
+    MeleeWeapon.new({
+      name: 'Rusty Dagger',
+      icon: '†',
+      equipment_slot: :right_hand,
+      weight: 4,
+      bonus_strength: 1
+    })
   end
       # RangedWeapon.new({
       #   name:,
@@ -137,20 +153,25 @@ module Item
       #   bonus_self_regen:
       # })
   def self.generate_ranged_weapons
-    [
-      RangedWeapon.new({
-        name: 'Standard Bow',
-        icon: '}',
-        color: :white,
-        range: '10',
-        thrown: false,
-        weight: 3,
-        bonus_health: 0,
-        bonus_mana: 0,
-        bonus_strength: 0,
-        bonus_defense: 0
-      })
-    ]
+    RangedWeapon.new({
+      name: 'Standard Bow',
+      icon: '}',
+      ammo_type: 'Arrow',
+      color: :white,
+      range: '10',
+      thrown: false,
+      weight: 3
+    })
+    RangedWeapon.new({
+      name: 'Arrow',
+      icon: '-',
+      color: :white,
+      destroy_on_collision_with: 'P C',
+      stack_size: 50,
+      range: '10',
+      thrown: true,
+      weight: 0.3
+    })
   end
       # MagicWeapon.new({
       #   name:,
@@ -170,8 +191,6 @@ module Item
       #   bonus_self_regen:
       # })
   def self.generate_magic_weapons
-    [
-    ]
   end
       # Equipment.new({
       #   name:,
@@ -189,7 +208,5 @@ module Item
       #   bonus_self_regen:
       # })
   def self.generate_equipment
-    [
-    ]
   end
 end

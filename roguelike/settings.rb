@@ -97,6 +97,11 @@ class Settings
         do_in_direction([@@scroll_horz, @@scroll], 5, method(:flash!))
         clear_settings
       end
+      if $gamemode == 'target_shoot'
+        do_in_direction([@@scroll_horz, @@scroll], 100, method(:shoot!))
+        clear_settings
+      end
+    when $key_exit then $gamemode == 'dead' ? Game.end : ''
     when "P" then Game.pause
     when "\"" then show_full_map = true
     when $key_sleep
@@ -183,6 +188,7 @@ class Settings
   end
 
   def self.direct_target(direction)
+    do_in_direction(direction, 100, method(:shoot!)) if $gamemode == 'direct_shoot'
     do_in_direction(direction, 100, method(:throw!)) if $gamemode == 'direct_throw'
     do_in_direction(direction, 5, method(:flash!)) if $gamemode == 'direct_flash'
   end
@@ -219,7 +225,7 @@ class Settings
   def self.ready_shoot(src, item)
     @@selected_item = item
     $gamemode = 'direct_shoot'
-    $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+    $message = "Click the direction you would like to shoot. '#{$key_select_position}' to choose coordinate."
     Game.redraw
   end
 
@@ -235,6 +241,15 @@ class Settings
 
   def self.throw!(coord)
     Player.throw_item(@@selected_item, coord)
+  end
+
+  def self.shoot!(coord)
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    Log.add "Shot #{@@selected_item.name}."
+    Player.inventory.delete(@@selected_item)
+    Projectile.new(coords, @@selected_item)
+    clear_settings
+    Game.tick
   end
 
   def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selectable, @@selection_objects = [] end
@@ -310,6 +325,7 @@ class Settings
     else
       lines = case $gamemode
       when 'help' then build_help_menu
+      when 'dead' then build_dead_menu
       when 'logs' then build_log_menu
       when 'inventory' then build_inventory
       when 'item_options' then build_inventory_options_menu
@@ -371,6 +387,12 @@ class Settings
     @@title = "Help"
     @@selectable = false
     word_wrap(help_menu_text)
+  end
+
+  def self.build_dead_menu
+    @@title = "You have Died!"
+    @@selectable = false
+    word_wrap(dead_menu_text)
   end
 
   def self.build_log_menu
@@ -517,6 +539,7 @@ class Settings
     when 1 # Throw
       $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
       $gamemode = 'direct_throw'
+      $gamemode = 'direct_throw'
       @@selectable = false
       clear = false; play = false
     when 2 # Drop
@@ -655,6 +678,12 @@ View and edit keys by hitting the '#{$key_open_keybindings}' key.
 
 -------------------------------------------------------------------------------- #{'Movement'.color(:red)}
 Each frame takes place on every interval of the speed of the Player(you). Monster may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. If the player moves at a speed of 10 and a monster moves at a speed of 15, the monsters position will only update every time the player moves. Every other turn the monster will appear to move 2 spaces because of the extra speed.
+)
+  end
+
+  def self.dead_menu_text
+%(
+You have DIED! Hit '#{$key_exit}' to exit the game.
 )
   end
 end

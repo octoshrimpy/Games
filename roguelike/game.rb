@@ -15,6 +15,7 @@ class Game
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
     $gamemode = "play"
+    $gameover = false
     $spawn_creatures = true
     $screen_shot = nil
     $world = []
@@ -35,11 +36,15 @@ class Game
   end
 
   def self.tick
-    Player.tick
-    Game.run_time(Player.speed)
+    if $gameover
+      $gamemode = 'dead' if $gamemode == 'play'
+    else
+      Player.tick
+      Game.run_time(Player.speed)
 
-    Game.redraw
-    sleep 0.03
+      Game.redraw
+      sleep 0.03
+    end
   end
 
   def self.run_time(time)
@@ -47,7 +52,7 @@ class Game
       Creature.current.each do |creature|
         creature.move if $tick % (100 - creature.run_speed) == 0
       end if Creature.current
-      Projectile.all.each { |shot| shot.tick } if $tick % (20) == 0
+      Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 - shot.speed) == 0 }
       $tick += 1
     end
     Player.verify_stats

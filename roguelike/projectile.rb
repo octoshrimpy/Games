@@ -1,7 +1,9 @@
 class Projectile
-  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source
+  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob
 
   def initialize(destination, item, source=Player)
+    self.dob = $time
+    self.speed ||= 80
     self.source = source
     self.x ||= source.x
     self.y ||= source.y
@@ -24,15 +26,18 @@ class Projectile
     end
     distance = line.count
     self.destination = line[power] if distance > power
-    next_spot = line[1]
-    stop = (!(next_spot) || Dungeon.at(next_spot, depth).is_solid?)
-    unless stop
-      if next_spot == Player.coords && source != Player
+
+    last_coord = {x: x, y: y}
+    unless stop = destination == last_coord
+      next_coord = line[1]
+      spot = next_coord ? Dungeon.at(next_coord, depth) : nil
+      stop = spot.is_solid? if spot
+      if (next_coord == Player.coords || last_coord == Player.coords) && source != Player
         stop = true
         collided_with = Player
       else
         Creature.on(depth).each do |creature|
-          if next_spot == creature.coords && source != creature
+          if (next_coord == creature.coords || last_coord == creature.coords) && source != creature
             stop = true
             collided_with = creature
           end
@@ -40,15 +45,20 @@ class Projectile
       end
     end
     if stop
+      collided_with_item = collided_with || spot
       if collided_with
         collided_with.hit(item.collided_damage(power), self)
-        self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, depth if self.item
+        if self.item.should_destroy(collided_with_item)
+          self.item.destroy
+        else
+          self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, depth
+        end
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item
       end
       $projectiles.delete(self)
     else
-      self.coords = next_spot
+      self.coords = next_coord
     end
   end
 

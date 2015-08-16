@@ -74,8 +74,8 @@ class Player
     if self.health <= 0 && @@live == true
       @@live = false
       Log.add("You have been slaughtered by #{last_hit_by}.")
-      Game.redraw
-      Game.end
+      $gamemode = 'dead'
+      $gameover = true
     end
     self.invisibility_ticks = 0 if self.invisibility_ticks < 0
     self.health = max_health if self.health > max_health
@@ -86,8 +86,9 @@ class Player
   end
 
   def self.tick
+    return false unless $gameover
     self.selected = 0
-    loss = (rand(10) == 0 ? 1 : 0)
+    loss = (rand(20) == 0 ? 1 : 0)
     self.energy -= loss
     Log.add "I'm starving." if loss > 0 && energy <= 0
     hp_gain = (rand(5) == 0 ? self_regen : 0)
@@ -218,10 +219,11 @@ class Player
       # --------------------------------------------------- CHEATS ----------------------------
     when "v"
       print "\nUp: "
-      Dungeon.current.search_for("< ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
-      print "\n\rDown: "
-      Dungeon.current.search_for("> ").each {|d| print "(#{d[:x]}, #{d[:y]}) "}
+      Dungeon.current.search_for("< ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }
+      print "Down: "
+      Dungeon.current.search_for("> ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }
       puts
+      Game.redraw
     when "V"
       Dungeon.current.each_with_index do |row, y|
         row.each_with_index do |col, x|
@@ -230,7 +232,7 @@ class Player
       end
       seen.uniq!
       Log.add "Cheat activated: Full vision."
-      Game.draw
+      Game.redraw
       # --------------------------------------------------- / CHEATS ---------------------------
     end
     if (x_dest != 0 || y_dest != 0)
@@ -240,6 +242,8 @@ class Player
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
             is_creature = true
             if self.energy > 0
+              loss = (rand(10) == 0 ? 1 : 0)
+              self.energy -= loss
               damage = (0..100).to_a.sample > accuracy ? -1 : (strength + (-1..1).to_a.sample)
               if damage == 0
                 Log.add "#{creature.color(creature.name)} blocked your attack."
@@ -254,6 +258,8 @@ class Player
           end
         end
         unless is_creature
+          loss = (rand(20) == 0 ? 1 : 0)
+          self.energy -= loss
           self.x += x_dest
           self.y += y_dest
         end

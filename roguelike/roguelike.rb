@@ -14,9 +14,7 @@ Scaling for enemies
 Enemy special abilities?
 
 Every 10 levels, spawn a BOSS. Render the map a little differently?
-
 Build the town to buy/sell stuff.
-
 Refactor map generation to allow for different types and specifications
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
@@ -24,6 +22,7 @@ Enemy spawning rarity. Some monsters are more common than others, depending on t
 Use different amounts of energy for different actions. Standing still? VERY little. Walking, a bit. Attacking, a lot.
 
 Add a menu to show the character stats (including bonuses from armor/weapons/potions)
+Allow User to customize Key bindings
 
 Save data
 
@@ -89,7 +88,9 @@ require './visible.rb'
 Game.start
 
 Player.inventory << Item['Scroll of Unstable Teleportation']
-50.times { Player.inventory << Item['Scroll of Flash'] }
+Player.inventory << Item['Standard Bow']
+100.times { Player.inventory << Item['Arrow'] }
+5.times { Player.inventory << Item['Scroll of Flash'] }
 system 'clear' or system 'cls'
 Game.draw
 

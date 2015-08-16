@@ -20,6 +20,7 @@ $key_inspect_surroundings = "M"
 $key_open_inventory = "I"
 $key_open_equipment = "R"
 $key_read_more = "r"
+$key_exit = "X"
 
 $key_pickup_items = "SPACE"
 $key_confirm = "RETURN"
