@@ -86,7 +86,7 @@ class Player
   end
 
   def self.tick
-    return false unless $gameover
+    return false if $gameover
     self.selected = 0
     loss = (rand(20) == 0 ? 1 : 0)
     self.energy -= loss

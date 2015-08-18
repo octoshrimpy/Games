@@ -18,13 +18,11 @@ module Item
   end
 
   def explode!(radius, damage)
-    Log.add "Exploded!"
     (-radius..radius).map do |rel_y|
       (-radius..radius).map do |rel_x|
         coord = {x: x + rel_x, y: y + rel_y}
         if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
           unless Dungeon.at(coord, depth).is_solid?
-            Log.add "Boom: (#{x + rel_x}, #{rel_y + y})"
             Creature.at(coord, self.depth).each do |creature|
               creature.hurt(damage, "#{creature.color(creature.name)} got blown up for #{damage.round} damage.")
             end
