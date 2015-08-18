@@ -25,8 +25,12 @@ class Dungeon
     at_level(depth)[coord[:y]][coord[:x]]
   end
 
-  def self.find_open_spaces
-    current.search_for("  ")
+  def self.find_open_spaces(allow_landing_items=true)
+    if allow_landing_items
+      current.search_for("  ")
+    else
+      current.search_for("  ")  - (Item.on_board.map(&:coords) + Gold.all.map(&:coords) + Creature.current.map(&:coords) + [Player.coords])
+    end
   end
 
   def build(size)

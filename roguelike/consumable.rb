@@ -41,7 +41,7 @@ class Consumable
       weight: 0.1,
       stack_size: 10,
       icon: '%',
-      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces.sample; Game.tick"
+      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces(false).sample; Game.tick"
     })
     new({
       name: "Scroll of Flash",
