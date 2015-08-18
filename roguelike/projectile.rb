@@ -1,9 +1,9 @@
 class Projectile
-  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob, :collided_action
+  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob
 
-  def initialize(destination, item, source, collided_action='')
+  def initialize(destination, item, source, options)
     self.dob = $time
-    self.speed ||= 80
+    self.speed = options[:speed] || 80
     self.source = source
     self.x ||= source.x
     self.y ||= source.y
@@ -11,7 +11,6 @@ class Projectile
     self.destination_x = destination[:x]
     self.destination_y = destination[:y]
     self.item = item
-    self.collided_action = collided_action
     self.power ||= Math.greater_of((x - destination_x).abs, (y - destination_y).abs)
 
     $projectiles << self
@@ -48,16 +47,11 @@ class Projectile
     if stop
       collided_with_item = collided_with || spot
       if collided_with
-        collided_with.hit(item.collided_damage(power), self)
-        if self.item.should_destroy(collided_with_item)
-          self.item.destroy
-        else
-          self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, depth
-        end
+        self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, collided_with.depth
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item
       end
-      eval(collided_action) if item
+      item.collide(collided_with_item)
       $projectiles.delete(self)
     else
       self.coords = next_coord

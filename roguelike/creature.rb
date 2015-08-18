@@ -175,7 +175,7 @@ class Creature
   end
 
   def destroy(src)
-    Log.add("#{color(@name)} was beaten to death.")
+    Log.add("#{color(@name)} died.")
     drop_locations = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
@@ -212,7 +212,7 @@ class Creature
   def hit(raw_damage, source)
     self.hurt(raw_damage - self.defense)
   end
-  
+
   def hurt(damage=1, src="#{color(@name)} received #{damage.round} damage.")
     @health -= damage.round
     Log.add(src)

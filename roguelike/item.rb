@@ -18,12 +18,15 @@ module Item
   end
 
   def explode!(radius, damage)
+    Log.add "Exploded!"
     (-radius..radius).map do |rel_y|
       (-radius..radius).map do |rel_x|
+        coord = {x: x + rel_x, y: y + rel_y}
         if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
-          unless Dungeon.current[y + rel_y][rel_x + x].is_solid?
-            Creature.at({x: rel_x, y: rel_y}, self.depth).each do |creature|
-              creature.hurt(damage, "#{creature.color(@name)} got blown up for #{damage.round} damage.")
+          unless Dungeon.at(coord, depth).is_solid?
+            Log.add "Boom: (#{x + rel_x}, #{rel_y + y})"
+            Creature.at(coord, self.depth).each do |creature|
+              creature.hurt(damage, "#{creature.color(creature.name)} got blown up for #{damage.round} damage.")
             end
           end
         end
@@ -31,7 +34,7 @@ module Item
     end
   end
 
-  def should_destroy(collided_with)
+  def should_destroy_on_collision(collided_with)
     cast_object = case
     when collided_with.class == Creature then 'C'
     when collided_with.class == String then collided_with.is_solid? ? 'S' : 's'
@@ -45,7 +48,7 @@ module Item
     return false if $gameover && !(usable_after_death)
     if self.equipment_slot
       Player.equip(self)
-    elsif self.class == RangedWeapon
+    elsif self.class == RangedWeapon || self.class == MagicWeapon
       self.fire!
     elsif self.respond_to?(:consume)
       self.consume
@@ -57,6 +60,14 @@ module Item
 
   def collided_damage(power)
     5
+  end
+
+  def collide(collided_with)
+    if should_destroy_on_collision(collided_with)
+      destroy
+    end
+    eval(collided_action) if collided_action
+    Game.input true; binding.pry unless collided_action
   end
 
   def show
@@ -89,6 +100,7 @@ module Item
   def self.generate
      Consumable.generate
      generate_melee_weapons
+     generate_projectiles
      generate_ranged_weapons
      generate_magic_weapons
      generate_equipment
@@ -96,7 +108,16 @@ module Item
 
   def self.all; $items; end
   def self.count; all.count; end
-  def self.[](name); item = all.select {|i| i.name == name }.first.dup; $items << item; item; end
+  def self.[](name)
+    item = all.select {|i| i.name == name }.first
+    if item
+      new_item = item.dup
+      $items << new_item
+    else
+      Game.input true; binding.pry
+    end
+    item
+  end
   def self.by_name(name); item = all.select {|i| i.name == name }.first; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
   def self.melee; all.select {|i| i.class == MeleeWeapon }; end
@@ -149,6 +170,30 @@ module Item
       bonus_strength: 1
     })
   end
+
+  def self.generate_projectiles
+    RangedWeapon.new({
+      name: 'Arrow',
+      icon: '-',
+      color: :white,
+      destroy_on_collision_with: 'P C',
+      stack_size: 50,
+      range: '10',
+      projectile_speed: 80,
+      thrown: true,
+      weight: 0.3
+    })
+    RangedWeapon.new({
+      name: 'Fire Blast',
+      icon: 'o',
+      color: :light_red,
+      destroy_on_collision_with: 'a',
+      range: '10',
+      projectile_speed: 40,
+      collided_action: "explode!(1, 20); destroy",
+      thrown: true
+    })
+  end
       # RangedWeapon.new({
       #   name:,
       #   icon:,
@@ -175,16 +220,6 @@ module Item
       thrown: false,
       weight: 3
     })
-    RangedWeapon.new({
-      name: 'Arrow',
-      icon: '-',
-      color: :white,
-      destroy_on_collision_with: 'P C',
-      stack_size: 50,
-      range: '10',
-      thrown: true,
-      weight: 0.3
-    })
   end
       # MagicWeapon.new({
       #   name:,
@@ -205,9 +240,10 @@ module Item
       # })
   def self.generate_magic_weapons
     MagicWeapon.new({
-      name: 'Book of Magic Blast',
+      name: 'Book of Fire Blast',
       icon: '[',
       color: :blue,
+      spell_to_cast: 'Fire Blast',
       range: 15,
       type: 'fire',
       weight: 3,

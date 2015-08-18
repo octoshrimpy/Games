@@ -1,7 +1,7 @@
 class RangedWeapon
   include Item
 
-  attr_accessor :range, :thrown, :ammo_type
+  attr_accessor :range, :thrown, :ammo_type, :projectile_speed, :collided_action
 
   def fire!
     if thrown
