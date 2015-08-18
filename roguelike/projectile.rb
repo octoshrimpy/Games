@@ -1,7 +1,7 @@
 class Projectile
-  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob
+  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob, :collided_action
 
-  def initialize(destination, item, source=Player)
+  def initialize(destination, item, source, collided_action='')
     self.dob = $time
     self.speed ||= 80
     self.source = source
@@ -11,6 +11,7 @@ class Projectile
     self.destination_x = destination[:x]
     self.destination_y = destination[:y]
     self.item = item
+    self.collided_action = collided_action
     self.power ||= Math.greater_of((x - destination_x).abs, (y - destination_y).abs)
 
     $projectiles << self
@@ -56,6 +57,7 @@ class Projectile
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item
       end
+      eval(collided_action) if item
       $projectiles.delete(self)
     else
       self.coords = next_coord

@@ -247,7 +247,7 @@ class Settings
     coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
     Log.add "Shot #{@@selected_item.name}."
     Player.inventory.delete(@@selected_item)
-    Projectile.new(coords, @@selected_item)
+    Projectile.new(coords, @@selected_item, Player)
     clear_settings
     Game.tick
   end

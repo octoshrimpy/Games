@@ -170,6 +170,10 @@ class Creature
     $npcs.flatten
   end
 
+  def self.at(coord, depth=Player.depth)
+    Creature.on(depth).select { |creature| creature.x == coord[:x] && creature.y == coord[:y] }
+  end
+
   def destroy(src)
     Log.add("#{color(@name)} was beaten to death.")
     drop_locations = (-1..1).map do |y|
@@ -208,7 +212,7 @@ class Creature
   def hit(raw_damage, source)
     self.hurt(raw_damage - self.defense)
   end
-
+  
   def hurt(damage=1, src="#{color(@name)} received #{damage.round} damage.")
     @health -= damage.round
     Log.add(src)
@@ -231,7 +235,7 @@ class Creature
     move_on = false
     until move_on
       coord = random_coord
-      move_on = Dungeon.at(coord) == "  " ? true : false
+      move_on = Dungeon.at(coord) == '  ' ? true : false
     end
     coord
   end
@@ -240,7 +244,7 @@ class Creature
     {x: (@x-10..@x+10).to_a.sample, y: (@y-10..@y+10).to_a.sample}
   end
 
-  def move(type="check")
+  def move(type='check')
     @destination = nil if @destination == coords || rand(10) == 0
     if player_in_range?
       @destination = Player.coords.clone

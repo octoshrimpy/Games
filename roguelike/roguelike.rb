@@ -7,6 +7,8 @@ magic and spells!!
 
 add descriptions for items
 
+Stop unstable teleportation from landing in catacombs
+
 item modifiers / special abilities
 
 Character Experience/levels
@@ -18,8 +20,6 @@ Build the town to buy/sell stuff.
 Refactor map generation to allow for different types and specifications
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
-
-Use different amounts of energy for different actions. Standing still? VERY little. Walking, a bit. Attacking, a lot.
 
 Add a menu to show the character stats (including bonuses from armor/weapons/potions)
 Allow User to customize Key bindings
@@ -36,11 +36,9 @@ Have skill levels for different types of weapons
 Incorporate two handed weapons
 (2-handed weapons grant speed reduction if there is an item in the other hand)
 
-Create a fallback for all items. What do they do when used/consumed?
-
 Allow player to select items from the drop menu in order to pick them up manually
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Saving data -
 

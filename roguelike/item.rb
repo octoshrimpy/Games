@@ -17,6 +17,20 @@ module Item
     true
   end
 
+  def explode!(radius, damage)
+    (-radius..radius).map do |rel_y|
+      (-radius..radius).map do |rel_x|
+        if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
+          unless Dungeon.current[y + rel_y][rel_x + x].is_solid?
+            Creature.at({x: rel_x, y: rel_y}, self.depth).each do |creature|
+              creature.hurt(damage, "#{creature.color(@name)} got blown up for #{damage.round} damage.")
+            end
+          end
+        end
+      end
+    end
+  end
+
   def should_destroy(collided_with)
     cast_object = case
     when collided_with.class == Creature then 'C'
@@ -99,7 +113,6 @@ module Item
       equipment
     ]
   end
-
       # MeleeWeapon.new({
       #   name: '',
       #   icon: '',
@@ -191,6 +204,15 @@ module Item
       #   bonus_self_regen:
       # })
   def self.generate_magic_weapons
+    MagicWeapon.new({
+      name: 'Book of Magic Blast',
+      icon: '[',
+      color: :blue,
+      range: 15,
+      type: 'fire',
+      weight: 3,
+      mana_usage: 5
+    })
   end
       # Equipment.new({
       #   name:,

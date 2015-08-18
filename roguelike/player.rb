@@ -429,7 +429,7 @@ class Player
     else
       Log.add "Threw #{item.name}."
     end
-    Projectile.new({x: Player.x + x, y: Player.y + y}, item)
+    Projectile.new({x: Player.x + x, y: Player.y + y}, item, Player)
   end
 
   def self.drop(item, show_log=true)
