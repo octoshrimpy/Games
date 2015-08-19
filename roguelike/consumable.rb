@@ -14,7 +14,6 @@ class Consumable
         Game.redraw
         eval(execution_script)
       end
-      Game.redraw
     end
   end
 

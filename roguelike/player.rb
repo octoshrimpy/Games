@@ -217,6 +217,8 @@ class Player
         tick = true
       end
       # --------------------------------------------------- CHEATS ----------------------------
+    when ";"
+      sort_inventory!
     when "="
       blow_walls
       Game.redraw
@@ -352,6 +354,10 @@ class Player
     else
       Player.inventory.include?(item)
     end
+  end
+
+  def self.sort_inventory!
+    inventory.sort_by!(&:name)
   end
 
   def self.inventory_by_stacks

@@ -1,11 +1,8 @@
 # TODO
 =begin
-Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
-^^ nope! I hope?
-
 add descriptions for items
 
-flash is redrawing so message is lost
+Show explode effect for 1 frame
 
 item modifiers / special abilities
 DOT's

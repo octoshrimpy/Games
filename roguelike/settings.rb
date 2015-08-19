@@ -230,14 +230,12 @@ class Settings
     @@selected_item = item
     $gamemode = 'direct_throw'
     $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
-    Game.redraw
   end
 
   def self.ready_shoot(src, item)
     @@selected_item = item
     $gamemode = 'direct_shoot'
     $message = "Click the direction you would like to shoot. '#{$key_select_position}' to choose coordinate."
-    Game.redraw
   end
 
   def self.flash!(coord)
@@ -678,6 +676,7 @@ Type 'x' then hit enter to cancel.
     padding = 20
     lines = ['']
     lines << "Name: #{item.name.or('N/A')}"
+    lines << "Icon: #{item.icon.or('N/A')}"
     lines << "Weight: #{item.weight.or('N/A')}"
     lines << "Slot: #{humanize_slot(item.equipment_slot).or('N/A')}"
     lines << ""
