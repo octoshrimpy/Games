@@ -217,6 +217,9 @@ class Player
         tick = true
       end
       # --------------------------------------------------- CHEATS ----------------------------
+    when "="
+      blow_walls
+      Game.redraw
     when "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }

@@ -33,7 +33,8 @@ class Dungeon
     end
   end
 
-  def build(size)
+  def build(size, depth=Player.depth)
+    srand($seed + depth)
     arena = Arena.new
     create_dungeon(arena, size)
     arena[0, 0] = @up_stairs

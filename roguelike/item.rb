@@ -53,6 +53,7 @@ module Item
     else
       Log.add "Couldn't do anything with #{self.name}."
     end
+    Game.redraw
     self
   end
 
@@ -65,7 +66,6 @@ module Item
       destroy
     end
     eval(collided_action) if collided_action
-    Game.input true; binding.pry unless collided_action
   end
 
   def show
@@ -111,10 +111,10 @@ module Item
     if item
       new_item = item.dup
       $items << new_item
+      new_item
     else
       Game.input true; binding.pry
     end
-    item
   end
   def self.by_name(name); item = all.select {|i| i.name == name }.first; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
@@ -179,7 +179,8 @@ module Item
       range: '10',
       projectile_speed: 80,
       thrown: true,
-      weight: 0.3
+      weight: 0.3,
+      description: "Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby. Or- enter a letter to sleep until that specific attribute has reached max. Additionally, you can follow that key with a number to sleep until that number reaches the specified amount. Example: 'h 20' will sleep until your health reaches 20. If your health is already greater, you will not sleep. You will automatically awaken early if there is danger nearby."
     })
     RangedWeapon.new({
       name: 'Fire Blast',

@@ -46,31 +46,42 @@ class Settings
 
     case input
     when $key_open_help
-      $gamemode = $gamemode.toggle("help", 'play')
+      $gamemode = $gamemode.toggle('help', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_logs
-      $gamemode = $gamemode.toggle("logs", 'play')
+      $gamemode = $gamemode.toggle('logs', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_keybindings
-      $gamemode = $gamemode.toggle("key_bindings", 'play')
+      $gamemode = $gamemode.toggle('key_bindings', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_inventory
-      $gamemode = $gamemode.toggle("inventory", 'play')
+      $gamemode = $gamemode.toggle('inventory', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_open_equipment
-      $gamemode = $gamemode.toggle("equipment", 'play')
+      $gamemode = $gamemode.toggle('equipment', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_read_more
       if @@scroll_horz
-        $gamemode = $gamemode.toggle("read_more", 'map')
+        $gamemode = $gamemode.toggle('read_more', 'map')
         $gamemode == 'map' ? (@@scroll = @@select; @@select = nil) : (@@select = @@scroll)
         Settings.show
       else
-        $gamemode = $gamemode.toggle("read_more", 'play')
-        $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
+        case $gamemode
+        when 'read_more'
+          $gamemode = 'play'
+          Game.redraw
+          clear_settings
+        when 'play'
+          $gamemode = 'read_more'
+          Settings.show
+        when 'inventory'
+          grab_inventory
+          $gamemode = 'read_about'
+          Settings.show
+        end
       end
     when $key_inspect_surroundings
-      $gamemode = $gamemode.toggle("map", 'play')
+      $gamemode = $gamemode.toggle('map', 'play')
       $screen_shot = nil
       if $gamemode == 'play'
         Game.redraw
@@ -273,7 +284,8 @@ class Settings
     when 'key_bindings' then 'play'
     when 'equipment' then 'play'
     when 'map' then 'play'
-    when 'read_more' then 'map'
+    when 'read_more' then 'play'
+    when 'read_about' then 'inventory'
     when 'equip_head' then 'equipment'
     when 'equip_torso' then 'equipment'
     when 'equip_left_hand' then 'equipment'
@@ -332,6 +344,7 @@ class Settings
       when 'key_bindings' then build_key_bindings
       when 'equipment' then build_equipment_menu
       when 'read_more' then build_read_more_menu
+      when 'read_about' then build_read_about_menu
       when 'equip_head' then build_inventory_by('head')
       when 'equip_torso' then build_inventory_by('torso')
       when 'equip_left_hand' then build_inventory_by('left_hand')
@@ -443,6 +456,12 @@ class Settings
     @@title = 'Read More'
     @@selectable = false
     word_wrap($previous_message)
+  end
+
+  def self.build_read_about_menu
+    @@title = "About #{@@selected_item.name}"
+    @@selectable = false
+    explain_item_text(@@selected_item)
   end
 
   def self.build_equipment_menu
@@ -571,6 +590,12 @@ class Settings
     show
   end
 
+  def self.columnize(padding, cols)
+    cols.map do |col|
+      "#{col}#{Array.new(padding - col.length).join(' ')}"
+    end.join
+  end
+
   def self.redirect_selection
     new_gamemode = case $gamemode
     when 'equipment'
@@ -650,24 +675,27 @@ Type 'x' then hit enter to cancel.
   end
 
   def self.explain_item_text(item)
-%(
-Name: #{item.name.or('N/A')}
-Weight: #{item.weight.or('N/A')}
-Slot: #{humanize_slot(item.equipment_slot).or('N/A')}
-
-Range: #{item.range.or('N/A')}
-
-Bonus Stats:
- Health: #{item.bonus_health.or('N/A')}
- Mana: #{item.bonus_mana.or('N/A')}
- Energy: #{item.bonus_energy.or('N/A')}
- Strength: #{item.bonus_strength.or('N/A')}
- Magic Power: #{item.bonus_magic_power.or('N/A')}
- Defense: #{item.bonus_defense.or('N/A')}
- Speed: #{item.bonus_speed.or('N/A')}
- Accuracy: #{item.bonus_accuracy.or('N/A')}
- Regeneration: #{item.bonus_self_regen.or('N/A')}
-)
+    padding = 20
+    lines = ['']
+    lines << "Name: #{item.name.or('N/A')}"
+    lines << "Weight: #{item.weight.or('N/A')}"
+    lines << "Slot: #{humanize_slot(item.equipment_slot).or('N/A')}"
+    lines << ""
+    lines += ["Range: #{item.range.or('N/A')}", ""] if item.respond_to?(:range)
+    lines << "Bonus Stats:"
+    lines << "   #{columnize(padding, ["Health:", "#{item.bonus_health.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Mana:", "#{item.bonus_mana.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Energy:", "#{item.bonus_energy.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Strength:", "#{item.bonus_strength.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Magic Power:", "#{item.bonus_magic_power.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Defense:", "#{item.bonus_defense.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Speed:", "#{item.bonus_speed.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Accuracy:", "#{item.bonus_accuracy.or('N/A')}"])}"
+    lines << "   #{columnize(padding, ["Regeneration:", "#{item.bonus_self_regen.or('N/A')}"])}"
+    lines << ""
+    lines << " How to use:"
+    lines += word_wrap(item.description || "N/A")
+    lines
   end
 
   def self.help_menu_text

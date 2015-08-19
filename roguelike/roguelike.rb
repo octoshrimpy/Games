@@ -3,13 +3,12 @@
 Make more efficient- If Player is in hallway, do we check for every single block outside of the hallway?
 ^^ nope! I hope?
 
-magic and spells!!
-
 add descriptions for items
 
-Stop unstable teleportation from landing in catacombs
+flash is redrawing so message is lost
 
 item modifiers / special abilities
+DOT's
 
 Character Experience/levels
 Scaling for enemies
@@ -82,8 +81,8 @@ require './settings.rb'
 require './dungeon.rb'
 require './visible.rb'
 
-
-Game.start
+seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join.to_i
+Game.start(seed)
 
 Player.inventory << Item['Scroll of Unstable Teleportation']
 Player.inventory << Item['Standard Bow']

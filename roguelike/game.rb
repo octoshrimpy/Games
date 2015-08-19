@@ -7,8 +7,8 @@ class Game
   VIEWPORT_WIDTH = 41
   VIEWPORT_HEIGHT = 21
 
-  def self.start
-    $seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join
+  def self.start(seed)
+    $seed = seed
     srand($seed.to_i)
     $items = []
     $projectiles = []
