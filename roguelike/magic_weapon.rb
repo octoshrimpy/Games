@@ -7,7 +7,7 @@ class MagicWeapon
     if Player.mana >= mana_usage
       Settings.ready_shoot(self, Item[spell_to_cast])
       Player.mana -= mana_usage
-      true
+      false
     else
       Log.add "Out of mana."
       $gamemode = 'play'

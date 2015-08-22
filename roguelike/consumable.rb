@@ -17,7 +17,6 @@ class Consumable
         tick = eval(execution_script)
       end
     end
-    Game.input(true); binding.pry;
     tick
   end
 

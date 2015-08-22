@@ -224,8 +224,6 @@ class Player
         tick = true
       end
       # --------------------------------------------------- CHEATS ----------------------------
-    when ";"
-      sort_inventory!
     when "="
       blow_walls
       Game.redraw

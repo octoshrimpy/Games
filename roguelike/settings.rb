@@ -32,7 +32,7 @@ class Settings
       when $key_move_up_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left(10); tick = true)
       when $key_move_down_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
       when $key_move_down_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
-      when $key_move_nowhere then @@selected_select ? swap_items : @@selected_select = @@select if $gamemode == 'inventory'
+      when $key_move_nowhere then click_select
       when $key_confirm then (tick = confirm_selection if @@select)
       when $key_back_menu
         menu_back
@@ -101,7 +101,7 @@ class Settings
         $gamemode[0..5] = 'target'
         Game.show
       end
-    when $key_confirm, $key_move_nowhere
+    when $key_confirm
       if $gamemode == 'target_throw'
         do_in_direction([@@scroll_horz, @@scroll], 100, method(:throw!))
         clear_settings
@@ -660,6 +660,16 @@ class Settings
     Player.swap_inventory(@@selected_select - 1, @@select - 1)
     @@selected_select = nil
     Settings.show
+  end
+
+  def self.click_select
+    if $gamemode == 'inventory'
+      @@selected_select ? swap_items : @@selected_select = @@select
+    else
+      clear_settings
+      $gamemode = 'play'
+    end
+    false
   end
 
   def self.multi_line_message(type)
