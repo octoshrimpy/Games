@@ -13,5 +13,6 @@ class RangedWeapon
         Log.add "Out of ammo. Need more #{ammo_type}"
       end
     end
+    false
   end
 end

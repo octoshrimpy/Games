@@ -550,9 +550,9 @@ class Settings
 
     case @@select - 1
     when 0 # User/consume
-      hold_gamemode = $gamemode.dup
-      @@selected_item.use!
-      tick = false; play = false unless hold_gamemode == $gamemode
+      unless @@selected_item.use!
+        tick = false; play = false
+      end
     when 1 # Throw
       $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
       $gamemode = 'direct_throw'
@@ -577,7 +577,6 @@ class Settings
     clear_settings if clear
     Game.tick if tick
     Settings.show if show_settings
-
     true
   end
 

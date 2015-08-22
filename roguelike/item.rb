@@ -44,17 +44,18 @@ module Item
 
   def use!
     return false if $gameover && !(usable_after_death)
+    tick = true
     if self.equipment_slot
-      Player.equip(self)
+      tick = Player.equip(self)
     elsif self.class == RangedWeapon || self.class == MagicWeapon
-      self.fire!
+      tick = self.fire!
     elsif self.respond_to?(:consume)
-      self.consume
+      tick = self.consume
     else
       Log.add "Couldn't do anything with #{self.name}."
     end
     Game.redraw
-    self
+    tick
   end
 
   def collided_damage(power)

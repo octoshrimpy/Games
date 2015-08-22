@@ -5,16 +5,19 @@ class Consumable
   attr_accessor :execution_script
 
   def consume
+    tick = false
     if Player.inventory.delete(self)
       Log.add "You have #{usage_verb || 'used'} #{name}."
       Player.energize(self.restore_energy.to_i, nil)
       Player.restore(self.restore_mana.to_i, nil)
       Player.heal(self.restore_health.to_i, nil)
+      tick = true
       if execution_script
         Game.redraw
-        eval(execution_script)
+        tick = eval(execution_script)
       end
     end
+    tick
   end
 
   def self.generate
@@ -40,7 +43,7 @@ class Consumable
       weight: 0.1,
       stack_size: 10,
       icon: '%',
-      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces(false).sample; Game.tick"
+      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces(false).sample; Game.tick; true"
     })
     new({
       name: "Scroll of Flash",
@@ -48,7 +51,16 @@ class Consumable
       stack_size: 10,
       icon: '%',
       color: :yellow,
-      execution_script: "$gamemode = 'direct_flash'; $message = \"Click the direction you would like to flash. '#{$key_select_position}' to choose coordinate.\""
+      execution_script: "$gamemode = 'direct_flash'; $message = \"Click the direction you would like to flash. '#{$key_select_position}' to choose coordinate.\"; false"
+    })
+    new({
+      name: 'Potion of Resurrection',
+      weight: 1,
+      stack_size: 1,
+      icon: 'u',
+      color: :magenta,
+      usable_after_death: true,
+      execution_script: "Player.resurrect"
     })
   end
 end

@@ -4,8 +4,19 @@ add descriptions for items
 
 Show explode effect for 1 frame
 
+Creatures should still spawn while sleeping
+
+Should not be able to use an item without energy
+
 item modifiers / special abilities
 DOT's
+
+Spell books should be read. Using opens another menu where you choose spells
+More advanced books have more spells
+
+Make more obvious to the user that hitting 1-9 in menu will jump to that spot
+
+Allow player to sort inventory
 
 Character Experience/levels
 Scaling for enemies
@@ -82,6 +93,7 @@ seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] 
 Game.start(seed)
 
 Player.inventory << Item['Scroll of Unstable Teleportation']
+Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Book of Fire Blast']
 100.times { Player.inventory << Item['Arrow'] }

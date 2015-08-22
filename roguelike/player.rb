@@ -3,7 +3,7 @@ class Player
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quickbar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for
+                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for, :live
 
   @@x = 0
   @@y = 0
@@ -83,6 +83,13 @@ class Player
     self.mana = max_mana if self.mana > max_mana
     self.energy = 0 if self.energy < 0
     self.energy = max_energy if self.energy > max_energy
+  end
+
+  def self.resurrect
+    $gamemode = 'play'
+    $gameover = false
+    Player.live = true
+    Player.health = (Player.max_health/2).round
   end
 
   def self.tick
