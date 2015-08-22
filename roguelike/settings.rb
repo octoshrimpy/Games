@@ -4,6 +4,7 @@ class Settings
   @@title = ""
   @@select = nil
   @@selected_item = nil
+  @@selected_select = nil
   @@stack = nil
   @@scroll = nil
   @@scroll_horz = nil
@@ -31,7 +32,8 @@ class Settings
       when $key_move_up_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left(10); tick = true)
       when $key_move_down_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
       when $key_move_down_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
-      when $key_move_nowhere, $key_confirm then (tick = confirm_selection if @@select)
+      when $key_move_nowhere then @@selected_select ? swap_items : @@selected_select = @@select if $gamemode == 'inventory'
+      when $key_confirm then (tick = confirm_selection if @@select)
       when $key_back_menu
         menu_back
       when $key_exit_menu
@@ -261,7 +263,7 @@ class Settings
     Game.tick
   end
 
-  def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selectable, @@selection_objects = [] end
+  def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selected_select, @@selectable, @@selection_objects = [] end
   def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
   def self.scroll_left(amount=1); move_coord(-amount,0); end
   def self.scroll_right(amount=1); move_coord(amount,0); end
@@ -378,7 +380,7 @@ class Settings
     $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}\r| -- #{@@title}"
     (@@game_height - 4).times do |y|
       $settings[y + 2] = if @@selectable
-        "   #{@@select == (@@scroll + y) ? '>' : ' '}   #{lines[@@scroll + y]}"
+        "   #{@@select == (@@scroll + y) ? '>' : (@@selected_select == (@@scroll + y) ? '>'.color(:blue, :white) : ' ')}   #{lines[@@scroll + y]}"
       else
         " #{lines[@@scroll + y]}"
       end.override_background_with(:white).override_foreground_with(:black)
@@ -419,7 +421,7 @@ class Settings
     player_stacks = Player.inventory_by_stacks
     @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{Player.inventory_weight}lbs"
     @@selectable = true
-    [''] + player_stacks.map do |name, items|
+    ['Sort Inventory'] + player_stacks.map do |name, items|
       count = items.count < 10 ? " #{items.count}" : items.count
       title = "#{count}x   #{items.first.icon} #{name}"
 
@@ -609,6 +611,10 @@ class Settings
   end
 
   def self.grab_inventory
+    if @@select == 0
+      Player.sort_inventory!
+      Settings.show
+    end
     if Player.inventory_by_stacks.to_a[@@select - 1] && @@select - 1 >= 0
       @@selected_item = Player.inventory_by_stacks.to_a[@@select - 1][1][0]
       @@stack = @@select - 1
@@ -648,6 +654,12 @@ class Settings
       lines << line
     end
     lines
+  end
+
+  def self.swap_items
+    Player.swap_inventory(@@selected_select - 1, @@select - 1)
+    @@selected_select = nil
+    Settings.show
   end
 
   def self.multi_line_message(type)

@@ -4,7 +4,13 @@ add descriptions for items
 
 Show explode effect for 1 frame
 
-Creatures should still spawn while sleeping
+Should have negative effect for having 0 energy
+
+Spells are broken again. Using mana, not allowing to select direction
+
+Click S to cancel aim/throw/target
+Click S to select item in Inventory
+^^ Only in inventory
 
 Should not be able to use an item without energy
 

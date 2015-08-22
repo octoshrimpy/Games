@@ -364,7 +364,30 @@ class Player
   end
 
   def self.sort_inventory!
-    inventory.sort_by!(&:name)
+    old_inven = self.inventory
+    sorted_inven = self.inventory.sort_by(&:name)
+    is_equal = true
+    i = 0
+    while is_equal && i < old_inven.length
+      unless old_inven[i].name == sorted_inven[i].name
+        is_equal = false
+      end
+      i += 1
+    end
+    if is_equal
+      self.inventory = self.inventory.sort_by(&:name).reverse
+    else
+      self.inventory = self.inventory.sort_by(&:name)
+    end
+  end
+
+  def self.swap_inventory(slot_a, slot_b)
+    return false unless slot_a && slot_b
+    inven_by_array = self.inventory_by_stacks.to_a
+    return false unless inven_by_array[slot_a] && inven_by_array[slot_b]
+    inven_by_array[slot_a], inven_by_array[slot_b] = inven_by_array[slot_b], inven_by_array[slot_a]
+    self.inventory = inven_by_array.map { |name, array_of_items| array_of_items}.flatten
+    true
   end
 
   def self.inventory_by_stacks

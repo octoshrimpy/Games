@@ -52,6 +52,7 @@ class Game
       Creature.current.each do |creature|
         creature.move if $tick % (100 - creature.run_speed) == 0
       end if Creature.current
+      spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
       Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 - shot.speed) == 0 }
       $tick += 1
     end
@@ -152,7 +153,6 @@ class Game
       $spawn_creatures = false
       Log.add "You have eradicated all forms of life on this floor."
     end
-    spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
     Game.input(true)
     print "\e[100m"
     (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "  "}
