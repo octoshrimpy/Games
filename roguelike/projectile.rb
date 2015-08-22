@@ -1,7 +1,7 @@
 class Projectile
   attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob
 
-  def initialize(destination, item, source, options)
+  def initialize(destination, item, source, options={})
     self.dob = $time
     self.speed = options[:speed] || 80
     self.source = source

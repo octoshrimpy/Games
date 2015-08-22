@@ -196,6 +196,7 @@ class Game
     puts "Time: #{$time}"
     puts "Game Mode: #{$gamemode}"
     puts "Player: #{Player.visible ? 'visible' : 'invisible for ' + (Player.invisibility_ticks - 1).to_s}"
+    puts "Player speed: #{Player.speed}"
     puts "Ticks: #{$tick}"
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"

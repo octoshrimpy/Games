@@ -50,7 +50,7 @@ class Player
   @@raw_max_health = 7
   @@mana = 7
   @@raw_max_mana = 7
-  @@energy = 100
+  @@energy = 10
   @@raw_max_energy = 100
   @@raw_magic_power = 0
   @@raw_strength = 10
@@ -329,7 +329,7 @@ class Player
   def self.magic_power; raw_magic_power + bonuses[:magic_power].to_i; end
   def self.defense; raw_defense + bonuses[:defense].to_i; end
   def self.accuracy; raw_accuracy + bonuses[:accuracy].to_i; end
-  def self.speed; raw_speed + bonuses[:speed].to_i; end
+  def self.speed; (raw_speed + bonuses[:speed].to_i) / (energy > 0 ? 1 : 2); end
   def self.max_health; raw_max_health + bonuses[:max_health].to_i; end
   def self.max_mana; raw_max_mana + bonuses[:max_mana].to_i; end
   def self.max_energy; raw_max_energy + bonuses[:max_energy].to_i; end

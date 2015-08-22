@@ -556,11 +556,15 @@ class Settings
         tick = false; play = false
       end
     when 1 # Throw
-      $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
-      $gamemode = 'direct_throw'
-      $gamemode = 'direct_throw'
-      @@selectable = false
-      clear = false; play = false
+      if Player.energy <= 0
+        $message = "I don't have the energy to do that."
+        Log.add "I don't have the energy to do that."
+      else
+        $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+        $gamemode = 'direct_throw'
+        @@selectable = false
+        clear = false; play = false
+      end
     when 2 # Drop
       Player.drop(@@selected_item)
     when 3 # Drop all

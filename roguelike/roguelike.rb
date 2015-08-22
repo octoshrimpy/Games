@@ -5,7 +5,6 @@ add descriptions for items
 Show explode effect for 1 frame
 
 Should have negative effect for having 0 energy
-
 Should not be able to use an item without energy
 
 item modifiers / special abilities
@@ -15,8 +14,6 @@ Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
 
 Make more obvious to the user that hitting 1-9 in menu will jump to that spot
-
-Allow player to sort inventory
 
 Character Experience/levels
 Scaling for enemies

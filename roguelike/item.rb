@@ -33,6 +33,7 @@ module Item
   end
 
   def should_destroy_on_collision(collided_with)
+    return false unless destroy_on_collision_with
     cast_object = case
     when collided_with.class == Creature then 'C'
     when collided_with.class == String then collided_with.is_solid? ? 'S' : 's'
@@ -44,8 +45,11 @@ module Item
 
   def use!
     return false if $gameover && !(usable_after_death)
-    unless Player.energy > 0
+    unless !(Player.energy <= 0 && self.class != Consumable)
       Log.add "I don't have the energy to do that."
+      $message = "I don't have the energy to do that."
+      $gamemode = 'play'
+      Game.redraw
       return false
     end
 
@@ -72,7 +76,11 @@ module Item
     if should_destroy_on_collision(collided_with)
       destroy
     end
-    eval(collided_action) if collided_action
+    if self.respond_to?(:collided_action) && collided_action
+      eval(collided_action)
+    else
+      false
+    end
   end
 
   def show
