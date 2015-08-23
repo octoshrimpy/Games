@@ -1,38 +1,25 @@
-require 'pry-rails'
-ALPHABET = ('a'..'z').to_a + ('A'..'Z').to_a
-
-class Module
-  def class_accessible(*attribute_names)
-    attribute_names.each do |attribute_name|
-      define_singleton_method(attribute_name) do
-        class_variable_get("@@#{attribute_name}")
-      end
-      define_singleton_method("#{attribute_name}=") do |val|
-        class_variable_set("@@#{attribute_name}", val)
-      end
+def receive_sms(from, body)
+  puts "From: #{from}\nMessage: #{body}"
+  if from == "+13852599640"
+    if body == 'pass'
+      contact_request.update(success: true)
+      puts "Allowed contact request from: #{contact_request.name}."
+    elsif body.downcase =~ /talk/
+      puts "RoccoLogger"
     end
   end
+  puts "Body: #{body}, Split: #{body.split('')}, Length: #{body.split('').length}"
+  if body.split('').length < 10
+    if ["Open.", "Close."].include?(body.split.join)
+      puts "activate"
+    else
+      puts "nothing"
+    end
+  else
+    num = from.split('').map {|x| x[/\d+/]}.join
+    puts  "This is an automated text messaging system. \nIf you have questions about class, please contact the Instructor. Their contact information is available in the class details. \nIf you would like to stop receiving Notifications, please disable text notifications in your Account Settings on parkourutah.com/account"
+    puts  "To: #{num}\nThis is an automated text messaging system. \nIf you have questions about class, please contact the Instructor. Their contact information is available in the class details. \nIf you would like to stop receiving Notifications, please disable text notifications in your Account Settings on parkourutah.com/account"
+  end
 end
 
-class Player
-  class_accessible :x, :y
-
-  @@x = 5
-  @@y = 5
-
-  def self.coords
-    {x: x, y: y}
-  end
-
-  def self.goto(new_coords)
-    @@x = new_coords[:x]
-    @@y = new_coords[:y]
-    coords
-  end
-
-end
-
-
-binding.pry
-
-Player.x
+receive_sms("180792442", "Stop texting me")

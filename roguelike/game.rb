@@ -11,6 +11,7 @@ class Game
     $seed = seed
     srand($seed.to_i)
     $items = []
+    $effects = []
     $projectiles = []
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
@@ -43,6 +44,7 @@ class Game
       Game.run_time(Player.speed)
 
       Game.redraw
+      Effect.tick if Effect.all
       sleep 0.03
     end
   end
@@ -170,11 +172,11 @@ class Game
     end
     puts
     (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
-    puts " \rStats "
+    puts "+\rStats "
     # Should calculate the board first, then draw it all at once.
     VIEWPORT_HEIGHT.times do |i|
-      print "|"
-      STATS_GUI_WIDTH.times do |t|
+      print "0" #Placeholder
+      STATS_GUI_WIDTH.times do
         print "  "
       end
       print "|\e[0m"
@@ -259,7 +261,7 @@ class Game
 
   def self.draw_logs(board)
     (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
-    print " \rLogs "
+    print "+\rLogs "
     puts
     i = 0
     logs = Log.retrieve(LOGS_GUI_HEIGHT)
@@ -275,8 +277,9 @@ class Game
       puts "\e[100;37m"
       i += 1
     end
-    (VIEWPORT_WIDTH + STATS_GUI_WIDTH + 1).times {print "--"}
-    puts " \e[0m"
+    print "+-"
+    (VIEWPORT_WIDTH + STATS_GUI_WIDTH).times {print "--"}
+    puts "+\e[0m"
   end
 
   def self.use_stairs(direction)
@@ -466,6 +469,11 @@ class Game
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show
         end
       end if Creature.current
+      Effect.all.each do |effect|
+        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
+          $level[effect.y - y_offset][effect.x - x_offset] = effect.show
+        end
+      end if Effect.all
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
   end
@@ -519,6 +527,11 @@ class Game
           $screen_shot_objects << {instance: creature, x: creature.x, y: creature.y}
         end
       end if Creature.current
+      Effect.all.each do |effect|
+        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
+          $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
+        end
+      end if Effect.all
     end
     $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
     $screen_shot

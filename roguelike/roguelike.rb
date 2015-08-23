@@ -4,9 +4,6 @@ add descriptions for items
 
 Show explode effect for 1 frame
 
-Should have negative effect for having 0 energy
-Should not be able to use an item without energy
-
 item modifiers / special abilities
 DOT's
 
@@ -71,6 +68,7 @@ require './log.rb'
 
 require './gold.rb'
 require './item.rb'
+require './effect.rb'
 require './consumable.rb'
 require './projectile.rb'
 require './equipment.rb'

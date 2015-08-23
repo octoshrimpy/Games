@@ -23,6 +23,7 @@ module Item
         coord = {x: x + rel_x, y: y + rel_y}
         if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
           unless Dungeon.at(coord, depth).is_solid?
+            Effect.new('Fire Blast Effect', '* '.color(:light_red), coord)
             Creature.at(coord, self.depth).each do |creature|
               creature.hurt(damage, "#{creature.color(creature.name)} got blown up for #{damage.round} damage.")
             end
