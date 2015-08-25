@@ -1,4 +1,4 @@
-class Effect
+class VisualEffect
   attr_accessor :icon, :life, :x, :y, :name
 
   def initialize(name, icon, coords)
@@ -6,17 +6,17 @@ class Effect
     self.x = coords[:x]
     self.y = coords[:y]
     self.name = name
-    $effects << self
+    $visual_effects << self
   end
 
   def self.tick
-    Effect.all.count.times do
-      Effect.all.first.destroy
+    VisualEffect.all.length.times do
+      VisualEffect.all.first.destroy
     end
   end
 
   def self.all
-    $effects
+    $visual_effects
   end
 
   def show
@@ -28,6 +28,6 @@ class Effect
   end
 
   def destroy
-    $effects.delete(self)
+    $visual_effects.delete(self)
   end
 end

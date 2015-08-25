@@ -28,7 +28,7 @@ class Consumable
       restore_energy: 10,
       stack_size: 10,
       icon: '`',
-      execution_script: "Player.visibility(10)"
+      execution_script: Evals.player_invisible(10)
     })
     new({
       name: "Bread Scrap",
@@ -43,7 +43,7 @@ class Consumable
       weight: 0.1,
       stack_size: 10,
       icon: '%',
-      execution_script: "sleep(0.3); Player.coords = Dungeon.find_open_spaces(false).sample; Game.tick; true"
+      execution_script: Evals.unstable_teleportation
     })
     new({
       name: "Scroll of Flash",
@@ -51,7 +51,7 @@ class Consumable
       stack_size: 10,
       icon: '%',
       color: :yellow,
-      execution_script: "$gamemode = 'direct_flash'; $message = \"Click the direction you would like to flash. '#{$key_select_position}' to choose coordinate.\"; false"
+      execution_script: Evals.flash(5)
     })
     new({
       name: 'Potion of Resurrection',
@@ -60,7 +60,7 @@ class Consumable
       icon: 'u',
       color: :magenta,
       usable_after_death: true,
-      execution_script: "Player.resurrect"
+      execution_script: Evals.resurrect_player
     })
   end
 end

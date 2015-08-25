@@ -11,7 +11,9 @@ class Game
     $seed = seed
     srand($seed.to_i)
     $items = []
-    $effects = []
+    $ids = 1
+    $visual_effects = []
+    $dot_effects = []
     $projectiles = []
     $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
     $previous_message = ''
@@ -44,7 +46,8 @@ class Game
       Game.run_time(Player.speed)
 
       Game.redraw
-      Effect.tick if Effect.all
+      VisualEffect.tick if VisualEffect.all
+      DotEffect.tick if DotEffect.all
       sleep 0.03
     end
   end
@@ -52,7 +55,7 @@ class Game
   def self.run_time(time)
     (100 - time).times do |t|
       Creature.current.each do |creature|
-        creature.move if $tick % (100 - creature.run_speed) == 0
+        creature.tick if $tick % (100 - creature.run_speed) == 0
       end if Creature.current
       spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
       Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 - shot.speed) == 0 }
@@ -469,11 +472,11 @@ class Game
           $level[creature.y - y_offset][creature.x - x_offset] = creature.show
         end
       end if Creature.current
-      Effect.all.each do |effect|
+      VisualEffect.all.each do |effect|
         if effect.x == in_sight[:x] && effect.y == in_sight[:y]
           $level[effect.y - y_offset][effect.x - x_offset] = effect.show
         end
-      end if Effect.all
+      end if VisualEffect.all
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
   end
@@ -527,11 +530,11 @@ class Game
           $screen_shot_objects << {instance: creature, x: creature.x, y: creature.y}
         end
       end if Creature.current
-      Effect.all.each do |effect|
+      VisualEffect.all.each do |effect|
         if effect.x == in_sight[:x] && effect.y == in_sight[:y]
           $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
         end
-      end if Effect.all
+      end if VisualEffect.all
     end
     $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
     $screen_shot

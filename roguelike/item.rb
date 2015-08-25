@@ -17,17 +17,12 @@ module Item
     true
   end
 
-  def explode!(radius, damage)
+  def aoe(radius, script)
     (-radius..radius).map do |rel_y|
       (-radius..radius).map do |rel_x|
         coord = {x: x + rel_x, y: y + rel_y}
         if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
-          unless Dungeon.at(coord, depth).is_solid?
-            Effect.new('Fire Blast Effect', '* '.color(:light_red), coord)
-            Creature.at(coord, self.depth).each do |creature|
-              creature.hurt(damage, "#{creature.color(creature.name)} got blown up for #{damage.round} damage.")
-            end
-          end
+          eval(script)
         end
       end
     end
@@ -70,7 +65,7 @@ module Item
   end
 
   def collided_damage(power)
-    5
+    0
   end
 
   def collide(collided_with)
@@ -205,10 +200,22 @@ module Item
       destroy_on_collision_with: 'a',
       range: '10',
       projectile_speed: 40,
-      collided_action: "explode!(1, 20); destroy",
+      collided_action: Evals.explode(1, 20),
+      thrown: true
+    })
+    RangedWeapon.new({
+      name: 'Poison Blast',
+      icon: 'o',
+      color: :light_green,
+      destroy_on_collision_with: 'a',
+      range: '10',
+      projectile_speed: 40,
+      collided_action: Evals.poison_blast(0, 5, 1),
       thrown: true
     })
   end
+  # Log.add(\'poisoned\')
+  #
       # RangedWeapon.new({
       #   name:,
       #   icon:,
@@ -258,7 +265,7 @@ module Item
       name: 'Book of Fire Blast',
       icon: '[',
       color: :blue,
-      spell_to_cast: 'Fire Blast',
+      spell_to_cast: 'Poison Blast',
       range: 15,
       type: 'fire',
       weight: 3,

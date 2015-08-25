@@ -1,5 +1,5 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :depth,
+  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :rarity, :accuracy, :defense
 
   def initialize(type, color)
@@ -7,6 +7,7 @@ class Creature
     @color = color
     @destination = nil
     @depth = Player.depth
+    @id = $ids; $ids += 1
     drops = %w( g b )
     amount = rand(5)
     stats = case type
@@ -154,6 +155,10 @@ class Creature
     @name = stats[:name]
   end
 
+  def self.find(id)
+    Creature.all.select { |monster| monster.id == id }.first
+  end
+
   def self.count
     $npcs[Player.depth].length
   end
@@ -213,13 +218,13 @@ class Creature
     self.hurt(raw_damage - self.defense)
   end
 
-  def hurt(damage=1, src="#{color(@name)} received #{damage.round} damage.")
+  def hurt(damage=1, src="#{color} received #{damage.round} damage.")
     @health -= damage.round
     Log.add(src)
     self.destroy(src) if @health <= 0
   end
 
-  def color(str)
+  def color(str=self.name)
     str.color(@color)
   end
 
@@ -244,7 +249,7 @@ class Creature
     {x: (@x-10..@x+10).to_a.sample, y: (@y-10..@y+10).to_a.sample}
   end
 
-  def move(type='check')
+  def tick(type='check')
     @destination = nil if @destination == coords || rand(10) == 0
     if player_in_range?
       @destination = Player.coords.clone

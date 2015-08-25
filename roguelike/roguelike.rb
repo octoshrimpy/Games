@@ -2,10 +2,7 @@
 =begin
 add descriptions for items
 
-Show explode effect for 1 frame
-
 item modifiers / special abilities
-DOT's
 
 Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
@@ -62,13 +59,15 @@ require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
 require './monkey_patches.rb'
+require './evals.rb'
 require './key_bindings.rb'
 require './input.rb'
 require './log.rb'
 
 require './gold.rb'
 require './item.rb'
-require './effect.rb'
+require './visual_effect.rb'
+require './dot_effect.rb'
 require './consumable.rb'
 require './projectile.rb'
 require './equipment.rb'

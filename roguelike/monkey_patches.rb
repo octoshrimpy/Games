@@ -4,7 +4,7 @@ class Object
     Marshal.load(Marshal.dump(self))
   end
 
-  def toggle(arg1, arg2)
+  def toggle(arg1=true, arg2=false)
     self == arg1 ? arg2 : arg1
   end
 
