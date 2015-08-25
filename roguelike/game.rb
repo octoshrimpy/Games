@@ -257,7 +257,12 @@ class Game
       " 1 2 3 4 5 6 7 8 9"
     when 20
       print " "
-      Player.quickbar.map { |name| name ? "#{Item.by_name(name).show}\e[100;30m" : "  "}.join("")
+      Player.quickbar.map { |name|
+        item = Item.by_name(name)
+        ammo = item.respond_to?(:ammo_type) ? "#{Item.by_name(item.ammo_type).show}\b" : ' '
+        # Game.input(true); binding.pry if item.respond_to?(:ammo_type)
+        item ? "#{item.show}\b#{ammo.override_background_with(:light_black)}\e[100;30m" : "  "
+      }.join("")
     end
     puts "\e[100;37m"
   end

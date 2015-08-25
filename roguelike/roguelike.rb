@@ -90,6 +90,7 @@ Player.inventory << Item['Scroll of Unstable Teleportation']
 Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Book of Fire Blast']
+Player.inventory << Item['Book of Poison Blast']
 100.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
 system 'clear' or system 'cls'

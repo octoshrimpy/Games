@@ -265,9 +265,19 @@ module Item
       name: 'Book of Fire Blast',
       icon: '[',
       color: :blue,
-      spell_to_cast: 'Poison Blast',
+      ammo_type: 'Fire Blast',
       range: 15,
       type: 'fire',
+      weight: 3,
+      mana_usage: 5
+    })
+    MagicWeapon.new({
+      name: 'Book of Poison Blast',
+      icon: '[',
+      color: :blue,
+      ammo_type: 'Poison Blast',
+      range: 15,
+      type: 'poison',
       weight: 3,
       mana_usage: 5
     })
