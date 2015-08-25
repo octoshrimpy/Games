@@ -2,7 +2,7 @@ class Player
   class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quickbar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
-                   :last_hit_by, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
+                   :last_hit_id, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
                    :invisibility_ticks, :sleeping, :inventory_size, :stunned_for, :live
 
   @@x = 0
@@ -63,17 +63,26 @@ class Player
   @@visible = true
   @@sleeping = false
   @@autopickup = true
-  @@last_hit_by = nil
+  @@last_hit_id = nil
   @@stunned_for = 0
 
   def self.name; "me"; end
   def self.coords; {x: Player.x, y: Player.y}; end
   def self.coords=(coord); {x: Player.x = coord[:x], y: Player.y = coord[:y]}; end
+  def self.last_hit_by
+    return false unless last_hit_id
+    Creature.find(last_hit_id)
+  end
+  def self.last_hit_name
+    if last_hit_by
+      last_hit_by.name
+    end
+  end
 
   def self.verify_stats
     if self.health <= 0 && @@live == true
       @@live = false
-      Log.add("You have been slaughtered by #{last_hit_by}.")
+      Log.add("You have been slaughtered by #{last_hit_name}.")
       $gamemode = 'dead'
       $gameover = true
     end
@@ -123,11 +132,13 @@ class Player
     self.hurt(raw_damage - self.defense)
   end
 
-  def self.hurt(damage=1, src="You got hurt by an unknown source.")
+  def self.hurt(damage=1, type="")
     # Reflect if getting dangerously low on stats
     self.health -= damage
     $sleep_condition = 'true'
-    Log.add(src) if src
+    last_hit = Player.last_hit_by
+    type += ' ' if type.length > 0
+    Log.add("#{last_hit.colored_name} #{last_hit.verbs.sample} you for #{damage} #{type}damage.") if last_hit
     ratio = (health / raw_max_health.to_f) * 100.00
     Log.add "You are critically low on health." if ratio < 20
   end
@@ -256,11 +267,11 @@ class Player
               self.energy -= loss
               damage = (0..100).to_a.sample > accuracy ? -1 : (strength + (-1..1).to_a.sample)
               if damage == 0
-                Log.add "#{creature.color(creature.name)} blocked your attack."
+                Log.add "#{creature.colored_name} blocked your attack."
               elsif damage < 0
-                Log.add "You missed #{creature.color(creature.name)}."
+                Log.add "You missed #{creature.colored_name}."
               else
-                creature.hurt(damage, "You hit #{creature.color(creature.name)} for #{damage} damage.")
+                creature.hurt(damage, 'raw')
               end
             else
               Log.add("I'm out of energy!")

@@ -1,10 +1,10 @@
 class Creature
   attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :depth, :id,
-                :drops ,:destination, :vision, :rarity, :accuracy, :defense
+                :drops ,:destination, :vision, :rarity, :accuracy, :defense, :verbs
 
-  def initialize(type, color)
+  def initialize(type, creature_color)
     @mask = "#{type} "
-    @color = color
+    @creature_color = creature_color
     @destination = nil
     @depth = Player.depth
     @id = $ids; $ids += 1
@@ -155,8 +155,8 @@ class Creature
     @name = stats[:name]
   end
 
-  def self.find(id)
-    Creature.all.select { |monster| monster.id == id }.first
+  def self.find(search_id)
+    Creature.all.compact.select { |monster| monster.id == search_id }.first
   end
 
   def self.count
@@ -180,7 +180,7 @@ class Creature
   end
 
   def destroy(src)
-    Log.add("#{color(@name)} died.")
+    Log.add("#{colored_name} died.")
     drop_locations = (-1..1).map do |y|
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
@@ -218,14 +218,15 @@ class Creature
     self.hurt(raw_damage - self.defense)
   end
 
-  def hurt(damage=1, src="#{color} received #{damage.round} damage.")
+  def hurt(damage=1, src="")
     @health -= damage.round
-    Log.add(src)
+    src += ' ' if src.length > 0
+    Log.add("#{colored_name} received #{damage.round} #{src}damage.")
     self.destroy(src) if @health <= 0
   end
 
-  def color(str=self.name)
-    str.color(@color)
+  def colored_name(str=self.name)
+    str.color(@creature_color)
   end
 
   def spawn
@@ -264,10 +265,10 @@ class Creature
       damage = rand(Player.visible ? @accuracy : 4) <= 1 ? 0 : rand(@strength) + 1
 
       if damage == 0
-        Log.add "#{color(@name)} missed you!"
+        Log.add "#{colored_name} missed you!"
       else
-        Player.hurt(damage, "#{color(@name)} #{@verbs.sample} you for #{damage} damage.")
-        Player.last_hit_by = color(@name)
+        Player.last_hit_id = @id
+        Player.hurt(damage, 'raw')
       end
     elsif move_to
       @x = move_to[:x]
