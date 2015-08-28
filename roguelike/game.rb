@@ -260,7 +260,6 @@ class Game
       Player.quickbar.map { |name|
         item = Item.by_name(name)
         ammo = item.respond_to?(:ammo_type) ? "#{Item.by_name(item.ammo_type).show}\b" : ' '
-        # Game.input(true); binding.pry if item.respond_to?(:ammo_type)
         item ? "#{item.show}\b#{ammo.override_background_with(:light_black)}\e[100;30m" : "  "
       }.join("")
     end

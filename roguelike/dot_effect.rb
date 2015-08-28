@@ -10,7 +10,7 @@ class DotEffect
 
   def self.tick
     DotEffect.all.each do |dot|
-      if dot && dot.effector && dot.duration > 0
+      if dot && dot.effector.health > 0 && dot.duration > 0
         eval(dot.effect_script) if dot.effect_script
         dot.duration -= 1
       else

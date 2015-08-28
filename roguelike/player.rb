@@ -46,14 +46,14 @@ class Player
     self_regen: 0
   }
   @@raw_accuracy = 90
-  @@health = 7
-  @@raw_max_health = 7
-  @@mana = 7
+  @@raw_max_health = 20
+  @@health = 20
   @@raw_max_mana = 7
-  @@energy = 10
+  @@mana = 7
   @@raw_max_energy = 100
+  @@energy = 100
   @@raw_magic_power = 0
-  @@raw_strength = 10
+  @@raw_strength = 1
   @@raw_defense = 0
   @@raw_speed = 10
   @@raw_self_regen = 1
@@ -272,6 +272,10 @@ class Player
                 Log.add "You missed #{creature.colored_name}."
               else
                 creature.hurt(damage, 'raw')
+                effected = creature
+                Player.equipped.each do |slot, item|
+                  eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect)
+                end
               end
             else
               Log.add("I'm out of energy!")

@@ -89,6 +89,7 @@ Game.start(seed)
 Player.inventory << Item['Scroll of Unstable Teleportation']
 Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
+Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire Blast']
 Player.inventory << Item['Book of Poison Blast']
 100.times { Player.inventory << Item['Arrow'] }

@@ -1,5 +1,5 @@
 module Item
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death, :on_hit_effect
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
 
   def initialize(defaults)
@@ -115,6 +115,15 @@ module Item
      generate_equipment
   end
 
+  def self.damage_to_coord(coord, damage, type)
+    unless Dungeon.at(coord).is_solid?
+      VisualEffect.new("Fire Blast Effect", "* ".color(:light_red), coord) # refactor this to be more expandable
+      Creature.at(coord).each do |creature|
+        creature.hurt(damage, type)
+      end
+    end
+  end
+
   def self.all; $items; end
   def self.count; all.count; end
   def self.[](name)
@@ -178,6 +187,15 @@ module Item
       weight: 4,
       bonus_strength: 1
     })
+    MeleeWeapon.new({
+      name: 'Fire Sword',
+      icon: '†',
+      color: :red,
+      equipment_slot: :right_hand,
+      weight: 4,
+      bonus_strength: 1,
+      on_hit_effect: Evals.burn(5, 2)
+    })
   end
 
   def self.generate_projectiles
@@ -210,7 +228,7 @@ module Item
       destroy_on_collision_with: 'a',
       range: '10',
       projectile_speed: 40,
-      collided_action: Evals.poison_blast(0, 5, 1),
+      collided_action: Evals.poison(5, 1),
       thrown: true
     })
   end

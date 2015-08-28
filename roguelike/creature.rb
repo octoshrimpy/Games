@@ -27,7 +27,7 @@ class Creature
       }
     when "b"
       {
-        health: (2 * (1 + @depth * 0.3)).round,
+        health: (20 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
         accuracy: 90,
