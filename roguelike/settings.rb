@@ -380,7 +380,8 @@ class Settings
     $settings[1] = "#{'  '*(@@game_width/2 - top.length/2)}#{top}\r| -- #{@@title}"
     (@@game_height - 4).times do |y|
       $settings[y + 2] = if @@selectable
-        "   #{@@select == (@@scroll + y) ? '>' : (@@selected_select == (@@scroll + y) ? '>'.color(:blue, :white) : ' ')}   #{lines[@@scroll + y]}"
+        quick_num = (y > 0 && y < 10) ? "#{y}-" : "  "
+        "  #{@@select == (@@scroll + y) ? '>' : (@@selected_select == (@@scroll + y) ? '>'.color(:blue, :white) : ' ')}   #{lines[@@scroll + y]}\r|#{quick_num}"
       else
         " #{lines[@@scroll + y]}"
       end.override_background_with(:white).override_foreground_with(:black)

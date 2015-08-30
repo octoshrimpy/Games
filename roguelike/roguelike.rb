@@ -2,12 +2,8 @@
 =begin
 add descriptions for items
 
-item modifiers / special abilities
-
 Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
-
-Make more obvious to the user that hitting 1-9 in menu will jump to that spot
 
 Character Experience/levels
 Scaling for enemies
