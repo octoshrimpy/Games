@@ -65,7 +65,7 @@ module Item
   end
 
   def collided_damage(power)
-    0
+    power
   end
 
   def collide(collided_with)

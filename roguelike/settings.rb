@@ -62,6 +62,9 @@ class Settings
     when $key_open_equipment
       $gamemode = $gamemode.toggle('equipment', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
+    when $key_char_stats
+      $gamemode = $gamemode.toggle('char_stats', 'play')
+      $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_read_more
       if @@scroll_horz
         $gamemode = $gamemode.toggle('read_more', 'map')
@@ -344,6 +347,7 @@ class Settings
       when 'key_bindings' then build_key_bindings
       when 'equipment' then build_equipment_menu
       when 'read_more' then build_read_more_menu
+      when 'char_stats' then build_char_stats_menu
       when 'read_about' then build_read_about_menu
       when 'equip_head' then build_inventory_by('head')
       when 'equip_torso' then build_inventory_by('torso')
@@ -394,19 +398,25 @@ class Settings
   def self.build_sleep_prompt_menu
     @@title = "How long would you like to rest for?"
     @@selectable = false
-    word_wrap( multi_line_message('sleep') )
+    word_wrap( sleep_message )
   end
 
   def self.build_help_menu
     @@title = "Help"
     @@selectable = false
-    word_wrap(help_menu_text)
+    word_wrap( help_menu_text )
   end
 
   def self.build_dead_menu
     @@title = "You have Died!"
     @@selectable = false
-    word_wrap(dead_menu_text)
+    word_wrap( dead_menu_text )
+  end
+
+  def self.build_char_stats_menu
+    @@title = 'Character Stats'
+    @@selectable = false
+    char_stats_text
   end
 
   def self.build_log_menu
@@ -677,9 +687,7 @@ class Settings
     false
   end
 
-  def self.multi_line_message(type)
-    case type
-    when 'sleep'
+  def self.sleep_message
 %(
 Type a number, and then hit enter to sleep for that many moves.
 
@@ -693,9 +701,6 @@ m - Mana
 
 Type 'x' then hit enter to cancel.
 )
-    else
-      "Something is bad."
-    end
   end
 
   def self.explain_item_text(item)
@@ -732,6 +737,20 @@ View and edit keys by hitting the '#{$key_open_keybindings}' key.
 -------------------------------------------------------------------------------- #{'Movement'.color(:red)}
 Each frame takes place on every interval of the speed of the Player(you). Monster may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. If the player moves at a speed of 10 and a monster moves at a speed of 15, the monsters position will only update every time the player moves. Every other turn the monster will appear to move 2 spaces because of the extra speed.
 )
+  end
+
+  def self.char_stats_text
+    padding = 40
+    lines = ['']
+    lines << "   #{columnize(padding, ['Health:', "#{Player.max_health}"])}"
+    lines << "   #{columnize(padding, ['Mana:', "#{Player.max_mana}"])}"
+    lines << "   #{columnize(padding, ['Energy:', "#{Player.max_energy}"])}"
+    lines << "   #{columnize(padding, ['Health Regeneration:', "#{Player.self_regen}"])}"
+    lines << "   #{columnize(padding, ['Strength:', "#{Player.strength}"])}"
+    lines << "   #{columnize(padding, ['Magic Power:', "#{Player.magic_power}"])}"
+    lines << "   #{columnize(padding, ['Defense:', "#{Player.defense}"])}"
+    lines << "   #{columnize(padding, ['Accuracy:', "#{Player.accuracy}"])}"
+    lines << "   #{columnize(padding, ['Speed:', "#{Player.speed}"])}"
   end
 
   def self.dead_menu_text

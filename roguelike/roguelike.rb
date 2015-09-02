@@ -1,5 +1,6 @@
 # TODO
 =begin
+
 add descriptions for items
 
 Spell books should be read. Using opens another menu where you choose spells
@@ -15,7 +16,6 @@ Refactor map generation to allow for different types and specifications
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
 
-Add a menu to show the character stats (including bonuses from armor/weapons/potions)
 Allow User to customize Key bindings
 
 Save data
