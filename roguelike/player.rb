@@ -98,7 +98,7 @@ class Player
     $gamemode = 'play'
     $gameover = false
     Player.live = true
-    Player.health = (Player.max_health/2).round
+    Player.health = Player.max_health
   end
 
   def self.tick
