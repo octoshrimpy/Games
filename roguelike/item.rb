@@ -1,5 +1,5 @@
 module Item
-  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death, :on_hit_effect
+  attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death, :on_hit_effect, :on_hit_damage
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
 
   def initialize(defaults)
@@ -65,7 +65,7 @@ module Item
   end
 
   def collided_damage(power)
-    power
+    on_hit_damage || power
   end
 
   def collide(collided_with)
@@ -218,6 +218,7 @@ module Item
       destroy_on_collision_with: 'a',
       range: '10',
       projectile_speed: 40,
+      on_hit_damage: 0,
       collided_action: Evals.explode(1, 20),
       thrown: true
     })
@@ -228,6 +229,7 @@ module Item
       destroy_on_collision_with: 'a',
       range: '10',
       projectile_speed: 40,
+      on_hit_damage: 0,
       collided_action: Evals.poison(5, 1),
       thrown: true
     })

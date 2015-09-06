@@ -1,5 +1,5 @@
 class Creature
-  attr_accessor :x, :y, :health, :attack_speed, :run_speed, :name, :strength, :depth, :id,
+  attr_accessor :x, :y, :health, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :rarity, :accuracy, :defense, :verbs
 
   def initialize(type, creature_color)
@@ -19,22 +19,20 @@ class Creature
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + @depth * 0.3)).round,
-        attack_speed: 4,
-        run_speed: (10 * (1 + @depth * 0.3)).round,
+        run_speed: 6,
         verbs: %w( bit clawed cut ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Ant"
       }
     when "b"
       {
-        health: (20 * (1 + @depth * 0.3)).round,
+        health: (2 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
-        accuracy: 90,
+        accuracy: 20,
         vision: 10,
         strength: (1 * (1 + @depth * 0.3)).round,
-        attack_speed: 4,
-        run_speed: (12 * (1 + @depth * 0.3)).round,
+        run_speed: 11,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Bat"
@@ -50,8 +48,7 @@ class Creature
         accuracy: 90,
         vision: 10,
         strength: (1 * (1 + @depth * 0.3)).round,
-        attack_speed: 4,
-        run_speed: (15 * (1 + @depth * 0.3)).round,
+        run_speed: 7,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Possessed Fox"
@@ -72,11 +69,10 @@ class Creature
         health: (3 * (1 + @depth * 0.3)).round,
         # rarity: ,
         defense: 0,
-        accuracy: 90,
+        accuracy: 60,
         vision: 10,
         strength: (1 * (1 + @depth * 0.3)).round,
-        attack_speed: 4,
-        run_speed: (15 * (1 + @depth * 0.3)).round,
+        run_speed: 4,
         verbs: %w( bit clawed slammed tore\ at shredded ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Giant Rat"
@@ -89,8 +85,7 @@ class Creature
         accuracy: 90,
         vision: 10,
         strength: (3 * (1 + @depth * 0.3)).round,
-        attack_speed: 7,
-        run_speed: (3 * (1 + @depth * 0.3)).round,
+        run_speed: 3,
         verbs: %w( bit struck whipped choked ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Snake"
@@ -107,8 +102,7 @@ class Creature
         accuracy: 90,
         vision: 10,
         strength: (4 * (1 + @depth * 0.3)).round,
-        attack_speed: 5,
-        run_speed: (3 * (1 + @depth * 0.3)).round,
+        run_speed: 4,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
         drops: ["#{drops.sample}#{amount}"],
         name: "Unknown Beast"
@@ -148,7 +142,6 @@ class Creature
     @rarity = stats[:rarity]
     @accuracy = stats[:accuracy]
     @strength = stats[:strength]
-    @attack_speed = stats[:attack_speed]
     @run_speed = stats[:run_speed]
     @verbs = stats[:verbs]
     @drops = stats[:drops]
@@ -268,7 +261,7 @@ class Creature
         Log.add "#{colored_name} missed you!"
       else
         Player.last_hit_id = @id
-        Player.hurt(damage, 'raw')
+        Player.hurt(damage, 'physical')
       end
     elsif move_to
       @x = move_to[:x]

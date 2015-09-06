@@ -6,6 +6,14 @@ add descriptions for items
 Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
 
+Require more than X energy to use different types of attacks?
+More food to restore more energy!
+
+quiver to hold more arrows/slot?
+
+dodged/blocked only when necessary. Some items (magic spells) won't do damage on collision, but should show a status effect.
+"{} has been poisoned/burned/etc"
+
 Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
@@ -88,6 +96,7 @@ Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire Blast']
 Player.inventory << Item['Book of Poison Blast']
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire Blast", "Book of Poison Blast", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
 100.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
 system 'clear' or system 'cls'

@@ -63,7 +63,7 @@ class Settings
       $gamemode = $gamemode.toggle('equipment', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_char_stats
-      $gamemode = $gamemode.toggle('char_stats', 'play')
+      $gamemode = $gamemode.toggle('char_stats', 'play') unless $gamemode == 'map'
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
     when $key_read_more
       if @@scroll_horz
@@ -313,8 +313,7 @@ class Settings
         @@game_width.times do |x|
           print (y == 0 || y == @@game_height-1 ? "--" : "  ").color(:black, :white)
         end
-        print "|".color(:black, :white)
-        puts "\r|#{$settings[y]}".color(:black, :white)
+        puts (y == 0 || y == @@game_height-1 ? "+\r+#{$settings[y]}" : "|\r|#{$settings[y]}").color(:black, :white)
       end
       puts $gamemode
       puts @@select

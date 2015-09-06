@@ -46,14 +46,14 @@ class Player
     self_regen: 0
   }
   @@raw_accuracy = 90
-  @@raw_max_health = 20
-  @@health = 20
+  @@raw_max_health = 7
+  @@health = 7
   @@raw_max_mana = 7
   @@mana = 7
   @@raw_max_energy = 100
   @@energy = 100
   @@raw_magic_power = 0
-  @@raw_strength = 1
+  @@raw_strength = 3
   @@raw_defense = 0
   @@raw_speed = 10
   @@raw_self_regen = 1
@@ -104,17 +104,20 @@ class Player
   def self.tick
     return false if $gameover
     self.selected = 0
-    loss = (rand(20) == 0 ? 1 : 0)
+
+    loss = (rand(50) == 0 ? 1 : 0)
     self.energy -= loss
+
     Log.add "I'm starving." if loss > 0 && energy <= 0
+
     hp_gain = (rand(5) == 0 ? self_regen : 0)
     mana_gain = (rand(3) == 0 ? self_regen : 0)
-    if energy > 0
-      self.health += hp_gain
-      self.mana += mana_gain
-    else
-      $sleep_condition = 'true'
-    end
+
+    self.health += hp_gain if energy >= 20
+    self.mana += mana_gain if energy >= 10
+    # Out of energy. Stop sleeping
+    $sleep_condition = 'true' if energy <= 0
+
     Player.invisibility_ticks -= 1
     if Player.invisibility_ticks > 0
       if Player.visible
@@ -256,6 +259,7 @@ class Player
       Game.redraw
       # --------------------------------------------------- / CHEATS ---------------------------
     end
+
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
         is_creature = false
@@ -271,7 +275,7 @@ class Player
               elsif damage < 0
                 Log.add "You missed #{creature.colored_name}."
               else
-                creature.hurt(damage, 'raw')
+                creature.hurt(damage, 'physical')
                 effected = creature
                 Player.equipped.each do |slot, item|
                   eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect)
@@ -283,7 +287,7 @@ class Player
           end
         end
         unless is_creature
-          loss = (rand(20) == 0 ? 1 : 0)
+          loss = (rand(30) == 0 ? 1 : 0)
           self.energy -= loss
           self.x += x_dest
           self.y += y_dest
@@ -292,6 +296,7 @@ class Player
         tick = false
       end
     end
+
     pickup_items('auto') if autopickup && !(@@skip_pick_up)
     @@skip_pick_up = false
     tick
@@ -300,7 +305,9 @@ class Player
   def self.use_quickbar(input)
     item = item_in_inventory_by_name(quickbar[input])
     if item
-      item.use!
+      if item.use!
+        Game.tick
+      end
     else
       error = quickbar[input] ? "I don't have any #{quickbar[input]}." : "Nothing is assigned to that slot."
       Log.add(error)
@@ -469,7 +476,7 @@ class Player
   def self.throw_item(item, direction_coords)
     Player.inventory.delete(item)
 
-    str = Player.raw_strength
+    str = Math.greater_of(Player.raw_strength, 10)
     x, y = direction_coords
     x = x > str ? str : x
     y = y > str ? str : y

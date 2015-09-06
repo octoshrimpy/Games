@@ -12,7 +12,7 @@ class Consumable
       Player.restore(self.restore_mana.to_i, nil)
       Player.heal(self.restore_health.to_i, nil)
       tick = true
-      if execution_script
+      if execution_script && execution_script.length > 0
         Game.redraw
         tick = eval(execution_script)
       end

@@ -47,7 +47,7 @@ class Projectile
     if stop
       collided_with_item = collided_with || spot
       if collided_with
-        collided_with.hit(item.collided_damage(power), self)
+        collided_with.hit(item.collided_damage(power), self) if item.collided_damage(power) > 0
         self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, collided_with.depth
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item
