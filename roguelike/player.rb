@@ -24,6 +24,7 @@ class Player
   @@equipped = {
     head: nil,
     torso: nil,
+    back: nil,
     left_hand: nil,
     right_hand: nil,
     ring1: nil,
