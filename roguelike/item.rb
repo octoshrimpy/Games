@@ -223,6 +223,17 @@ module Item
       thrown: true
     })
     RangedWeapon.new({
+      name: 'Fire Ball',
+      icon: 'o',
+      color: :light_red,
+      destroy_on_collision_with: 'a',
+      range: '10',
+      projectile_speed: 40,
+      on_hit_damage: 0,
+      collided_action: Evals.explode(0, 10),
+      thrown: true
+    })
+    RangedWeapon.new({
       name: 'Poison Blast',
       icon: 'o',
       color: :light_green,
@@ -292,6 +303,16 @@ module Item
       mana_usage: 5
     })
     MagicWeapon.new({
+      name: 'Book of Fire Ball',
+      icon: '[',
+      color: :blue,
+      ammo_type: 'Fire Ball',
+      range: 15,
+      type: 'fire',
+      weight: 3,
+      mana_usage: 2
+    })
+    MagicWeapon.new({
       name: 'Book of Poison Blast',
       icon: '[',
       color: :blue,
@@ -299,7 +320,7 @@ module Item
       range: 15,
       type: 'poison',
       weight: 3,
-      mana_usage: 5
+      mana_usage: 1
     })
   end
       # Equipment.new({

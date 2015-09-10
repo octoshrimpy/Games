@@ -397,12 +397,26 @@ class Game
         end
       end
     end
-    coord = Dungeon.find_open_spaces.sample
-    sword = Item["Rusty Dagger"]
-    sword.depth = 1
-    sword.x = coord[:x]
-    sword.y = coord[:y]
-    Dungeon.current[20][20] = "  "
+    current_depth = Player.depth
+
+    case current_depth
+    when 1
+      coord = Dungeon.find_open_spaces.sample
+      sword = Item["Rusty Dagger"]
+      sword.depth = 1
+      sword.x = coord[:x]
+      sword.y = coord[:y]
+    end
+    if current_depth % 10 == 0
+      coord = Dungeon.find_open_spaces.sample
+      Gems.new(
+        pickup_script: 'Log.add("Pickup up Gem. Max Health and Max Mana increased."); Player.raw_max_health += 5; Player.raw_max_mana += 2; Player.revitalize!',
+        x: coord[:x],
+        y: coord[:y],
+        depth: current_depth
+      )
+    end
+
   end
 
   def self.spawn_creature
@@ -481,6 +495,11 @@ class Game
           $level[effect.y - y_offset][effect.x - x_offset] = effect.show
         end
       end if VisualEffect.all
+      Gems.all.each do |effect|
+        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
+          $level[effect.y - y_offset][effect.x - x_offset] = effect.show
+        end
+      end if Gems.all
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
   end
@@ -539,6 +558,11 @@ class Game
           $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
         end
       end if VisualEffect.all
+      Gems.all.each do |effect|
+        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
+          $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
+        end
+      end if Gems.all
     end
     $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
     $screen_shot

@@ -3,7 +3,7 @@ class Player
                    :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quickbar, :energy,
                    :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
                    :last_hit_id, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for, :live
+                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for, :live, :invincibility
 
   @@x = 0
   @@y = 0
@@ -58,6 +58,7 @@ class Player
   @@raw_speed = 10
   @@raw_self_regen = 1
   @@live = true
+  @@invincibility = 0
   @@invisibility_ticks = 0
 
   @@visible = true
@@ -98,7 +99,14 @@ class Player
     $gamemode = 'play'
     $gameover = false
     Player.live = true
+    Player.invincibility += 4
     Player.health = Player.max_health
+  end
+
+  def self.revitalize!
+    Player.health = Player.max_health
+    Player.energy = Player.max_energy
+    Player.mana = Player.max_mana
   end
 
   def self.tick
@@ -115,9 +123,10 @@ class Player
 
     self.health += hp_gain if energy >= 20
     self.mana += mana_gain if energy >= 10
-    # Out of energy. Stop sleeping
-    $sleep_condition = 'true' if energy <= 0
 
+    $sleep_condition = 'true' if energy <= 0 # Out of energy. Stop sleeping
+
+    Player.invincibility -= 1 if Player.invincibility >= 1
     Player.invisibility_ticks -= 1
     if Player.invisibility_ticks > 0
       if Player.visible
@@ -136,14 +145,19 @@ class Player
   end
 
   def self.hurt(damage=1, type="")
-    # Reflect if getting dangerously low on stats
-    self.health -= damage
-    $sleep_condition = 'true'
-    last_hit = Player.last_hit_by
-    type += ' ' if type.length > 0
-    Log.add("#{last_hit.colored_name} #{last_hit.verbs.sample} you for #{damage} #{type}damage.") if last_hit
-    ratio = (health / raw_max_health.to_f) * 100.00
-    Log.add "You are critically low on health." if ratio < 20
+    if Player.invincible?
+      last_hit = Player.last_hit_by
+      Log.add "#{last_hit.colored_name} #{last_hit.verbs.sample} you, but you receive no damage."
+    else
+      # Reflect if getting dangerously low on stats
+      self.health -= damage
+      $sleep_condition = 'true'
+      last_hit = Player.last_hit_by
+      type += ' ' if type.length > 0
+      Log.add("#{last_hit.colored_name} #{last_hit.verbs.sample} you for #{damage} #{type}damage.") if last_hit
+      ratio = (health / raw_max_health.to_f) * 100.00
+      Log.add "You are critically low on health." if ratio < 20
+    end
   end
 
   def self.heal(regenerate=1, src="You got healed by an unknown source.")
@@ -176,9 +190,11 @@ class Player
   end
 
   def self.show
-    special = "94"
-    special = "47;34" unless Player.visible
-    "\e[#{special}m@\e[0m "
+    foreground = :light_blue
+    background = :black
+    foreground, background = :blue, :white unless Player.visible
+    foreground = :yellow if Player.invincible?
+    "@".color(foreground, background) + " "
   end
 
   def self.try_action(input)
@@ -298,6 +314,7 @@ class Player
     end
 
     pickup_items('auto') if autopickup && !(@@skip_pick_up)
+    pickup_gems
     @@skip_pick_up = false
     tick
   end
@@ -312,6 +329,13 @@ class Player
       error = quickbar[input] ? "I don't have any #{quickbar[input]}." : "Nothing is assigned to that slot."
       Log.add(error)
       Game.redraw
+    end
+  end
+
+  def self.pickup_gems
+    Gems.all.select { |g| g.coords == coords}.each do |g|
+      g.pickup
+      g.destroy
     end
   end
 
@@ -509,6 +533,10 @@ class Player
 
   def self.visibility(amount)
     self.invisibility_ticks += amount
+  end
+
+  def self.invincible?
+    Player.invincibility > 0
   end
 
   def self.blow_walls

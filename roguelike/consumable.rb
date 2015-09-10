@@ -28,22 +28,43 @@ class Consumable
       restore_energy: 10,
       stack_size: 10,
       icon: '`',
-      execution_script: Evals.player_invisible(10)
+      execution_script: Evals.player_invisible(10),
+      description: "Restores 10 energy on consume. You will become invisible to enemies for 10 ticks."
     })
     new({
       name: "Bread Scrap",
       weight: 0.1,
       usage_verb: 'consumed',
       restore_energy: 2,
+      stack_size: 20,
+      icon: '`',
+      description: "Restores 2 energy on consume."
+    })
+    new({
+      name: "Bread Chunk",
+      weight: 0.3,
+      usage_verb: 'consumed',
+      restore_energy: 10,
       stack_size: 10,
-      icon: '`'
+      icon: '`',
+      description: "Restores 10 energy on consume."
+    })
+    new({
+      name: "Bread Loaf",
+      weight: 0.5,
+      usage_verb: 'consumed',
+      restore_energy: 30,
+      stack_size: 5,
+      icon: '`',
+      description: "Restores 30 energy on consume."
     })
     new({
       name: "Scroll of Unstable Teleportation",
       weight: 0.1,
       stack_size: 10,
       icon: '%',
-      execution_script: Evals.unstable_teleportation
+      execution_script: Evals.unstable_teleportation,
+      description: 'Teleports the Player to a random location on the current floor.'
     })
     new({
       name: "Scroll of Flash",
@@ -51,7 +72,8 @@ class Consumable
       stack_size: 10,
       icon: '%',
       color: :yellow,
-      execution_script: Evals.flash(5)
+      execution_script: Evals.flash(5),
+      description: 'Teleports the player up to 5 spaces away in any direction. Will fail if the space is not available for landing.'
     })
     new({
       name: 'Potion of Resurrection',
@@ -60,7 +82,8 @@ class Consumable
       icon: 'u',
       color: :magenta,
       usable_after_death: true,
-      execution_script: Evals.resurrect_player
+      execution_script: Evals.resurrect_player,
+      description: 'Usable after death, will bring the Player back to life with full health.'
     })
   end
 end

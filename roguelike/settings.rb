@@ -368,6 +368,7 @@ class Settings
   def self.build_menu(lines=[])
     $settings = Array.new(@@game_height) {""}
     max = lines.count - @@game_height + 4
+    @@scroll ||= 1
     if @@select && @@selectable
       screen = @@scroll + @@game_height - 5
       @@select = @@select > screen ? @@scroll : @@select
@@ -722,7 +723,7 @@ Type 'x' then hit enter to cancel.
     lines << "   #{columnize(padding, ["Accuracy:", "#{item.bonus_accuracy.or('N/A')}"])}"
     lines << "   #{columnize(padding, ["Regeneration:", "#{item.bonus_self_regen.or('N/A')}"])}"
     lines << ""
-    lines << " How to use:"
+    lines << " Description:"
     lines += word_wrap(item.description || "N/A")
     lines
   end
@@ -735,6 +736,9 @@ View and edit keys by hitting the '#{$key_open_keybindings}' key.
 
 -------------------------------------------------------------------------------- #{'Movement'.color(:red)}
 Each frame takes place on every interval of the speed of the Player(you). Monster may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. If the player moves at a speed of 10 and a monster moves at a speed of 15, the monsters position will only update every time the player moves. Every other turn the monster will appear to move 2 spaces because of the extra speed.
+
+-------------------------------------------------------------------------------- #{'Targeting'.color(:red)}
+When using a spell or ability, or throwing/shooting a projectile, you can quick cast by hitting the corresponding directional key. By hitting '#{$key_select_position}', you are able to scroll around using normal movement keys to select a specific place to target. If the range is less than the max range of the projectile, it will stop on the selected position. If the target is beyond the range of the projectile, it will stop at its' max range.
 )
   end
 

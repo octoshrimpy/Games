@@ -6,6 +6,15 @@ add descriptions for items
 Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
 
+Collision detection of projectiles seems off
+
+Arrows do too much damage
+
+Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
+  Monsters should have base damage + small level multiplier
+
+Ranged enemies
+
 Require more than X energy to use different types of attacks?
 More food to restore more energy!
 
@@ -69,6 +78,7 @@ require './input.rb'
 require './log.rb'
 
 require './gold.rb'
+require './gems.rb'
 require './item.rb'
 require './visual_effect.rb'
 require './dot_effect.rb'
@@ -94,11 +104,12 @@ Player.inventory << Item['Scroll of Unstable Teleportation']
 Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Fire Sword']
-Player.inventory << Item['Book of Fire Blast']
+Player.inventory << Item['Book of Fire Ball']
 Player.inventory << Item['Book of Poison Blast']
-Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire Blast", "Book of Poison Blast", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire Ball", "Book of Poison Blast", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
 100.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
+
 system 'clear' or system 'cls'
 Game.draw
 

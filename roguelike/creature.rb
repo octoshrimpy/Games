@@ -8,8 +8,6 @@ class Creature
     @destination = nil
     @depth = Player.depth
     @id = $ids; $ids += 1
-    drops = %w( g b )
-    amount = rand(5)
     stats = case type
     when "a"
       {
@@ -21,7 +19,7 @@ class Creature
         strength: (1 * (1 + @depth * 0.3)).round,
         run_speed: 6,
         verbs: %w( bit clawed cut ),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: %w( b bb g ).sample(rand(5)),
         name: "Giant Ant"
       }
     when "b"
@@ -30,11 +28,11 @@ class Creature
         # rarity: ,
         defense: 0,
         accuracy: 20,
-        vision: 10,
+        vision: 15,
         strength: (1 * (1 + @depth * 0.3)).round,
         run_speed: 11,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: (%w( b g )*5).sample(rand(5)),
         name: "Giant Bat"
       }
     when "c"
@@ -50,7 +48,7 @@ class Creature
         strength: (1 * (1 + @depth * 0.3)).round,
         run_speed: 7,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: (%w( b g )*5).sample(rand(5)),
         name: "Possessed Fox"
       }
     when "g"
@@ -74,7 +72,7 @@ class Creature
         strength: (1 * (1 + @depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( bit clawed slammed tore\ at shredded ),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: (%w( b g )*5).sample(rand(5)),
         name: "Giant Rat"
       }
     when "s"
@@ -87,7 +85,7 @@ class Creature
         strength: (3 * (1 + @depth * 0.3)).round,
         run_speed: 3,
         verbs: %w( bit struck whipped choked ),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: (%w( b g )*5).sample(rand(5)),
         name: "Snake"
       }
     when "t"
@@ -104,7 +102,7 @@ class Creature
         strength: (4 * (1 + @depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
-        drops: ["#{drops.sample}#{amount}"],
+        drops: (%w( b g )*5).sample(rand(5)),
         name: "Unknown Beast"
       }
     when "y"
@@ -188,17 +186,16 @@ class Creature
       end
     end.flatten.compact
     self.drops.each do |d|
-      d[1].to_i.times do
-        spot = drop_locations.sample
-        item = case d[0]
-        when "g" then Gold.new({value: rand(1..3)})
-        when 'b' then Item['Bread Scrap']
-        else "o "
-        end
-        item.x = spot[:x]
-        item.y = spot[:y]
-        item.depth = self.depth
+      spot = drop_locations.sample
+      item = case d
+      when "g" then Gold.new({value: rand(Player.depth..(Player.depth * 1.6).round)})
+      when 'b' then Item['Bread Scrap']
+      when 'bb' then Item['Bread Chunk']
+      else "o "
       end
+      item.x = spot[:x]
+      item.y = spot[:y]
+      item.depth = self.depth
     end
     $npcs[Player.depth].delete(self)
   end
@@ -224,6 +221,9 @@ class Creature
 
   def spawn
     coord = Dungeon.find_open_spaces.sample
+    until Math.distance_between(coord, Player.coords) > 10
+      coord = Dungeon.find_open_spaces.sample
+    end
     @x = coord[:x]
     @y = coord[:y]
     $npcs[Player.depth] ||= []
