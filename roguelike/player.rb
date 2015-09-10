@@ -295,7 +295,7 @@ class Player
                 creature.hurt(damage, 'physical')
                 effected = creature
                 Player.equipped.each do |slot, item|
-                  eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect)
+                  eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect) && item.on_hit_effect
                 end
               end
             else
@@ -401,7 +401,7 @@ class Player
   end
 
   def self.has(item)
-    if item.is_a? String
+    if item.is_a?(String)
       Player.inventory.map(&:name).include?(item)
     else
       Player.inventory.include?(item)
@@ -442,7 +442,7 @@ class Player
       item_out_of_place = true
       i = 2
       while item_out_of_place
-        if stacks[item.name].length < item.stack_size
+        if stacks[item.name].length < stack_size_of(item)
           stacks[item.name] << item
           item_out_of_place = false
         else
@@ -456,6 +456,15 @@ class Player
       end
     end
     stacks
+  end
+
+  def self.stack_size_of(item)
+    Player.equipped.each do |slot, equipment|
+      if equipment.respond_to?(:contains)
+        return equipment.contains == item.name ? equipment.size : item.stack_size
+      end
+    end
+    item.stack_size
   end
 
   def self.item_in_inventory_by_name(name)

@@ -47,7 +47,7 @@ class RangedWeapon
       icon: '-',
       color: :white,
       destroy_on_collision_with: 'P C',
-      stack_size: 50,
+      stack_size: 15,
       range: '10',
       projectile_speed: 80,
       thrown: true,
