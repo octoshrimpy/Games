@@ -139,6 +139,10 @@ class Player
       Log.add "You have become visible." unless Player.visible
       Player.visible = true
     end
+
+    while inventory_by_stacks.count > inventory_size
+      drop_many(inventory_by_stacks.to_a.last[1])
+    end
   end
 
   def self.hit(raw_damage, source)
@@ -150,14 +154,13 @@ class Player
       last_hit = Player.last_hit_by
       Log.add "#{last_hit.colored_name} #{last_hit.verbs.sample} you, but you receive no damage."
     else
-      # Reflect if getting dangerously low on stats
       self.health -= damage
       $sleep_condition = 'true'
       last_hit = Player.last_hit_by
       type += ' ' if type.length > 0
       Log.add("#{last_hit.colored_name} #{last_hit.verbs.sample} you for #{damage} #{type}damage.") if last_hit
       ratio = (health / raw_max_health.to_f) * 100.00
-      Log.add "You are critically low on health." if ratio < 20
+      Log.add "You are critically low on health." if ratio < 20 && health > 0
     end
   end
 
@@ -264,7 +267,6 @@ class Player
       print "Down: "
       Dungeon.current.search_for("> ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }
       puts
-      Game.redraw
     when "V"
       Dungeon.current.each_with_index do |row, y|
         row.each_with_index do |col, x|
@@ -315,6 +317,7 @@ class Player
     end
 
     pickup_items('auto') if autopickup && !(@@skip_pick_up)
+    describe_ground_items
     pickup_gems
     @@skip_pick_up = false
     tick
@@ -350,6 +353,7 @@ class Player
       picked_up_something = true
     end
     Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
+    inventory_full = false
     Item.on_board.select { |i| i.coords == coords }.group_by {|i| i.name }.each do |item_name, items|
       items_picked_up = []
       items.each do |item|
@@ -365,9 +369,10 @@ class Player
       if items_picked_up.count > 0
         Log.add "Picked up #{item_name}#{items_picked_up.count > 1 ? " x#{items_picked_up.count}" : ''}."
       else
-        Log.add "My inventory is full. I can't pick this up."
+        inventory_full = true
       end
     end
+    Log.add "My inventory is full." if inventory_full
     self.pickup_items('do_again') if picked_up_something
     Log.add("Nothing to pick up.") if !(picked_up_something) && method == 'key_press'
   end
@@ -539,6 +544,38 @@ class Player
     items.each do |item|
       drop(item, false)
     end
+  end
+
+  def self.describe_ground_items
+    items_below = Item.on_board.select { |i| i.coords == coords }
+    on_down_stairs = Dungeon.current.search_for("> ").include?(Player.coords)
+    on_up_stairs = Dungeon.current.search_for("< ").include?(Player.coords)
+    message = ''
+    message = "I am standing on a staircase #{on_down_stairs ? 'downwards' : 'upwards'}.\n\n" if on_down_stairs || on_up_stairs
+
+    if items_below.count > 0
+      if message.length <= 1
+        stacks = items_below.group_by(&:name)
+        top_stack = if items_below.count == 1 && stacks.length == 1
+          items_below.first.name
+        elsif stacks.length == 1
+          "a stack of #{items_below.first.name}"
+        else
+          "a stack of items"
+        end
+        message = "I am standing on #{top_stack}.\n\n#{Game::VIEWPORT_WIDTH.times.map{'  '}.join}"
+      end
+      stacks.each do |stack_name, items|
+        if items.length > 1
+          message << "#{items.length}x #{stack_name}\n"
+        else
+          message << "#{stack_name}\n"
+        end
+      end
+    end
+
+    $message = message if message.length > 0
+    message
   end
 
   def self.visibility(amount)
