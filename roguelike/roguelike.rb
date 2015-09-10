@@ -15,11 +15,6 @@ Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
 
 Ranged enemies
 
-Require more than X energy to use different types of attacks?
-More food to restore more energy!
-
-quiver to hold more arrows/slot?
-
 dodged/blocked only when necessary. Some items (magic spells) won't do damage on collision, but should show a status effect.
 "{} has been poisoned/burned/etc"
 
