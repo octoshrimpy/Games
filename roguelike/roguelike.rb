@@ -8,8 +8,6 @@ More advanced books have more spells
 
 Collision detection of projectiles seems off
 
-Arrows do too much damage
-
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
   Monsters should have base damage + small level multiplier
 

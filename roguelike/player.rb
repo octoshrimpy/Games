@@ -554,8 +554,8 @@ class Player
     message = "I am standing on a staircase #{on_down_stairs ? 'downwards' : 'upwards'}.\n\n" if on_down_stairs || on_up_stairs
 
     if items_below.count > 0
+      stacks = items_below.group_by(&:name)
       if message.length <= 1
-        stacks = items_below.group_by(&:name)
         top_stack = if items_below.count == 1 && stacks.length == 1
           items_below.first.name
         elsif stacks.length == 1

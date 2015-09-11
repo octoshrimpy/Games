@@ -21,13 +21,15 @@
 class RangedWeapon
   include Item
 
-  attr_accessor :range, :thrown, :ammo_type, :projectile_speed, :collided_action
+  attr_accessor :range, :thrown, :ammo_type, :projectile_speed, :collided_action, :shoot_damage
 
   def fire!
     if thrown
       Settings.ready_throw(self)
     else
       if Player.has(ammo_type)
+        ammo = Player.item_in_inventory_by_name(ammo_type)
+        ammo.on_hit_damage = Item[ammo_type].on_hit_damage + (self.shoot_damage || 0)
         Settings.ready_shoot(self, Player.item_in_inventory_by_name(ammo_type))
       else
         Log.add "Out of ammo. Need more #{ammo_type}"
@@ -50,6 +52,7 @@ class RangedWeapon
       stack_size: 15,
       range: '10',
       projectile_speed: 80,
+      on_hit_damage: 3,
       thrown: true,
       weight: 0.3,
       description: "This is an arrow"
@@ -96,6 +99,7 @@ class RangedWeapon
       ammo_type: 'Arrow',
       color: :white,
       range: '10',
+      shoot_damage: 5,
       thrown: false,
       weight: 3
     })
