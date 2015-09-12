@@ -4,6 +4,7 @@ class Settings
   @@title = ""
   @@select = nil
   @@selected_item = nil
+  @@opened_spellbook = nil
   @@selected_select = nil
   @@stack = nil
   @@scroll = nil
@@ -266,7 +267,12 @@ class Settings
     Game.tick
   end
 
-  def self.clear_settings; @@scroll, @@scroll_horz, @@select, @@selected_select, @@selectable, @@selection_objects = [] end
+  def self.clear_settings
+    @@title = ""
+    @@select, @@selected_item, @@opened_spellbook, @@selected_select, @@stack, @@scroll, @@scroll_horz, @@selectable = nil
+    @@selection_objects = []
+  end
+
   def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
   def self.scroll_left(amount=1); move_coord(-amount,0); end
   def self.scroll_right(amount=1); move_coord(amount,0); end
@@ -623,7 +629,9 @@ class Settings
     else $gamemode
     end
     unless $gamemode == new_gamemode
+      item = @@selected_item
       clear_settings
+      @@selected_item = item
       $gamemode = new_gamemode
     end
   end

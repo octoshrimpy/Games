@@ -44,7 +44,7 @@ class MeleeWeapon
       equipment_slot: :right_hand,
       weight: 4,
       bonus_strength: 1,
-      on_hit_effect: Evals.burn(5, 2)
+      on_hit_effect: Evals.new_dot(5, 2, 'fire', false)
     })
   end
 end

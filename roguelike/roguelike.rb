@@ -97,9 +97,10 @@ Player.inventory << Item['Scroll of Unstable Teleportation']
 Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Fire Sword']
-Player.inventory << Item['Book of Fire Ball']
-Player.inventory << Item['Book of Poison Blast']
-Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire Ball", "Book of Poison Blast", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
+Player.inventory << Item['Rusty Dagger']
+Player.inventory << Item['Book of Fire']
+Player.inventory << Item['Book of Poison']
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Book of Poison", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
 100.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
 

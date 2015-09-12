@@ -19,12 +19,13 @@
 class MagicWeapon
   include Item
 
-  attr_accessor :range, :type, :mana_usage, :ammo_type
+  attr_accessor :range, :type, :mana_usage, :ammo_type, :castable_spells
 
   def fire!
-    if Player.mana >= mana_usage
-      Settings.ready_shoot(self, Item[ammo_type])
-      Player.mana -= mana_usage
+    ammo = Item[ammo_type]
+    if Player.mana >= ammo.mana_cost
+      Settings.ready_shoot(self, ammo)
+      Player.mana -= ammo.mana_cost
       false
     else
       Log.add "Not enough mana."
@@ -36,34 +37,24 @@ class MagicWeapon
 
   def self.generate
     new({
-      name: 'Book of Fire Blast',
+      name: 'Book of Fire',
       icon: '[',
       color: :blue,
       ammo_type: 'Fire Blast',
       range: 15,
       type: 'fire',
       weight: 3,
-      mana_usage: 5
+      castable_spells: ['Fire Ball', 'Fire Blast']
     })
     new({
-      name: 'Book of Fire Ball',
-      icon: '[',
-      color: :blue,
-      ammo_type: 'Fire Ball',
-      range: 15,
-      type: 'fire',
-      weight: 3,
-      mana_usage: 2
-    })
-    new({
-      name: 'Book of Poison Blast',
+      name: 'Book of Poison',
       icon: '[',
       color: :blue,
       ammo_type: 'Poison Blast',
       range: 15,
       type: 'poison',
       weight: 3,
-      mana_usage: 1
+      castable_spells: ['Poison Blast']
     })
   end
 end

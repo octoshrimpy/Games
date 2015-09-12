@@ -295,8 +295,8 @@ class Player
                 Log.add "You missed #{creature.colored_name}."
               else
                 creature.hurt(damage, 'physical')
-                effected = creature
                 Player.equipped.each do |slot, item|
+                  collided_with = creature
                   eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect) && item.on_hit_effect
                 end
               end
@@ -551,7 +551,7 @@ class Player
     on_down_stairs = Dungeon.current.search_for("> ").include?(Player.coords)
     on_up_stairs = Dungeon.current.search_for("< ").include?(Player.coords)
     message = ''
-    message = "I am standing on a staircase #{on_down_stairs ? 'downwards' : 'upwards'}.\n\n" if on_down_stairs || on_up_stairs
+    message = "I am standing on a staircase #{on_down_stairs ? 'downwards' : 'upwards'}.\n\n#{Game::VIEWPORT_WIDTH.times.map{'  '}.join}          " if on_down_stairs || on_up_stairs
 
     if items_below.count > 0
       stacks = items_below.group_by(&:name)

@@ -22,6 +22,7 @@ class RangedWeapon
   include Item
 
   attr_accessor :range, :thrown, :ammo_type, :projectile_speed, :collided_action, :shoot_damage
+  attr_accessor :mana_cost, :range
 
   def fire!
     if thrown
@@ -65,8 +66,9 @@ class RangedWeapon
       range: '10',
       projectile_speed: 40,
       on_hit_damage: 0,
-      collided_action: Evals.explode(1, 20),
-      thrown: true
+      collided_action: Evals.explode(1, 20, 'fire'),
+      thrown: true,
+      mana_cost: 5
     })
     new({
       name: 'Fire Ball',
@@ -76,8 +78,9 @@ class RangedWeapon
       range: '10',
       projectile_speed: 40,
       on_hit_damage: 0,
-      collided_action: Evals.explode(0, 10),
-      thrown: true
+      collided_action: Evals.explode(0, 10, 'fire'),
+      thrown: true,
+      mana_cost: 3
     })
     new({
       name: 'Poison Blast',
@@ -87,8 +90,9 @@ class RangedWeapon
       range: '10',
       projectile_speed: 40,
       on_hit_damage: 0,
-      collided_action: Evals.poison(5, 1),
-      thrown: true
+      collided_action: Evals.new_dot(5, 2, 'poison'),
+      thrown: true,
+      mana_cost: 2
     })
   end
 
