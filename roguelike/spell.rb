@@ -16,7 +16,14 @@ class Spell
 
   attr_accessor :mana_cost, :range, :collided_action, :is_projectile, :projectile_speed, :non_projectile_script
 
-  def cast!
+  def cast!(needs_verify=false)
+    if needs_verify
+      unless Player.inventory.select { |item| item.class == SpellBook }.map { |books| books.castable_spells }.flatten.include?(self.name)
+        Log.add "I can't cast this spell"
+        $gamemode = 'play'
+        return false
+      end
+    end
     if Player.mana >= mana_cost
       Player.mana -= mana_cost
       if is_projectile
@@ -28,7 +35,7 @@ class Spell
       Log.add "Not enough Mana."
       $gamemode = 'play'
     end
-    Game.redraw
+    Game.redraw unless needs_verify
     false
   end
 

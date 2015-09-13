@@ -325,6 +325,12 @@ class Player
 
   def self.use_quickbar(input)
     item = item_in_inventory_by_name(quickbar[input])
+    unless item
+      temp_item = Item[quickbar[input]]
+      is_spell = temp_item.class == Spell
+      item = temp_item if is_spell
+    end
+
     if item
       if item.use!
         Game.tick

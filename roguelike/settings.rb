@@ -35,6 +35,7 @@ class Settings
       when $key_move_down_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
       when $key_move_down_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
       when $key_move_nowhere then click_select
+      when $key_pickup_items then clicked_space
       when $key_confirm then (tick = confirm_selection if @@select)
       when $key_back_menu
         menu_back
@@ -486,7 +487,7 @@ class Settings
   def self.build_spellbook_menu
     @@title = "Reading #{@@selected_item.name}"
     @@selectable = true
-    lines = ['Sort Spells']
+    lines = ["Sort Spells - Press '#{$key_pickup_items}' to assign to quickbar."]
     @@selected_item.castable_spells.each do |spell|
       lines << spell
     end
@@ -734,6 +735,19 @@ class Settings
     end
     @@selected_select = nil
     Settings.show
+  end
+
+  def self.clicked_space
+    if $gamemode == 'read_spellbook'
+      item_name = @@selected_item.castable_spells[@@select - 1]
+      item = Item[item_name] if item_name
+      if @@select >= 1 && item
+        @@selected_item = item
+        $message = "Enter the number to assign #{@@selected_item.name} to."
+        $gamemode = 'query_quickbar'
+        Game.redraw
+      end
+    end
   end
 
   def self.click_select

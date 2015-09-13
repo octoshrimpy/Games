@@ -59,6 +59,8 @@ module Item
       Settings.read_book(self)
       tick = false
       play = false
+    elsif self.class == Spell
+      tick = self.cast!(true)
     elsif self.respond_to?(:consume)
       tick = self.consume
     else

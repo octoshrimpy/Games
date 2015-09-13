@@ -3,7 +3,6 @@
 
 add descriptions for items
 
-Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
