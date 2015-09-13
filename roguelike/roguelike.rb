@@ -5,6 +5,7 @@ add descriptions for items
 
 Spell books should be read. Using opens another menu where you choose spells
 More advanced books have more spells
+Able to transcribe scrolls into books if the element matches
 
 Collision detection of projectiles seems off
 
@@ -81,6 +82,8 @@ require './equipment.rb'
 require './melee_weapon.rb'
 require './ranged_weapon.rb'
 require './magic_weapon.rb'
+require './spell_book.rb'
+require './spell.rb'
 
 require './creature.rb'
 require './player.rb'

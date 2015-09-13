@@ -26,14 +26,14 @@ class RangedWeapon
 
   def fire!
     if thrown
-      Settings.ready_throw(self)
+      Settings.ready('throw', self, self.range)
     else
       if Player.has(ammo_type)
         ammo = Player.item_in_inventory_by_name(ammo_type)
         ammo.on_hit_damage = Item[ammo_type].on_hit_damage + (self.shoot_damage || 0)
-        Settings.ready_shoot(self, Player.item_in_inventory_by_name(ammo_type))
+        Settings.ready('shoot', ammo, self.range, Player.item_in_inventory_by_name(ammo_type))
       else
-        Log.add "Out of ammo. Need more #{ammo_type}"
+        Log.add "Out of ammo. Need more #{ammo_type}."
       end
     end
     false
@@ -51,48 +51,12 @@ class RangedWeapon
       color: :white,
       destroy_on_collision_with: 'P C',
       stack_size: 15,
-      range: '10',
+      range: 20,
       projectile_speed: 80,
       on_hit_damage: 3,
       thrown: true,
       weight: 0.3,
       description: "This is an arrow"
-    })
-    new({
-      name: 'Fire Blast',
-      icon: 'o',
-      color: :light_red,
-      destroy_on_collision_with: 'a',
-      range: '10',
-      projectile_speed: 40,
-      on_hit_damage: 0,
-      collided_action: Evals.explode(1, 20, 'fire'),
-      thrown: true,
-      mana_cost: 5
-    })
-    new({
-      name: 'Fire Ball',
-      icon: 'o',
-      color: :light_red,
-      destroy_on_collision_with: 'a',
-      range: '10',
-      projectile_speed: 40,
-      on_hit_damage: 0,
-      collided_action: Evals.explode(0, 10, 'fire'),
-      thrown: true,
-      mana_cost: 3
-    })
-    new({
-      name: 'Poison Blast',
-      icon: 'o',
-      color: :light_green,
-      destroy_on_collision_with: 'a',
-      range: '10',
-      projectile_speed: 40,
-      on_hit_damage: 0,
-      collided_action: Evals.new_dot(5, 2, 'poison'),
-      thrown: true,
-      mana_cost: 2
     })
   end
 
@@ -102,7 +66,7 @@ class RangedWeapon
       icon: '}',
       ammo_type: 'Arrow',
       color: :white,
-      range: '10',
+      range: 10,
       shoot_damage: 5,
       thrown: false,
       weight: 3

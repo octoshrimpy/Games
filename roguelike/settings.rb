@@ -2,9 +2,10 @@ class Settings
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
   @@title = ""
+  @@confirmed = true
+  @@item_range = 0
   @@select = nil
   @@selected_item = nil
-  @@opened_spellbook = nil
   @@selected_select = nil
   @@stack = nil
   @@scroll = nil
@@ -106,17 +107,9 @@ class Settings
         Game.show
       end
     when $key_confirm
-      if $gamemode == 'target_throw'
-        do_in_direction([@@scroll_horz, @@scroll], 100, method(:throw!))
-        clear_settings
-      end
-      if $gamemode == 'target_flash'
-        do_in_direction([@@scroll_horz, @@scroll], 5, method(:flash!))
-        clear_settings
-      end
-      if $gamemode == 'target_shoot'
-        do_in_direction([@@scroll_horz, @@scroll], 100, method(:shoot!))
-        clear_settings
+      if $gamemode[0..5] == 'target'
+        callback = "#{$gamemode[7..$gamemode.length]}!".to_sym
+        do_in_direction([@@scroll_horz, @@scroll], method(callback))
       end
     when $key_exit then $gamemode == 'dead' ? Game.end : ''
     when "P" then Game.pause
@@ -205,12 +198,14 @@ class Settings
   end
 
   def self.direct_target(direction)
-    do_in_direction(direction, 100, method(:shoot!)) if $gamemode == 'direct_shoot'
-    do_in_direction(direction, 100, method(:throw!)) if $gamemode == 'direct_throw'
-    do_in_direction(direction, 5, method(:flash!)) if $gamemode == 'direct_flash'
+    if $gamemode[0..5] == 'direct'
+      callback = "#{$gamemode[7..$gamemode.length]}!".to_sym
+      do_in_direction(direction, method(callback))
+    end
   end
 
-  def self.do_in_direction(direction, distance, callback)
+  def self.do_in_direction(direction, callback)
+    distance = @@item_range
     calc_direction = case direction
     when 'up' then [0, -distance]
     when 'down' then [0, distance]
@@ -232,16 +227,17 @@ class Settings
     false
   end
 
-  def self.ready_throw(item)
+  def self.ready(verb, item, distance, src=nil)
+    @@item_range = distance
     @@selected_item = item
-    $gamemode = 'direct_throw'
-    $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+    $gamemode = "direct_#{verb}"
+    $message = "Click the direction you would like to #{verb}. '#{$key_select_position}' to choose coordinate."
   end
 
-  def self.ready_shoot(src, item)
-    @@selected_item = item
-    $gamemode = 'direct_shoot'
-    $message = "Click the direction you would like to shoot. '#{$key_select_position}' to choose coordinate."
+  def self.ready_cast(spell)
+    @@selected_item = spell
+    $gamemode = 'direct_cast'
+    $message = "Click the direction you would like to cast. '#{$key_select_position}' to choose coordinate."
   end
 
   def self.flash!(coord)
@@ -267,9 +263,17 @@ class Settings
     Game.tick
   end
 
+  def self.cast!(coord)
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    Log.add "Cast #{@@selected_item.name}."
+    Projectile.new(coords, @@selected_item, Player, {speed: @@selected_item.projectile_speed})
+    clear_settings
+    Game.tick
+  end
+
   def self.clear_settings
     @@title = ""
-    @@select, @@selected_item, @@opened_spellbook, @@selected_select, @@stack, @@scroll, @@scroll_horz, @@selectable = nil
+    @@select, @@selected_item, @@selected_select, @@stack, @@scroll, @@scroll_horz, @@selectable = nil
     @@selection_objects = []
   end
 
@@ -295,6 +299,7 @@ class Settings
     when 'map' then 'play'
     when 'read_more' then 'play'
     when 'read_about' then 'inventory'
+    when 'read_spellbook' then 'item_options'
     when 'equip_head' then 'equipment'
     when 'equip_torso' then 'equipment'
     when 'equip_back' then 'equipment'
@@ -353,6 +358,7 @@ class Settings
       when 'key_bindings' then build_key_bindings
       when 'equipment' then build_equipment_menu
       when 'read_more' then build_read_more_menu
+      when 'read_spellbook' then build_spellbook_menu
       when 'char_stats' then build_char_stats_menu
       when 'read_about' then build_read_about_menu
       when 'equip_head' then build_inventory_by('head')
@@ -477,6 +483,16 @@ class Settings
     word_wrap($previous_message)
   end
 
+  def self.build_spellbook_menu
+    @@title = "Reading #{@@selected_item.name}"
+    @@selectable = true
+    lines = ['Sort Spells']
+    @@selected_item.castable_spells.each do |spell|
+      lines << spell
+    end
+    lines
+  end
+
   def self.build_read_about_menu
     @@title = "About #{@@selected_item.name}"
     @@selectable = false
@@ -499,7 +515,13 @@ class Settings
     lines = ['']
     @@title = "What would you like to do with #{@@selected_item.name}?"
     @@selectable = true
-    lines << 'Use/Consume'
+    verb = case
+    when @@selected_item.class == Consumable then 'Consume'
+    when @@selected_item.class == SpellBook then 'Read'
+    when @@selected_item.respond_to?(:equipment_slot) && @@selected_item.equipment_slot then 'Equip'
+    else 'Use'
+    end
+    lines << verb
     lines << 'Throw'
     lines << 'Drop'
     lines << 'Drop Stack'
@@ -553,7 +575,7 @@ class Settings
   end
 
   def self.confirm_selection
-    selects = %w( item_options equip_head equip_torso equip_back equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
+    selects = %w( item_options read_spellbook equip_head equip_torso equip_back equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
     menus = %w( equipment inventory )
     select_selection if selects.include?($gamemode)
     redirect_selection if menus.include?($gamemode)
@@ -562,6 +584,26 @@ class Settings
   def self.select_selection
     equip_item if $gamemode[0..4] == 'equip'
     do_item_option if $gamemode == 'item_options'
+    cast_selected_spell if $gamemode == 'read_spellbook'
+  end
+
+  def self.cast_selected_spell
+    if @@confirmed
+    if @@select == 0
+      @@selected_item.sort_spells!
+    else
+      spell_name = @@selected_item.castable_spells[@@select - 1]
+      @@selected_item.cast_spell(spell_name)
+    end
+    else
+      @@confirmed = true
+    end
+  end
+
+  def self.read_book(book)
+      clear_settings
+      $gamemode = 'read_spellbook'
+      @@selected_item = book
   end
 
   def self.do_item_option
@@ -571,9 +613,10 @@ class Settings
     show_settings = false
 
     case @@select - 1
-    when 0 # User/consume
+    when 0 # Use/consume/read/equip
       unless @@selected_item.use!
-        tick = false; play = false
+        @@confirmed = false
+        tick = false; play = false; clear = false
       end
     when 1 # Throw
       if Player.energy <= 0
@@ -684,13 +727,17 @@ class Settings
   end
 
   def self.swap_items
-    Player.swap_inventory(@@selected_select - 1, @@select - 1)
+    if $gamemode == 'read_spellbook'
+      @@selected_item.swap_spells(@@selected_select - 1, @@select - 1)
+    else
+      Player.swap_inventory(@@selected_select - 1, @@select - 1)
+    end
     @@selected_select = nil
     Settings.show
   end
 
   def self.click_select
-    if $gamemode == 'inventory'
+    if $gamemode == 'inventory' || $gamemode == 'read_spellbook'
       @@selected_select ? swap_items : @@selected_select = @@select
     else
       clear_settings

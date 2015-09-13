@@ -41,7 +41,7 @@ module Item
 
   def use!
     return false if $gameover && !(usable_after_death)
-    unless !(Player.energy <= 0 && self.class != Consumable)
+    if Player.energy <= 0 && self.class != Consumable
       Log.add "I don't have the energy to do that."
       $message = "I don't have the energy to do that."
       $gamemode = 'play'
@@ -50,17 +50,22 @@ module Item
     end
 
     tick = true
+    play = true
     if self.equipment_slot
       tick = Player.equip(self)
     elsif self.class == RangedWeapon || self.class == MagicWeapon
       tick = self.fire!
+    elsif self.class == SpellBook
+      Settings.read_book(self)
+      tick = false
+      play = false
     elsif self.respond_to?(:consume)
       tick = self.consume
     else
       Log.add "Couldn't do anything with #{self.name}."
       tick = false
     end
-    Game.redraw
+    play ? Game.redraw : Settings.show
     tick
   end
 
@@ -112,6 +117,8 @@ module Item
      RangedWeapon.generate
      MagicWeapon.generate
      Equipment.generate
+     SpellBook.generate
+     Spell.generate
   end
 
   def self.damage_to_coord(coord, damage, type)
