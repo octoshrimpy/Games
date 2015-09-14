@@ -22,9 +22,8 @@ Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
 
-Every 10 levels, spawn a BOSS. Render the map a little differently?
+Every 10 levels, spawn a BOSS.
 Build the town to buy/sell stuff.
-Refactor map generation to allow for different types and specifications
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
 
@@ -81,6 +80,7 @@ require './consumable.rb'
 require './projectile.rb'
 require './equipment.rb'
 require './melee_weapon.rb'
+require './static_item.rb'
 require './ranged_weapon.rb'
 require './magic_weapon.rb'
 require './spell_book.rb'
@@ -97,17 +97,14 @@ require './visible.rb'
 seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join.to_i
 Game.start(seed)
 
-Player.inventory << Item['Scroll of Unstable Teleportation']
-Player.inventory << Item['Potion of Resurrection']
 Player.inventory << Item['Standard Bow']
+15.times { Player.inventory << Item['Arrow'] }
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Rusty Dagger']
 Player.inventory << Item['Book of Fire']
-Player.inventory << Item['Book of Poison']
-Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Book of Poison", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
-100.times { Player.inventory << Item['Arrow'] }
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", nil, nil, nil, nil, nil, nil]
 5.times { Player.inventory << Item['Scroll of Flash'] }
-Player.invincibility = 999999999
+# Player.invincibility = 999999999
 
 system 'clear' or system 'cls'
 Game.draw

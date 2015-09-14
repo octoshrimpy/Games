@@ -7,7 +7,7 @@ class Player
 
   @@x = 0
   @@y = 0
-  @@vision_radius = 2
+  @@vision_radius = 7
 
   @@depth = 1
   @@dungeon_level = 1 #0 for town?
@@ -546,7 +546,7 @@ class Player
   end
 
   def self.drop_many(items)
-    Log.add "Dropped #{items.first.name} x#{items.count}."
+    Log.add "Dropped #{items.first.name} x#{items.count}." if items.count > 0
     items.each do |item|
       drop(item, false)
     end

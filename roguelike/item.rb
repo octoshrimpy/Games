@@ -1,3 +1,28 @@
+#  Item.new({
+#   weight: ,
+#   name: ,
+#   icon: ,
+#   color: ,
+#   x: ,
+#   y: ,
+#   depth: ,
+#   equipment_slot: ,
+#   stack_size: ,
+#   description: ,
+#   destroy_on_collision_with: ,
+#   usable_after_death: ,
+#   on_hit_effect: ,
+#   on_hit_damage: ,
+#   bonus_strength: ,
+#   bonus_defense: ,
+#   bonus_accuracy: ,
+#   bonus_speed: ,
+#   bonus_health: ,
+#   bonus_mana: ,
+#   bonus_energy: ,
+#   bonus_self_regen: ,
+#   bonus_magic_power:
+#  })
 module Item
   attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death, :on_hit_effect, :on_hit_damage
   attr_accessor :bonus_strength, :bonus_defense, :bonus_accuracy, :bonus_speed, :bonus_health, :bonus_mana, :bonus_energy, :bonus_self_regen, :bonus_magic_power
@@ -63,6 +88,8 @@ module Item
       tick = self.cast!(true)
     elsif self.respond_to?(:consume)
       tick = self.consume
+    elsif self.class == StaticItem
+      tick = self.examine
     else
       Log.add "Couldn't do anything with #{self.name}."
       tick = false
@@ -121,6 +148,7 @@ module Item
      Equipment.generate
      SpellBook.generate
      Spell.generate
+     StaticItem.generate
   end
 
   def self.damage_to_coord(coord, damage, type)
@@ -141,10 +169,11 @@ module Item
       $items << new_item
       new_item
     else
-      Game.input true; binding.pry
+      nil
     end
   end
   def self.by_name(name); item = all.select {|i| i.name == name }.first; end
+  def self.all_by_name(name); item = all.select {|i| i.name == name }; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
   def self.melee; all.select {|i| i.class == MeleeWeapon }; end
   def self.ranged; all.select {|i| i.class == RangedWeapon }; end

@@ -274,8 +274,8 @@ class Settings
 
   def self.clear_settings
     @@title = ""
-    @@select, @@selected_item, @@selected_select, @@stack, @@scroll, @@scroll_horz, @@selectable = nil
-    @@selection_objects = []
+    @@select, @@selected_item, @@selected_select, @@scroll, @@scroll_horz, @@selectable = nil
+    @@selection_objects = @@stack = []
   end
 
   def self.scroll_up(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(0,-amount); end
@@ -632,7 +632,7 @@ class Settings
     when 2 # Drop
       Player.drop(@@selected_item)
     when 3 # Drop all
-      Player.drop_many(Player.inventory_by_stacks.to_a[@@stack][1])
+      Player.drop_many(@@stack)
     when 4
       if @@selected_item.equipment_slot
         Player.equip(@@selected_item)
@@ -674,8 +674,10 @@ class Settings
     end
     unless $gamemode == new_gamemode
       item = @@selected_item
+      stack = @@stack
       clear_settings
       @@selected_item = item
+      @@stack = stack
       $gamemode = new_gamemode
     end
   end
@@ -685,9 +687,10 @@ class Settings
       Player.sort_inventory!
       Settings.show
     end
-    if Player.inventory_by_stacks.to_a[@@select - 1] && @@select - 1 >= 0
-      @@selected_item = Player.inventory_by_stacks.to_a[@@select - 1][1][0]
-      @@stack = @@select - 1
+    stacks = Player.inventory_by_stacks.to_a[@@select - 1]
+    if stacks && @@select - 1 >= 0
+      @@stack = stacks[1]
+      @@selected_item = @@stack.first
     end
   end
 

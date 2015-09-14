@@ -192,6 +192,7 @@ module Math
   end
 
   def self.distance_between(from, to)
+    return nil unless from && to
     return Math.sqrt((from[:x] - to[:x])**2 + (from[:y] - to[:y])**2)
   end
 end

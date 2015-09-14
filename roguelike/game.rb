@@ -53,12 +53,12 @@ class Game
   end
 
   def self.run_time(time)
-    (100 - time).times do |t|
+    (100 / time).times do |t|
       Creature.current.each do |creature|
-        creature.tick if $tick % (100 - creature.run_speed) == 0
+        creature.tick if $tick % (100 / creature.run_speed) == 0
       end if Creature.current
       spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
-      Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 - shot.speed) == 0 }
+      Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 / shot.speed) == 0 }
       $tick += 1
     end
     Player.verify_stats
@@ -428,10 +428,8 @@ class Game
 
   def self.spawn_creature
     color = :red
-    type = case Player.depth
-    when 1..100 then %w( s r a b f ).sample
-    else "x"
-    end
+    possibilities = []
+    type = Creature.creatures_on_level(Player.depth).sample
     Creature.new(type, color).spawn
   end
 
@@ -582,15 +580,6 @@ class Game
     when '>' then 'a staircase downwards'
     when '<' then 'a staircase upwards'
     when '.' then 'some dirt'
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
-    when '' then ''
     when '' then ''
     else ""
     end
