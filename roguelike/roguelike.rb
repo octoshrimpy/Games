@@ -6,6 +6,8 @@ add descriptions for items
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
+Reduce FOV greatly. Allow light sources to be placed. Light sources should store coordinates so that they do not continually have to calculate it, since they are static
+
 Collision detection of projectiles seems off
 
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
@@ -105,6 +107,7 @@ Player.inventory << Item['Book of Poison']
 Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Book of Poison", nil, nil, nil, "Scroll of Unstable Teleportation", "Scroll of Flash"]
 100.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
+Player.invincibility = 999999999
 
 system 'clear' or system 'cls'
 Game.draw

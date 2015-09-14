@@ -319,8 +319,15 @@ class Game
   end
 
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
+    preset = case
+    when Player.depth == 0 then 'outside'
+    when Player.depth % 10 == 0 then 'open'
+    when Player.depth % 7 == 0 then 'cavernous'
+    when Player.depth % 3 == 0 then 'tunnels'
+    else 'maze'
+    end
     until (dungeon_up ||= false) && (dungeon_down ||= false)
-      dungeon = Dungeon.new.build(500)
+      dungeon = Dungeon.new(preset).build(500)
       flat_dungeon = dungeon.to_array.flatten
       dungeon_up = flat_dungeon.include?("< ") ? true : false
       dungeon_down = flat_dungeon.include?("> ") ? true : false
