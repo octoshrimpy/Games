@@ -65,7 +65,7 @@ class Creature
         accuracy: 90,
         vision: 2,
         strength: (1 * (1 + @depth * 0.3)).round,
-        run_speed: 5,
+        run_speed: 4,
         color: :light_green,
         verbs: %w( slimed ),
         drops: (%w( i i i i i i g )*5).sample(rand(5)),

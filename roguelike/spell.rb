@@ -47,7 +47,7 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
-      projectile_speed: 30,
+      projectile_speed: 20,
       collided_action: Evals.explode(1, 20, 'fire'),
       mana_cost: 5
     })
@@ -58,7 +58,7 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
-      projectile_speed: 30,
+      projectile_speed: 20,
       on_hit_damage: 0,
       collided_action: Evals.explode(0, 10, 'fire'),
       mana_cost: 3
@@ -70,7 +70,7 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
-      projectile_speed: 30,
+      projectile_speed: 20,
       on_hit_damage: 0,
       collided_action: Evals.new_dot(5, 2, 'poison'),
       mana_cost: 2

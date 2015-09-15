@@ -7,7 +7,7 @@ class Player
 
   @@x = 0
   @@y = 0
-  @@vision_radius = 7
+  @@vision_radius = 2
 
   @@depth = 1
   @@dungeon_level = 1 #0 for town?

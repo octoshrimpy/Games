@@ -6,9 +6,17 @@ add descriptions for items
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
+Allow 'read more' to work in the Equipment screen
+
 Reduce FOV greatly. Allow light sources to be placed. Light sources should store coordinates so that they do not continually have to calculate it, since they are static
 
 Collision detection of projectiles seems off
+
+If 2 weapons have the same stat bonus, show +0 instead of blank.
+
+Quiver should only increase stack size for 1 stack. Any overflow should stack normally
+
+If 's' while standing on items and overflow inventory, should open inventory and be able to swap the selected item from the floor stack with an item in the inventory
 
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
   Monsters should have base damage + small level multiplier
@@ -22,7 +30,7 @@ Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
 
-Every 10 levels, spawn a BOSS.
+Every 10 levels, spawn a BOSS. -> Downstairs should be hidden until Boss has been defeated.
 Build the town to buy/sell stuff.
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
