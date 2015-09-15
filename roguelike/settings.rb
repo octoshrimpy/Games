@@ -1,6 +1,7 @@
 class Settings
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
+  @@previous_menus = []
   @@title = ""
   @@confirmed = true
   @@item_range = 0
@@ -14,6 +15,12 @@ class Settings
   @@selection_objects = []
 
   def self.receive(input)
+    if $gamemode == 'play'
+      @@previous_menus = []
+    else
+      @@previous_menus.pop if @@previous_menus.count > 0 && @@previous_menus.last[:mode] == $gamemode
+      @@previous_menus << {mode: $gamemode, item: @@selected_item, select: @@select}
+    end
     unless $gamemode == 'play'
       tick = false
       case input
@@ -74,16 +81,26 @@ class Settings
         $gamemode == 'map' ? (@@scroll = @@select; @@select = nil) : (@@select = @@scroll)
         Settings.show
       else
-        case $gamemode
-        when 'read_more'
+        case
+        when $gamemode == 'read_more'
           $gamemode = 'play'
           Game.redraw
           clear_settings
-        when 'play'
+        when $gamemode == 'play'
           $gamemode = 'read_more'
           Settings.show
-        when 'inventory'
+        when $gamemode == 'inventory'
           grab_inventory
+          $gamemode = 'read_about'
+          Settings.show
+        when $gamemode == 'equipment'
+          str = equip
+          slot = str[6..str.length]
+          @@selected_item = Player.equipped[slot.to_sym]
+          $gamemode = 'read_about'
+          Settings.show
+        when $gamemode[0..4] == 'equip'
+          @@selected_item = @@select < 2 ? nil : @@selection_objects[@@select - 2]
           $gamemode = 'read_about'
           Settings.show
         end
@@ -291,30 +308,14 @@ class Settings
 
   def self.menu_back
     @@select = 1
-    $gamemode = case $gamemode
-    when 'help' then 'play'
-    when 'logs' then 'play'
-    when 'inventory' then 'play'
-    when 'item_options' then 'inventory'
-    when 'key_bindings' then 'play'
-    when 'equipment' then 'play'
-    when 'map' then 'play'
-    when 'read_more' then 'play'
-    when 'read_about' then 'inventory'
-    when 'read_spellbook' then 'item_options'
-    when 'equip_head' then 'equipment'
-    when 'equip_torso' then 'equipment'
-    when 'equip_back' then 'equipment'
-    when 'equip_left_hand' then 'equipment'
-    when 'equip_right_hand' then 'equipment'
-    when 'equip_ring1' then 'equipment'
-    when 'equip_ring2' then 'equipment'
-    when 'equip_ring3' then 'equipment'
-    when 'equip_ring4' then 'equipment'
-    when 'equip_waist' then 'equipment'
-    when 'equip_leggings' then 'equipment'
-    when 'equip_feet' then 'equipment'
-    else 'play'
+    if @@previous_menus.length > 1
+      last_menu = @@previous_menus.pop(2).first
+      $gamemode = last_menu[:mode]
+      @@selected_item = last_menu[:item]
+      @@select = last_menu[:select]
+    else
+      clear_settings
+      $gamemode = 'play'
     end
     Settings.show
   end
@@ -496,6 +497,7 @@ class Settings
   end
 
   def self.build_read_about_menu
+    return no_item_text unless @@selected_item
     @@title = "About #{@@selected_item.name}"
     @@selectable = false
     explain_item_text(@@selected_item)
@@ -778,6 +780,12 @@ m - Mana
 
 Type 'x' then hit enter to cancel.
 )
+  end
+
+  def self.no_item_text
+    @@title = "No item selected"
+    @@selectable = false
+    word_wrap("\nThis menu will normally describe an item, including the name, weight, icon it uses, where it can be equipped, range, bonus stats, how to use it, and any other extra information.")
   end
 
   def self.explain_item_text(item)

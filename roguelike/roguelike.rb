@@ -8,6 +8,8 @@ Able to transcribe scrolls into books if the element matches
 
 Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1)
 
+http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
+
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
 
