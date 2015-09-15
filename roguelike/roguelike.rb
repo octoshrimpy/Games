@@ -13,8 +13,6 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
 
-Allow 'read more' to work in the Equipment screen
-
 Reduce FOV greatly. Allow light sources to be placed. Light sources should store coordinates so that they do not continually have to calculate it, since they are static
 
 Collision detection of projectiles seems off

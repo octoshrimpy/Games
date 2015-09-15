@@ -5,6 +5,7 @@ Fixed canceling a spell still using the mana
 Creature Names are now at the end of the log when receiving damage
 Previous menus visited are now stored and programmatically determined when pressing 'back' so no more strange redirects.
 Added functionality to 'read more' about items in the Equipment screens
+Fixed the range on Arrows not being long enough.
 
 Sept 14, 2015 v0.0.45
 Added Slimes

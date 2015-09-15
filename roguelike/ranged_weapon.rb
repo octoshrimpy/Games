@@ -31,7 +31,8 @@ class RangedWeapon
       if Player.has(ammo_type)
         ammo = Player.item_in_inventory_by_name(ammo_type)
         ammo.on_hit_damage = Item[ammo_type].on_hit_damage + (self.shoot_damage || 0)
-        Settings.ready('shoot', ammo, self.range, Player.item_in_inventory_by_name(ammo_type))
+        ammo.range = (Item[ammo_type].range || 0) + (self.range || 0)
+        Settings.ready('shoot', ammo, ammo.range, Player.item_in_inventory_by_name(ammo_type))
       else
         Log.add "Out of ammo. Need more #{ammo_type}."
       end
