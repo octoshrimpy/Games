@@ -1,11 +1,12 @@
 class Creature
   attr_accessor :x, :y, :health, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :accuracy, :defense, :verbs,
-                :tick_script, :attracted_to
+                :tick_script, :attracted_to, :sense_range, :can_move
 
   def initialize(type, creature_color)
     @mask = "#{type} "
     @creature_color = creature_color
+    @can_move = true
     @destination = nil
     @depth = Player.depth
     @id = $ids; $ids += 1
@@ -70,7 +71,8 @@ class Creature
         verbs: %w( slimed ),
         drops: (%w( i i i i i i g )*5).sample(rand(5)),
         attracted_to: ['Slime Ball', 'Player'],
-        tick_script: 'rand(5) == 0 ? eval(Evals.split_slime) : ""; eval(Evals.pickup_slime) ',
+        sense_range: {'Slime Ball' => 7},
+        tick_script: 'eval(Evals.try_to_split_slime); eval(Evals.pickup_slime)',
         name: "Slime"
       }
     when "n"
@@ -160,6 +162,7 @@ class Creature
     @verbs = stats[:verbs]
     @drops = stats[:drops]
     @attracted_to = stats[:attracted_to]
+    @sense_range = stats[:sense_range]
     @name = stats[:name]
   end
 
@@ -338,7 +341,7 @@ class Creature
   def hurt(damage=1, src="")
     @health -= damage.round
     src += ' ' if src.length > 0
-    Log.add("#{colored_name} received #{damage.round} #{src}damage.")
+    Log.add("#{damage.round} #{src}damage was dealt to #{colored_name}.")
     self.destroy(src) if @health <= 0
   end
 
@@ -373,6 +376,12 @@ class Creature
   end
 
   def tick(type='check')
+    @can_move = true
+
+    eval(@tick_script) if @tick_script
+
+    return false unless @can_move
+
     @destination = nil if @destination == coords || rand(10) == 0
     target = nil
     found_destination = nil
@@ -404,8 +413,6 @@ class Creature
       @x = move_to[:x]
       @y = move_to[:y]
     end
-
-    eval(@tick_script) if @tick_script
   end
 
   def find_nearest_item_in_range(name)
@@ -415,7 +422,7 @@ class Creature
     while found_item.nil?
       item = items_by_range[i]
       if item
-        is_in_range = Visible.in_range(self.vision, self.coords, item.coords)
+        is_in_range = Visible.in_range((sense_range[item.name] || self.vision), self.coords, item.coords)
         if is_in_range
           found_item = item
         end
@@ -453,10 +460,12 @@ class Creature
     in_range
   end
 
-  def possible_moves
+  def possible_moves(corners=true)
     move_to = (-1..1).map do |y|
       (-1..1).map do |x|
-        if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
+        if corners == false && ([[1, 1], [-1, 1], [1, -1], [-1, -1]]).include?([x, y])
+          nil
+        elsif Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
           unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.current.map {|m|m.coords}.include?({x: @x + x, y: @y + y})
             {x: @x + x, y: @y + y}
           else

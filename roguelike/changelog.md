@@ -1,3 +1,9 @@
+Sept 15, 2015 v0.0.46
+Creatures can prioritize target objects over others, and have different vision ranges for each.
+Made modifications to Slime spawning, made more efficient and less Slime over load
+Fixed canceling a spell still using the mana
+Creature Names are now at the end of the log when receiving damage
+
 Sept 14, 2015 v0.0.45
 Added Slimes
 * Slimes multiply slowly over time

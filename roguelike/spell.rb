@@ -25,7 +25,6 @@ class Spell
       end
     end
     if Player.mana >= mana_cost
-      Player.mana -= mana_cost
       if is_projectile
         Settings.ready('cast', self, self.range)
       else

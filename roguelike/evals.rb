@@ -14,20 +14,13 @@ class Evals
     }); #{should_destroy ? 'destroy' : ''}"
   end
 
-  def self.split_slime
-    "count = 0; range = 10
-    slime_coords = Creature['Slime'].map(&:coords)
-    (-range + self.y..range + self.y).each do |y|
-      (-range + self.x..range + self.x).each do |x|
-        count += slime_coords.include?({x: x, y: y}) ? 1 : 0
-      end
-    end
-    distance = Math.distance_between(coords, Player.coords)
-    coord = self.possible_moves.sample
-    if count <= 3 && distance > 10
-      Creature.new('m', :light_green).spawn(coord) if coord && Creature.count <= Game::MAX_ENEMIES + 5
-    elsif count <= 5 && distance <= 10
-      Creature.new('m', :light_green).spawn(coord) if coord && Creature.count <= Game::MAX_ENEMIES + 10
+  def self.try_to_split_slime
+    "distance = Math.distance_between(coords, Player.coords)
+    chance = distance < 10 ? 5 : 30
+    if rand(chance) == 0 && Creature.count < Game::MAX_ENEMIES
+      coord = self.possible_moves(false).sample
+      Creature.new('m', :light_green).spawn(coord) if coord
+      @can_move = !coord
     end"
   end
 

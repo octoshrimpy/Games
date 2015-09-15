@@ -6,6 +6,11 @@ add descriptions for items
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
+Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1)
+
+Greatly reduce magic damage, scale magic damage with magic power
+Allow purchase of items to increase defense and power
+
 Allow 'read more' to work in the Equipment screen
 
 Reduce FOV greatly. Allow light sources to be placed. Light sources should store coordinates so that they do not continually have to calculate it, since they are static
@@ -110,8 +115,9 @@ Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Rusty Dagger']
 Player.inventory << Item['Book of Fire']
-Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", nil, nil, nil, nil, nil, nil]
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Fire Blast", nil, nil, nil, nil, nil]
 5.times { Player.inventory << Item['Scroll of Flash'] }
+Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
 
 system 'clear' or system 'cls'

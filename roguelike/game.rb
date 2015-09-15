@@ -212,8 +212,9 @@ class Game
     $visible_calculations = 0
     print "Creature locations: "
     Creature.current.each do |creature|
-      color_modifier = creature.player_in_range? ? "\e[31m" : ''
-      print " #{color_modifier}(#{creature.x}, #{creature.y})\e[0m "
+      foreground = creature.player_in_range? ? :red : nil
+      background = creature.name == 'Slime' ? :green : nil
+      print " (#{creature.x}, #{creature.y}) ".color(foreground, background)
     end if Creature.current
     puts
   end
