@@ -317,7 +317,6 @@ class Player
     end
 
     pickup_items('auto') if autopickup && !(@@skip_pick_up)
-    describe_ground_items
     pickup_gems
     @@skip_pick_up = false
     tick
@@ -542,6 +541,7 @@ class Player
     item.y = Player.y
     item.depth = Player.depth
     Player.inventory.delete(item)
+    $screen_shot_objects << {instance: item, x: item.x, y: item.y}
     @@skip_pick_up = true
   end
 
@@ -552,36 +552,8 @@ class Player
     end
   end
 
-  def self.describe_ground_items
-    items_below = Item.on_board.select { |i| i.coords == coords }
-    on_down_stairs = Dungeon.current.search_for("> ").include?(Player.coords)
-    on_up_stairs = Dungeon.current.search_for("< ").include?(Player.coords)
-    message = ''
-    message = "I am standing on a staircase #{on_down_stairs ? 'downwards' : 'upwards'}.\n\n#{Game::VIEWPORT_WIDTH.times.map{'  '}.join}          " if on_down_stairs || on_up_stairs
-
-    if items_below.count > 0
-      stacks = items_below.group_by(&:name)
-      if message.length <= 1
-        top_stack = if items_below.count == 1 && stacks.length == 1
-          items_below.first.name
-        elsif stacks.length == 1
-          "a stack of #{items_below.first.name}"
-        else
-          "a stack of items"
-        end
-        message = "I am standing on #{top_stack}.\n\n#{Game::VIEWPORT_WIDTH.times.map{'  '}.join}"
-      end
-      stacks.each do |stack_name, items|
-        if items.length > 1
-          message << "#{items.length}x #{stack_name}\n"
-        else
-          message << "#{stack_name}\n"
-        end
-      end
-    end
-
-    $message = message if message.length > 0
-    message
+  def self.currently_standing_on
+    Item.on_board.select { |i| i.coords == coords }
   end
 
   def self.visibility(amount)

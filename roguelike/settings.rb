@@ -20,6 +20,7 @@ class Settings
     else
       @@previous_menus.pop if @@previous_menus.count > 0 && @@previous_menus.last[:mode] == $gamemode
       @@previous_menus << {mode: $gamemode, item: @@selected_item, select: @@select}
+      @@previous_menus = [{mode: 'map', item: nil, select: nil}] if $gamemode == 'map'
     end
     unless $gamemode == 'play'
       tick = false
@@ -482,8 +483,9 @@ class Settings
 
   def self.build_read_more_menu
     @@title = 'Read More'
-    @@selectable = false
-    word_wrap($previous_message)
+    @@selectable = Player.currently_standing_on.count > 0
+    coords = @@scroll && @@scroll_horz ? {x: @@scroll_horz, y: @@scroll} : Player.coords
+    word_wrap(Game.describe(Dungeon.at(coords), coords))
   end
 
   def self.build_spellbook_menu
@@ -605,9 +607,9 @@ class Settings
   end
 
   def self.read_book(book)
-      clear_settings
-      $gamemode = 'read_spellbook'
-      @@selected_item = book
+    clear_settings
+    $gamemode = 'read_spellbook'
+    @@selected_item = book
   end
 
   def self.do_item_option

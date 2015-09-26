@@ -17,10 +17,6 @@ Reduce FOV greatly. Allow light sources to be placed. Light sources should store
 
 Collision detection of projectiles seems off
 
-If 2 weapons have the same stat bonus, show +0 instead of blank.
-
-Quiver should only increase stack size for 1 stack. Any overflow should stack normally
-
 If 's' while standing on items and overflow inventory, should open inventory and be able to swap the selected item from the floor stack with an item in the inventory
 
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
@@ -35,7 +31,9 @@ Character Experience/levels
 Scaling for enemies
 Enemy special abilities?
 
-Every 10 levels, spawn a BOSS. -> Downstairs should be hidden until Boss has been defeated.
+Every 10 levels, spawn a BOSS.
+  Downstairs should be hidden until Boss has been defeated.
+
 Build the town to buy/sell stuff.
 
 Enemy spawning rarity. Some monsters are more common than others, depending on the floor
@@ -111,12 +109,13 @@ seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] 
 Game.start(seed)
 
 Player.inventory << Item['Standard Bow']
-15.times { Player.inventory << Item['Arrow'] }
+Player.equipped[:back] = Item["Quiver"]
+200.times { Player.inventory << Item['Arrow'] }
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Rusty Dagger']
 Player.inventory << Item['Book of Fire']
-Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Fire Blast", nil, nil, nil, nil, nil]
 5.times { Player.inventory << Item['Scroll of Flash'] }
+Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Fire Blast", nil, nil, nil, nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
 

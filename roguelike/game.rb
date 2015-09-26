@@ -21,6 +21,9 @@ class Game
     $gameover = false
     $spawn_creatures = true
     $screen_shot = nil
+    $screen_shot_objects = []
+    $screen_shot_visible = []
+    $stack = []
     $world = []
     $time = 0
     $milli_tick = 0
@@ -576,7 +579,11 @@ class Game
   end
 
   def self.describe(pixel, coords)
-    response = case pixel.clone.uncolor.split.join
+    player_here = coords == Player.coords
+    is_map = $gamemode == 'map'
+    response = player_here ? "I'm standing on " : 'There is '
+
+    standing_pixel = case pixel.clone.uncolor.split.join
     when '▒' then 'an unbreakable wall'
     when '#' then 'a rock'
     when '>' then 'a staircase downwards'
@@ -585,46 +592,29 @@ class Game
     when '' then ''
     else ""
     end
-    stack = []
+    $stack = []
     # Do not change their color
     $screen_shot_objects.each do |obj|
-      stack << obj if {x: obj[:x], y: obj[:y]} == coords
+      $stack << obj[:instance] if {x: obj[:x], y: obj[:y]} == coords && obj[:instance] != Player
     end
-    if response.length > 0 || stack.length > 0
-      if stack.count == 0
-        "This is #{response}."
-      else
-        str = case stack.count
-        when 1
-          case stack.first[:instance].class.to_s
-          when "Class" then "I am standing on #{response}."
-          when "Gold" then "There is some gold #{('on ' + response + ' ') if response != 'some dirt'}here."
-          when "" then Game.input true; binding.pry
-          else
-            if stack.first[:instance].name
-              "There is #{stack.first[:instance].name.articlize} #{('on ' + response + ' ') if response != 'some dirt'}here."
-            else
-              "Something is weird."
-              Game.input true; binding.pry
-            end
-          end
-        when 2
-          if stack.map {|s|s[:instance].class.to_s}.uniq.length == 1
-            "There is a stack of #{stack.first[:instance].name} here."
-          else
-            "There is #{stack.last[:instance].name.articlize} on #{stack.first[:instance].name.articlize} here."
-          end
-        else "There are #{stack.count} things here. "
-          if stack.map {|s|s[:instance].class.to_s}.uniq.length == 1
-            "There is a stack of #{stack.first[:instance].name} here."
-          else
-            "There is a stack of #{stack.first[:instance].name.articlize} and other things."
-          end
-        end
-        "#{str}\n#{VIEWPORT_WIDTH.times.map{'  '}.join}#{stack.map {|i|"\n" + i[:instance].name.capitalize}.join}"
-      end
+    stacks = $stack.group_by { |item| item.name }
+    stack_size = $stack.size
+
+    if standing_pixel =~ /staircase/
+      response << standing_pixel
+      response << (stack_size > 0 ? 'and some other things' : '')
     else
-      "I don't know what this is."
+      response << case stacks.size
+      when 0 then standing_pixel
+      when 1 then (stack_size == 1 || stack.first.stack_size == 1) ? "#{stack.first.name.articlize}" : "a stack of #{stack.first.name.articlize}"
+      when 2 then "#{$stack.last.stack_size == 1 ? $stack.last.name.articlize : "a stack of #{$stack.last.name.articlize}"} on #{$stack.first.stack_size == 1 ? $stack.first.name.articlize : "a stack of #{$stack.first.name.articlize}"}"
+      else "\b\b\bare #{stack_size} things"
+      end
     end
+
+    response << (is_map ? " here.\n" : ".\n")
+    response = "I don't know what this is." if standing_pixel.length == 0 && stack_size == 0
+    response << (VIEWPORT_WIDTH.times.map{'  '}.join + "\n")
+    response << stacks.map { |item_name, item_list| "#{item_name}#{item_list.count > 1 ? " x#{item_list.count}" : ''}\n"}.join
   end
 end
