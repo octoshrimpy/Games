@@ -1,5 +1,6 @@
 require './walker.rb'
 require './arena.rb'
+require './automata_cave.rb'
 
 class Dungeon
 
@@ -49,12 +50,19 @@ class Dungeon
     end
   end
 
-  def build(size, depth=Player.depth)
+  def standard_build(size, depth=Player.depth)
     srand($seed + depth)
+
     arena = Arena.new
     create_dungeon(arena, size)
     arena[0, 0] = @up_stairs
-    arena
+
+    arena.to_array
+  end
+
+  def open_cave_build(size, depth=Player.depth)
+    srand($seed + depth)
+    AutomataCave.new(size, size, 53).generate!
   end
 
   def create_dungeon(arena, walk_length, have_stairs = true, walker = Walker.new)

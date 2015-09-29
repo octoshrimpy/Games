@@ -276,6 +276,10 @@ class Player
       seen.uniq!
       Log.add "Cheat activated: Full vision."
       Game.redraw
+    when '+'
+      system 'clear' or system 'cls'
+      Game.input(true)
+      Dungeon.current.each { |row| puts row.join('') }
       # --------------------------------------------------- / CHEATS ---------------------------
     end
 

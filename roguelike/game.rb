@@ -326,19 +326,22 @@ class Game
   def self.make_dungeon(offset={x: 0, y: 0}, player_coords={x: 0, y: 0})
     preset = case
     when Player.depth == 0 then 'outside'
-    when Player.depth % 10 == 0 then 'open'
+    when Player.depth % 10 == 0 then 'boss'
     when Player.depth % 7 == 0 then 'cavernous'
     when Player.depth % 3 == 0 then 'tunnels'
     else 'maze'
     end
     until (dungeon_up ||= false) && (dungeon_down ||= false)
-      dungeon = Dungeon.new(preset).build(500)
-      flat_dungeon = dungeon.to_array.flatten
-      dungeon_up = flat_dungeon.include?("< ") ? true : false
-      dungeon_down = flat_dungeon.include?("> ") ? true : false
+      if preset == 'boss'
+        dungeon = Dungeon.new(preset).open_cave_build(50)
+      else
+        dungeon = Dungeon.new('tunnels').standard_build(300)
+      end
+      dungeon_up = dungeon.search_for("< ").first
+      dungeon_down = dungeon.search_for("> ").first
     end
 
-    $dungeon[Player.depth] = dungeon.to_array
+    $dungeon[Player.depth] = dungeon
 
     $height = Dungeon.current.length
     $width = Dungeon.current.first.length
@@ -368,8 +371,7 @@ class Game
 
     populate_dungeon
 
-    Player.x = dungeon.left.abs + 1
-    Player.y = dungeon.top.abs + 1
+    Player.coords = dungeon_up
 
     $world[Player.depth] ||= {}
     $world[Player.depth][:up] ||= []
@@ -388,7 +390,7 @@ class Game
     count = 0
     print "\e[32m"
     num.times do |t|
-      dungeon = Dungeon.new.build(300).to_array.flatten
+      dungeon = Dungeon.new.standard_build(300).flatten
       print dungeon.include?("< ") ? "." : (count+=1;"\e[31mF\e[32m")
       print dungeon.include?("> ") ? "." : (count+=1;"\e[31mF \e[32m")
     end
