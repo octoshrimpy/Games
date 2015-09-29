@@ -1,3 +1,12 @@
+Sept 29, 2015 v0.0.48
+If a Players inventory is full, or auto-pickup is off, he can view the items on the ground and select which to pick up
+Many bugs, as a lot of code was lost...
+Created a new Dungeon type that will appear on every 10th level.
+
+Sept 26, 2015 v0.0.47
+Refactored the way items on the ground are described.
+Player describes items that he is standing on.
+
 Sept 15, 2015 v0.0.46
 Creatures can prioritize target objects over others, and have different vision ranges for each.
 Made modifications to Slime spawning, made more efficient and less Slime over load
