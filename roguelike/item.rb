@@ -36,6 +36,14 @@ module Item
     $items << self
   end
 
+  def drop(coords, depth)
+    self.x = coords[:x]
+    self.y = coords[:y]
+    self.depth = depth
+    $screen_shot_objects << {instance: self, x: self.x, y: self.y}
+    self
+  end
+
   def destroy
     Player.inventory.delete(self)
     $items.delete(self)

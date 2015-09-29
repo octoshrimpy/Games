@@ -241,7 +241,7 @@ class Player
     when $key_move_nowhere
       tick = true
     when $key_pickup_items
-      pickup_items
+      try_pickup_items
       tick = true
     when $key_down_stairs
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
@@ -316,8 +316,12 @@ class Player
       end
     end
 
-    pickup_items('auto') if autopickup && !(@@skip_pick_up)
+    try_pickup_items('auto') if autopickup && !(@@skip_pick_up)
     pickup_gems
+    standing_on_message = Game.describe(Dungeon.at(Player.coords), Player.coords)
+    if standing_on_message.length > 0 && !(standing_on_message =~ /I don't know what this is./)
+      $message = standing_on_message if $message && $message.length == 0
+    end
     @@skip_pick_up = false
     tick
   end
@@ -348,7 +352,7 @@ class Player
     end
   end
 
-  def self.pickup_items(method="key_press")
+  def self.try_pickup_items(method="key_press")
     picked_up_something = false
     increase = 0
     Gold.all.select {|g| g.coords == coords}.each do |gold_piece|
@@ -358,28 +362,8 @@ class Player
       picked_up_something = true
     end
     Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
-    inventory_full = false
-    Item.on_board.select { |i| i.coords == coords }.group_by {|i| i.name }.each do |item_name, items|
-      items_picked_up = []
-      items.each do |item|
-        self.inventory << item
-        if Player.inventory_by_stacks.count > Player.inventory_size
-          self.inventory.delete(item)
-        else
-          item.pickup
-          picked_up_something = true
-          items_picked_up << item
-        end
-      end
-      if items_picked_up.count > 0
-        Log.add "Picked up #{item_name}#{items_picked_up.count > 1 ? " x#{items_picked_up.count}" : ''}."
-      else
-        inventory_full = true
-      end
-    end
-    Log.add "My inventory is full." if inventory_full
-    self.pickup_items('do_again') if picked_up_something
-    Log.add("Nothing to pick up.") if !(picked_up_something) && method == 'key_press'
+    picked_up_something = pickup_items(Item.on_board.select { |i| i.coords == coords }, method)
+    self.try_pickup_items('do_again') if picked_up_something
   end
 
   def self.strength; raw_strength + bonuses[:strength].to_i; end
@@ -436,18 +420,70 @@ class Player
     end
   end
 
-  def self.swap_inventory(slot_a, slot_b)
+  def self.swap_inventory(slot_a, slot_b, on_ground=false)
     return false unless slot_a && slot_b
+    return swap_with_ground(slot_a, slot_b) if on_ground
     inven_by_array = self.inventory_by_stacks.to_a
     return false unless inven_by_array[slot_a] && inven_by_array[slot_b]
     inven_by_array[slot_a], inven_by_array[slot_b] = inven_by_array[slot_b], inven_by_array[slot_a]
-    self.inventory = inven_by_array.map { |name, array_of_items| array_of_items}.flatten
+    self.inventory = inven_by_array.map { |name, array_of_items| array_of_items }.flatten
     true
+  end
+
+  def self.swap_with_ground(ground_item_slot, inven_item_slot)
+    ground_item_slot -= 1 # Offset since items start on 2 for the Read More
+    stacks = $stack.group_by { |item| item.name }
+    selected_items = stacks.to_a[ground_item_slot].last
+    return false unless selected_items
+    items_to_swap_from_ground = selected_items.first(selected_items.first.stack_size)
+    inven_by_array = self.inventory_by_stacks.to_a
+    return false unless inven_by_array[inven_item_slot] && items_to_swap_from_ground.first
+    drop_many(inven_by_array[inven_item_slot].last)
+    items_to_swap_from_ground.each do |item|
+      $screen_shot_objects.delete({instance: item, x: item.x, y: item.y})
+      item.x, item.y, item.depth = nil
+    end
+    pickup_items(items_to_swap_from_ground)
+    true
+  end
+
+  def self.pickup_items(items, method='key_press')
+    inventory_full = false
+    picked_up_something = false
+    items.group_by {|i| i.name }.each do |item_name, items|
+      items_picked_up = []
+      items.each do |item|
+        if pickup_item(item)
+          picked_up_something = true
+          items_picked_up << item
+        end
+      end
+      if items_picked_up.count > 0
+        Log.add "Picked up #{item_name}#{items_picked_up.count > 1 ? " x#{items_picked_up.count}" : ''}."
+      else
+        inventory_full = true
+      end
+    end
+    Log.add "My inventory is full." if inventory_full
+    Log.add("Nothing to pick up.") if !(picked_up_something) && method == 'key_press'
+    picked_up_something
+  end
+
+  def self.pickup_item(item)
+    self.inventory << item
+    if Player.inventory_by_stacks.count > Player.inventory_size
+      self.inventory.delete(item)
+      return false
+    else
+      item.pickup
+      return true
+    end
   end
 
   def self.inventory_by_stacks
     stacks = {}
     self.inventory.map do |item|
+      next unless item
       stacks[item.name] ||= []
       item_out_of_place = true
       i = 2
@@ -464,7 +500,7 @@ class Player
           i += 1
         end
       end
-    end
+    end.compact
     stacks
   end
 
@@ -537,11 +573,8 @@ class Player
 
   def self.drop(item, show_log=true)
     Log.add "Dropped #{item.name}." if show_log
-    item.x = Player.x
-    item.y = Player.y
-    item.depth = Player.depth
+    item.drop(Player.coords, Player.depth)
     Player.inventory.delete(item)
-    $screen_shot_objects << {instance: item, x: item.x, y: item.y}
     @@skip_pick_up = true
   end
 

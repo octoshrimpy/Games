@@ -2,6 +2,9 @@ class Settings
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
   @@previous_menus = []
+  @@options = {
+    has_ground_item: false
+  }
   @@title = ""
   @@confirmed = true
   @@item_range = 0
@@ -403,7 +406,7 @@ class Settings
     (@@game_height - 4).times do |y|
       $settings[y + 2] = if @@selectable
         quick_num = (y > 0 && y < 10) ? "#{y}-" : "  "
-        "  #{@@select == (@@scroll + y) ? '>' : (@@selected_select == (@@scroll + y) ? '>'.color(:blue, :white) : ' ')}   #{lines[@@scroll + y]}\r|#{quick_num}"
+        "  #{@@select == (@@scroll + y) ? '>' : (@@selected_select == (@@scroll + y) && !@@options[:has_ground_item] ? '>'.color(:blue, :white) : ' ')}   #{lines[@@scroll + y]}\r|#{quick_num}"
       else
         " #{lines[@@scroll + y]}"
       end.override_background_with(:white).override_foreground_with(:black)
@@ -739,7 +742,8 @@ class Settings
     if $gamemode == 'read_spellbook'
       @@selected_item.swap_spells(@@selected_select - 1, @@select - 1)
     else
-      Player.swap_inventory(@@selected_select - 1, @@select - 1)
+      Player.swap_inventory(@@selected_select - 1, @@select - 1, @@options[:has_ground_item])
+      @@options[:has_ground_item] = false
     end
     @@selected_select = nil
     Settings.show
@@ -761,6 +765,18 @@ class Settings
   def self.click_select
     if $gamemode == 'inventory' || $gamemode == 'read_spellbook'
       @@selected_select ? swap_items : @@selected_select = @@select
+    elsif $gamemode == 'read_more' && @@select
+      if Player.inventory_by_stacks.count < Player.inventory_size
+        stacks = $stack.group_by { |item| item.name }
+        selected_items = stacks.to_a[@@select - 2].last
+        items_to_pickup = selected_items.first(selected_items.first.stack_size)
+        Player.pickup_items(items_to_pickup)
+      else
+        @@options[:has_ground_item] = true
+        @@selected_select = @@select
+        $gamemode = 'inventory'
+      end
+      Settings.show
     else
       clear_settings
       $gamemode = 'play'
