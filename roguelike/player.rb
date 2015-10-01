@@ -1,9 +1,10 @@
 class Player
-  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana, :raw_max_health,
-                   :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected, :quickbar, :energy,
-                   :raw_max_energy, :visible, :raw_defense, :equipped, :inventory, :autopickup,
-                   :last_hit_id, :raw_self_regen, :bonus_stats, :raw_accuracy, :raw_magic_power,
-                   :invisibility_ticks, :sleeping, :inventory_size, :stunned_for, :live, :invincibility
+  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana,
+  :raw_max_health, :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected,
+  :quickbar, :energy, :raw_max_energy, :visible, :raw_defense, :equipped,
+  :inventory, :autopickup, :last_hit_id, :raw_self_regen, :bonus_stats,
+  :raw_accuracy, :raw_magic_power, :invisibility_ticks, :sleeping,
+  :inventory_size, :stunned_for, :live, :invincibility
 
   @@x = 0
   @@y = 0
@@ -71,14 +72,15 @@ class Player
   def self.name; "me"; end
   def self.coords; {x: Player.x, y: Player.y}; end
   def self.coords=(coord); {x: Player.x = coord[:x], y: Player.y = coord[:y]}; end
+
   def self.last_hit_by
     return false unless last_hit_id
     Creature.find(last_hit_id)
   end
+
   def self.last_hit_name
-    if last_hit_by
-      last_hit_by.name
-    end
+    return false unless last_hit_by
+    last_hit_by.name
   end
 
   def self.verify_stats
@@ -210,47 +212,47 @@ class Player
     case input
     when ("1".."9") then use_quickbar(input.to_i - 1)
       # Movement
-    when "UP", $key_move_up
+    when "UP", $key_mapping[:move_up]
       tick = true
       y_dest = -1
-    when "LEFT", $key_move_left
+    when "LEFT", $key_mapping[:move_left]
       tick = true
       x_dest = -1
-    when "DOWN", $key_move_down
+    when "DOWN", $key_mapping[:move_down]
       tick = true
       y_dest = 1
-    when "RIGHT", $key_move_right
+    when "RIGHT", $key_mapping[:move_right]
       tick = true
       x_dest = 1
-    when $key_move_up_left
+    when $key_mapping[:move_up_left]
       tick = true
       y_dest = -1
       x_dest = -1
-    when $key_move_up_right
+    when $key_mapping[:move_up_right]
       tick = true
       y_dest = -1
       x_dest = 1
-    when $key_move_down_right
+    when $key_mapping[:move_down_right]
       tick = true
       y_dest = 1
       x_dest = 1
-    when $key_move_down_left
+    when $key_mapping[:move_down_left]
       tick = true
       y_dest = 1
       x_dest = -1
-    when $key_move_nowhere
+    when $key_mapping[:move_nowhere]
       tick = true
-    when $key_pickup_items
+    when $key_mapping[:pickup_items]
       try_pickup_items
       tick = true
-    when $key_down_stairs
+    when $key_mapping[:down_stairs]
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
         $spawn_creatures = true
         Log.add "You go down the stairs..."
         tick = true
       end
-    when $key_up_stairs
+    when $key_mapping[:up_stairs]
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
         $spawn_creatures = true

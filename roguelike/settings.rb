@@ -29,28 +29,28 @@ class Settings
       tick = false
       case input
       when ("1".."9") then $gamemode == 'query_quickbar' ? (assign_quickbar(input); tick = true) : (@@select = input.to_i; tick = true if @@selectable && @@select)
-      when "UP", $key_move_up then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up; tick = true)
-      when "LEFT", $key_move_left then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left; tick = true)
-      when "DOWN", $key_move_down then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down; tick = true)
-      when "RIGHT", $key_move_right then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right; tick = true)
-      when "Shift-Up", $key_move_up.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up(10); tick = true)
-      when "Shift-Left", $key_move_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left(10); tick = true)
-      when "Shift-Down", $key_move_down.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down(10); tick = true)
-      when "Shift-Right", $key_move_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right(10); tick = true)
-      when $key_move_up_right then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right; tick = true)
-      when $key_move_up_left then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left; tick = true)
-      when $key_move_down_right then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right; tick = true)
-      when $key_move_down_left then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left; tick = true)
-      when $key_move_up_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right(10); tick = true)
-      when $key_move_up_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left(10); tick = true)
-      when $key_move_down_right.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
-      when $key_move_down_left.capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
-      when $key_move_nowhere then click_select
-      when $key_pickup_items then clicked_space
-      when $key_confirm then (tick = confirm_selection if @@select)
-      when $key_back_menu
+      when "UP", $key_mapping[:move_up] then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up; tick = true)
+      when "LEFT", $key_mapping[:move_left] then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left; tick = true)
+      when "DOWN", $key_mapping[:move_down] then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down; tick = true)
+      when "RIGHT", $key_mapping[:move_right] then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right; tick = true)
+      when "Shift-Up", $key_mapping[:move_up].capitalize then $gamemode[0..5] == 'direct' ? direct_target('up') : (scroll_up(10); tick = true)
+      when "Shift-Left", $key_mapping[:move_left].capitalize then $gamemode[0..5] == 'direct' ? direct_target('left') : (scroll_left(10); tick = true)
+      when "Shift-Down", $key_mapping[:move_down].capitalize then $gamemode[0..5] == 'direct' ? direct_target('down') : (scroll_down(10); tick = true)
+      when "Shift-Right", $key_mapping[:move_right].capitalize then $gamemode[0..5] == 'direct' ? direct_target('right') : (scroll_right(10); tick = true)
+      when $key_mapping[:move_up_right] then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right; tick = true)
+      when $key_mapping[:move_up_left] then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left; tick = true)
+      when $key_mapping[:move_down_right] then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right; tick = true)
+      when $key_mapping[:move_down_left] then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left; tick = true)
+      when $key_mapping[:move_up_right].capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-right') : (scroll_up_right(10); tick = true)
+      when $key_mapping[:move_up_left].capitalize then $gamemode[0..5] == 'direct' ? direct_target('up-left') : (scroll_up_left(10); tick = true)
+      when $key_mapping[:move_down_right].capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-right') : (scroll_down_right(10); tick = true)
+      when $key_mapping[:move_down_left].capitalize then $gamemode[0..5] == 'direct' ? direct_target('down-left') : (scroll_down_left(10); tick = true)
+      when $key_mapping[:move_nowhere] then click_select
+      when $key_mapping[:pickup_items] then clicked_space
+      when $key_mapping[:confirm] then (tick = confirm_selection if @@select)
+      when $key_mapping[:back_menu]
         menu_back
-      when $key_exit_menu
+      when $key_mapping[:exit_menu]
         $gamemode = "play"
         clear_settings
         Game.redraw
@@ -61,25 +61,25 @@ class Settings
     end
 
     case input
-    when $key_open_help
+    when $key_mapping[:open_help]
       $gamemode = $gamemode.toggle('help', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_open_logs
+    when $key_mapping[:open_logs]
       $gamemode = $gamemode.toggle('logs', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_open_keybindings
+    when $key_mapping[:open_keybindings]
       $gamemode = $gamemode.toggle('key_bindings', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_open_inventory
+    when $key_mapping[:open_inventory]
       $gamemode = $gamemode.toggle('inventory', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_open_equipment
+    when $key_mapping[:open_equipment]
       $gamemode = $gamemode.toggle('equipment', 'play')
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_char_stats
+    when $key_mapping[:char_stats]
       $gamemode = $gamemode.toggle('char_stats', 'play') unless $gamemode == 'map'
       $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
-    when $key_read_more
+    when $key_mapping[:read_more]
       if @@scroll_horz
         $gamemode = $gamemode.toggle('read_more', 'map')
         $gamemode == 'map' ? (@@scroll = @@select; @@select = nil) : (@@select = @@scroll)
@@ -109,7 +109,7 @@ class Settings
           Settings.show
         end
       end
-    when $key_inspect_surroundings
+    when $key_mapping[:inspect_surroundings]
       $gamemode = $gamemode.toggle('map', 'play')
       $screen_shot = nil
       if $gamemode == 'play'
@@ -120,7 +120,7 @@ class Settings
         @@scroll_horz = Player.x
         Game.show
       end
-    when $key_select_position
+    when $key_mapping[:select_position]
       $screen_shot = nil
       if $gamemode[0..5] == 'direct'
         @@scroll_horz = Player.x
@@ -128,15 +128,15 @@ class Settings
         $gamemode[0..5] = 'target'
         Game.show
       end
-    when $key_confirm
+    when $key_mapping[:confirm]
       if $gamemode[0..5] == 'target'
         callback = "#{$gamemode[7..$gamemode.length]}!".to_sym
         do_in_direction([@@scroll_horz, @@scroll], method(callback))
       end
-    when $key_exit then $gamemode == 'dead' ? Game.end : ''
+    when $key_mapping[:exit] then $gamemode == 'dead' ? Game.end : ''
     when "P" then Game.pause
     when "\"" then show_full_map = true
-    when $key_sleep
+    when $key_mapping[:sleep]
       $gamemode = "query_sleep"
       Settings.show
       Game.input(true)
@@ -253,13 +253,13 @@ class Settings
     @@item_range = distance
     @@selected_item = item
     $gamemode = "direct_#{verb}"
-    $message = "Click the direction you would like to #{verb}. '#{$key_select_position}' to choose coordinate."
+    $message = "Click the direction you would like to #{verb}. '#{$key_mapping[:select_position]}' to choose coordinate."
   end
 
   def self.ready_cast(spell)
     @@selected_item = spell
     $gamemode = 'direct_cast'
-    $message = "Click the direction you would like to cast. '#{$key_select_position}' to choose coordinate."
+    $message = "Click the direction you would like to cast. '#{$key_mapping[:select_position]}' to choose coordinate."
   end
 
   def self.flash!(coord)
@@ -351,11 +351,9 @@ class Settings
       @@scroll_horz = @@scroll_horz > 0 ? @@scroll_horz : 0
       max = $height - 1
       @@scroll = @@scroll > max ? max : @@scroll
-      @@scroll = @@scroll > 0 ? @@scroll : 0
+      @@scroll = @@scroll < 0 ? 0 : @@scroll
       Game.show({x: @@scroll_horz, y: @@scroll})
       false
-    when $gamemode == 'query_sleep'
-      build_menu( build_sleep_prompt_menu )
     else
       lines = case $gamemode
       when 'help' then build_help_menu
@@ -369,6 +367,7 @@ class Settings
       when 'read_spellbook' then build_spellbook_menu
       when 'char_stats' then build_char_stats_menu
       when 'read_about' then build_read_about_menu
+      when 'query_sleep' then build_sleep_prompt_menu
       when 'equip_head' then build_inventory_by('head')
       when 'equip_torso' then build_inventory_by('torso')
       when 'equip_back' then build_inventory_by('back')
@@ -390,16 +389,17 @@ class Settings
   def self.build_menu(lines=[])
     $settings = Array.new(@@game_height) {""}
     max = lines.count - @@game_height + 4
-    @@scroll ||= 1
+    @@scroll ||= 0
     if @@select && @@selectable
-      screen = @@scroll + @@game_height - 5
-      @@select = @@select > screen ? @@scroll : @@select
-      @@select = @@select < @@scroll ? screen : @@select
+      @@select = @@select > lines.count - 1 ? 0 : @@select
+      @@select = @@select < 0 ? lines.count - 1 : @@select
+      select_offset = @@select - (@@game_height - 5)
+      @@scroll = select_offset if select_offset > @@scroll
+      @@scroll = @@select - 1 if @@select - 1 < @@scroll
     end
     @@select ||= 1 if @@selectable
-    @@scroll ||= 0
     @@scroll = @@scroll > max ? max : @@scroll
-    @@scroll = @@scroll > 0 ? @@scroll : 0
+    @@scroll = @@scroll < 0 ? 0 : @@scroll
 
     above_count = @@scroll
     top = "^ #{above_count} ^"
@@ -482,7 +482,11 @@ class Settings
   def self.build_key_bindings
     @@title = "Key Binding Menu"
     @@selectable = true
-    []
+    lines = ['']
+    $key_mapping.each do |key, value|
+      lines << "#{key.to_s.split('_').map {|word|word.capitalize}.join(' ')}: #{value}"
+    end
+    lines
   end
 
   def self.build_read_more_menu
@@ -495,7 +499,7 @@ class Settings
   def self.build_spellbook_menu
     @@title = "Reading #{@@selected_item.name}"
     @@selectable = true
-    lines = ["Sort Spells - Press '#{$key_pickup_items}' to assign to quickbar."]
+    lines = ["Sort Spells - Press '#{$key_mapping[:pickup_items]}' to assign to quickbar."]
     @@selected_item.castable_spells.each do |spell|
       lines << spell
     end
@@ -633,7 +637,7 @@ class Settings
         $message = "I don't have the energy to do that."
         Log.add "I don't have the energy to do that."
       else
-        $message = "Click the direction you would like to throw. '#{$key_select_position}' to choose coordinate."
+        $message = "Click the direction you would like to throw. '#{$key_mapping[:select_position]}' to choose coordinate."
         $gamemode = 'direct_throw'
         @@selectable = false
         clear = false; play = false
@@ -836,15 +840,15 @@ Type 'x' then hit enter to cancel.
 
   def self.help_menu_text
 %(
-HELP - exit by pressing ESCAPE or the '#{$key_open_help}' key once again.
+HELP - exit by pressing ESCAPE or the '#{$key_mapping[:open_help]}' key once again.
 
-View and edit keys by hitting the '#{$key_open_keybindings}' key.
+View and edit keys by hitting the '#{$key_mapping[:open_keybindings]}' key.
 
 -------------------------------------------------------------------------------- #{'Movement'.color(:red)}
 Each frame takes place on every interval of the speed of the Player(you). Monster may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. If the player moves at a speed of 10 and a monster moves at a speed of 15, the monsters position will only update every time the player moves. Every other turn the monster will appear to move 2 spaces because of the extra speed.
 
 -------------------------------------------------------------------------------- #{'Targeting'.color(:red)}
-When using a spell or ability, or throwing/shooting a projectile, you can quick cast by hitting the corresponding directional key. By hitting '#{$key_select_position}', you are able to scroll around using normal movement keys to select a specific place to target. If the range is less than the max range of the projectile, it will stop on the selected position. If the target is beyond the range of the projectile, it will stop at its' max range.
+When using a spell or ability, or throwing/shooting a projectile, you can quick cast by hitting the corresponding directional key. By hitting '#{$key_mapping[:select_position]}', you are able to scroll around using normal movement keys to select a specific place to target. If the range is less than the max range of the projectile, it will stop on the selected position. If the target is beyond the range of the projectile, it will stop at its' max range.
 )
   end
 
@@ -864,7 +868,7 @@ When using a spell or ability, or throwing/shooting a projectile, you can quick 
 
   def self.dead_menu_text
 %(
-You have DIED! Hit '#{$key_exit}' to exit the game.
+You have DIED! Hit '#{$key_mapping[:exit]}' to exit the game.
 )
   end
 end

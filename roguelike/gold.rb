@@ -26,6 +26,14 @@ class Gold
     {x: @x, y: @y}
   end
 
+  def drop(coords, depth)
+    self.x = coords[:x]
+    self.y = coords[:y]
+    self.depth = depth
+    $screen_shot_objects << {instance: self, x: self.x, y: self.y}
+    self
+  end
+
   def name
     "gold"
   end

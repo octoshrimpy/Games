@@ -3,10 +3,14 @@
 
 add descriptions for items
 
+Fix Map resetting to top of scroll
+
+Allow User to customize Key bindings
+
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
-Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1)
+Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1) Left and Up has issues. Right and Down do not.
 
 http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
@@ -17,7 +21,7 @@ Reduce FOV greatly. Allow light sources to be placed. Light sources should store
 
 Collision detection of projectiles seems off
 
-If 's' while standing on items and overflow inventory, should open inventory and be able to swap the selected item from the floor stack with an item in the inventory
+add depth to all coords hashes ({x: x, y: y, depth: depth})
 
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
   Monsters should have base damage + small level multiplier
@@ -36,10 +40,6 @@ Every 10 levels, spawn a BOSS.
 
 Build the town to buy/sell stuff.
 
-Enemy spawning rarity. Some monsters are more common than others, depending on the floor
-
-Allow User to customize Key bindings
-
 Save data
 
 Configure defense of player and creatures to reduce damage taken.
@@ -51,8 +51,6 @@ Allow Player to level up and increase stats
 Have skill levels for different types of weapons
 Incorporate two handed weapons
 (2-handed weapons grant speed reduction if there is an item in the other hand)
-
-Allow player to select items from the drop menu in order to pick them up manually
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -106,14 +104,14 @@ require './dungeon.rb'
 require './visible.rb'
 
 seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join.to_i
-Game.start(seed)
+Game.start(15)
 
 Player.inventory << Item['Standard Bow']
 Player.equipped[:back] = Item["Quiver"]
-200.times { Player.inventory << Item['Arrow'] }
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Rusty Dagger']
 Player.inventory << Item['Book of Fire']
+200.times { Player.inventory << Item['Arrow'] }
 5.times { Player.inventory << Item['Scroll of Flash'] }
 Player.quickbar = ["Standard Bow", "Bread Scrap", "Book of Fire", "Fire Blast", nil, nil, nil, nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn

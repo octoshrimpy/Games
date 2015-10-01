@@ -323,9 +323,7 @@ class Creature
       when 'bb' then Item['Bread Chunk']
       else "o "
       end
-      item.x = spot[:x]
-      item.y = spot[:y]
-      item.depth = self.depth
+      item.drop(spot, self.depth)
     end
     $npcs[Player.depth].delete(self)
   end

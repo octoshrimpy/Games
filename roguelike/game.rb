@@ -15,7 +15,7 @@ class Game
     $visual_effects = []
     $dot_effects = []
     $projectiles = []
-    $message = "Welcome! Press '#{$key_open_help}' at any time to view how to play."
+    $message = "Welcome! Press '#{$key_mapping[:open_help]}' at any time to view how to play."
     $previous_message = ''
     $gamemode = "play"
     $gameover = false
@@ -172,7 +172,7 @@ class Game
     half_way_mark.times {print "--"}
     if $message.length > 0
       print " #{$message[0..(VIEWPORT_WIDTH*2 - 7)].gsub("\n", " ")}"
-      print "...(#{$key_read_more})" if $message.length > (VIEWPORT_WIDTH*2 - 7)
+      print "...(#{$key_mapping[:read_more]})" if $message.length > (VIEWPORT_WIDTH*2 - 7)
       $previous_message = $message.clone
       $message = ""
     end
