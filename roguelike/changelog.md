@@ -1,7 +1,11 @@
+Oct 1, 2015 v0.0.50
+User can now modify the keybindings in the keybindings ('K' by default) menu
+
 Sept 30, 2015 v.0.0.49
 Selecting items that are on the ground works better now.
 Swapping items from the ground now places those items in the swapped position
 Fixed Scrolling on menus with Selectable options
+Scrolling also now wraps based on the last item in the list instead of the full screen
 
 Sept 29, 2015 v0.0.48
 If a Players inventory is full, or auto-pickup is off, he can view the items on the ground and select which to pick up

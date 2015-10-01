@@ -30,3 +30,4 @@ $key_mapping = {
   back_menu: "BACKSPACE",
   some_other: 'asd'
 }
+$default_keys = $key_mapping.deep_clone

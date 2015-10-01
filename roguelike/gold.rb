@@ -34,6 +34,8 @@ class Gold
     self
   end
 
+  def stack_size; 1; end
+
   def name
     "gold"
   end

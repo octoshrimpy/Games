@@ -8,6 +8,7 @@ class Settings
   @@title = ""
   @@confirmed = true
   @@item_range = 0
+  @@selected_key = nil
   @@select = nil
   @@selected_item = nil
   @@selected_select = nil
@@ -18,6 +19,7 @@ class Settings
   @@selection_objects = []
 
   def self.receive(input)
+    return false if @@selected_key && override_keypress(input)
     if $gamemode == 'play'
       @@previous_menus = []
     else
@@ -454,7 +456,7 @@ class Settings
     player_stacks = Player.inventory_by_stacks
     @@title = "Inventory #{player_stacks.count} / #{Player.inventory_size}    Weight: #{Player.inventory_weight}lbs"
     @@selectable = true
-    ['Sort Inventory'] + player_stacks.map do |name, items|
+    [' * Sort Inventory'] + player_stacks.map do |name, items|
       count = items.count < 10 ? " #{items.count}" : items.count
       title = "#{count}x   #{items.first.icon} #{name}"
 
@@ -482,7 +484,7 @@ class Settings
   def self.build_key_bindings
     @@title = "Key Binding Menu"
     @@selectable = true
-    lines = ['']
+    lines = [' * Restore Defaults']
     $key_mapping.each do |key, value|
       lines << "#{key.to_s.split('_').map {|word|word.capitalize}.join(' ')}: #{value}"
     end
@@ -767,6 +769,18 @@ class Settings
     end
   end
 
+  def self.override_keypress(input)
+    if %w( UP DOWN LEFT RIGHT ).include?(input)
+      $key_mapping[@@selected_key.first] = @@selected_key.last
+    else
+      $key_mapping.select { |key, value| value == input }.each { |key, dup_value| $key_mapping[key] = @@selected_key.last }
+      $key_mapping[@@selected_key.first] = input
+    end
+    @@selected_key = nil
+    Settings.show
+    true
+  end
+
   def self.click_select
     if $gamemode == 'inventory' || $gamemode == 'read_spellbook'
       @@selected_select ? swap_items : @@selected_select = @@select
@@ -782,6 +796,14 @@ class Settings
           @@selected_select = @@select
           $gamemode = 'inventory'
         end
+      end
+      Settings.show
+    elsif $gamemode == 'key_bindings'
+      if @@select == 0
+        $key_mapping = $default_keys.deep_clone
+      else
+        @@selected_key = $key_mapping.to_a[@@select - 1]
+        $key_mapping[@@selected_key.first] = '_ <- Enter a new key to be bound.'
       end
       Settings.show
     else

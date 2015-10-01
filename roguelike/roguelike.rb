@@ -5,8 +5,6 @@ add descriptions for items
 
 Fix Map resetting to top of scroll
 
-Allow User to customize Key bindings
-
 More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
@@ -51,6 +49,8 @@ Allow Player to level up and increase stats
 Have skill levels for different types of weapons
 Incorporate two handed weapons
 (2-handed weapons grant speed reduction if there is an item in the other hand)
+
+Add different default keyboard layouts
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
