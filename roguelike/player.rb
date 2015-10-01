@@ -366,8 +366,14 @@ class Player
       picked_up_something = true
     end
     Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
-    picked_up_something = pickup_items(Item.on_board.select { |i| i.coords == coords }, method)
-    self.try_pickup_items('do_again') if picked_up_something
+    items_to_pickup = Item.on_board.select { |i| i.coords == coords }
+    if items_to_pickup.count > 0
+      picked_up_items = pickup_items(items_to_pickup)
+      Log.add "My inventory is full." if picked_up_items.count == 0
+      self.try_pickup_items('do_again') if picked_up_items.count > 0
+    else
+      Log.add "Nothing to pick up." if method == 'key_press'
+    end
   end
 
   def self.strength; raw_strength + bonuses[:strength].to_i; end
@@ -447,30 +453,28 @@ class Player
       $screen_shot_objects.delete({instance: item, x: item.x, y: item.y})
       item.x, item.y, item.depth = nil
     end
-    pickup_items(items_to_swap_from_ground)
+    pickup_items(items_to_swap_from_ground, inven_item_slot)
     true
   end
 
-  def self.pickup_items(items, method='key_press')
-    inventory_full = false
-    picked_up_something = false
+  def self.pickup_items(items, position='last')
+    items_picked_up = []
     items.group_by {|i| i.name }.each do |item_name, items|
       items_picked_up = []
       items.each do |item|
         if pickup_item(item)
-          picked_up_something = true
           items_picked_up << item
         end
       end
-      if items_picked_up.count > 0
-        Log.add "Picked up #{item_name}#{items_picked_up.count > 1 ? " x#{items_picked_up.count}" : ''}."
-      else
-        inventory_full = true
+      items_count = items_picked_up.count
+      if items_count > 0
+        Log.add "Picked up #{item_name}#{items_count > 1 ? " x#{items_count}" : ''}."
       end
     end
-    Log.add "My inventory is full." if inventory_full
-    Log.add("Nothing to pick up.") if !(picked_up_something) && method == 'key_press'
-    picked_up_something
+    unless position == 'last'
+      swap_inventory(inventory_by_stacks.count - 1, position)
+    end
+    items_picked_up
   end
 
   def self.pickup_item(item)

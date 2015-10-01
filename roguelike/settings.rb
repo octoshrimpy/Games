@@ -767,15 +767,17 @@ class Settings
     if $gamemode == 'inventory' || $gamemode == 'read_spellbook'
       @@selected_select ? swap_items : @@selected_select = @@select
     elsif $gamemode == 'read_more' && @@select
-      if Player.inventory_by_stacks.count < Player.inventory_size
-        stacks = $stack.group_by { |item| item.name }
-        selected_items = stacks.to_a[@@select - 2].last
-        items_to_pickup = selected_items.first(selected_items.first.stack_size)
-        Player.pickup_items(items_to_pickup)
-      else
-        @@options[:has_ground_item] = true
-        @@selected_select = @@select
-        $gamemode = 'inventory'
+      stacks = $stack.group_by { |item| item.name }
+      selected_items = stacks.to_a[@@select - 2] && @@select >= 2 ? stacks.to_a[@@select - 2].last : nil
+      if selected_items
+        if Player.inventory_by_stacks.count < Player.inventory_size
+          items_to_pickup = selected_items.first(selected_items.first.stack_size)
+          Player.pickup_items(items_to_pickup)
+        else
+          @@options[:has_ground_item] = true
+          @@selected_select = @@select
+          $gamemode = 'inventory'
+        end
       end
       Settings.show
     else
