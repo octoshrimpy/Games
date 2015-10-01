@@ -312,6 +312,7 @@ class Settings
 
   def self.menu_back
     @@select = 1
+    @@selected_select = nil
     if @@previous_menus.length > 1
       last_menu = @@previous_menus.pop(2).first
       $gamemode = last_menu[:mode]

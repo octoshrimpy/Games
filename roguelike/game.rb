@@ -608,9 +608,9 @@ class Game
     else
       response << case stacks.size
       when 0 then standing_pixel
-      when 1 then (stack_size == 1 || stack.first.stack_size == 1) ? "#{stack.first.name.articlize}" : "a stack of #{stack.first.name.articlize}"
+      when 1 then (stack_size == 1 || $stack.first.stack_size == 1) ? "#{$stack.first.name.articlize}" : "a stack of #{$stack.first.name.articlize}"
       when 2 then "#{$stack.last.stack_size == 1 ? $stack.last.name.articlize : "a stack of #{$stack.last.name.articlize}"} on #{$stack.first.stack_size == 1 ? $stack.first.name.articlize : "a stack of #{$stack.first.name.articlize}"}"
-      else "\b\b\bare #{stack_size} things"
+      else player_here ? "#{stack_size} things" : "\b\b\bare #{stack_size} things"
       end
     end
 

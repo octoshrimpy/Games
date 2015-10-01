@@ -132,9 +132,11 @@ module Item
   end
 
   def pickup
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y})
     self.x = nil
     self.y = nil
     self.depth = nil
+    self
   end
 
   def duplicate
