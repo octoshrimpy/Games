@@ -30,14 +30,14 @@ class Projectile
     last_coord = {x: x, y: y}
     unless stop = destination == last_coord
       next_coord = line[1]
-      spot = next_coord ? Dungeon.at(next_coord, depth) : nil
+      spot = next_coord ? Dungeon.at(next_coord.merge({depth: depth})) : nil
       stop = spot.is_solid? if spot
-      if (next_coord == Player.coords || last_coord == Player.coords) && source != Player
+      if (next_coord == Player.coords.filter(:x, :y) || last_coord == Player.coords.filter(:x, :y)) && source != Player
         stop = true
         collided_with = Player
       else
         Creature.on(depth).each do |creature|
-          if (next_coord == creature.coords || last_coord == creature.coords) && source != creature
+          if (next_coord == creature.coords.filter(:x, :y) || last_coord == creature.coords.filter(:x, :y)) && source != creature
             stop = true
             collided_with = creature
           end

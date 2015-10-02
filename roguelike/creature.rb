@@ -190,8 +190,8 @@ class Creature
     $npcs.flatten
   end
 
-  def self.at(coord, depth=Player.depth)
-    Creature.on(depth).select { |creature| creature.x == coord[:x] && creature.y == coord[:y] }
+  def self.at(coord)
+    Creature.on(coord[:depth]).select { |creature| creature.x == coord[:x] && creature.y == coord[:y] }
   end
 
   def self.creatures_on_level(level)
@@ -305,7 +305,7 @@ class Creature
       (-1..1).map do |x|
         if Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
           unless Dungeon.current[@y + y][@x + x].is_solid?
-            {x: @x + x, y: @y + y}
+            {x: @x + x, y: @y + y, depth: @depth}
           else
             nil
           end
@@ -323,13 +323,13 @@ class Creature
       when 'bb' then Item['Bread Chunk']
       else "o "
       end
-      item.drop(spot, self.depth)
+      item.drop(spot)
     end
     $npcs[Player.depth].delete(self)
   end
 
   def coords
-    {x: self.x, y: self.y}
+    {x: self.x, y: self.y, depth: self.depth}
   end
 
   def hit(raw_damage, source)
@@ -370,7 +370,7 @@ class Creature
   end
 
   def random_coord
-    {x: (@x-10..@x+10).to_a.sample, y: (@y-10..@y+10).to_a.sample}
+    {x: (@x-10..@x+10).to_a.sample, y: (@y-10..@y+10).to_a.sample, depth: depth}
   end
 
   def tick(type='check')
@@ -464,8 +464,8 @@ class Creature
         if corners == false && ([[1, 1], [-1, 1], [1, -1], [-1, -1]]).include?([x, y])
           nil
         elsif Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
-          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.current.map {|m|m.coords}.include?({x: @x + x, y: @y + y})
-            {x: @x + x, y: @y + y}
+          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.current.map {|m|m.coords}.include?({x: @x + x, y: @y + y, depth: depth})
+            {x: @x + x, y: @y + y, depth: depth}
           else
             nil
           end

@@ -17,6 +17,7 @@ class Game
     $projectiles = []
     $message = "Welcome! Press '#{$key_mapping[:open_help]}' at any time to view how to play."
     $previous_message = ''
+    $all_inputs = []
     $gamemode = "play"
     $gameover = false
     $spawn_creatures = true
@@ -417,9 +418,7 @@ class Game
     when 1
       coord = Dungeon.find_open_spaces.sample
       sword = Item["Rusty Dagger"]
-      sword.depth = 1
-      sword.x = coord[:x]
-      sword.y = coord[:y]
+      sword.drop({x: coord[:x], y: coord[:y], depth: current_depth})
     end
     if current_depth % 10 == 0
       coord = Dungeon.find_open_spaces.sample
@@ -583,6 +582,7 @@ class Game
   def self.describe(pixel, coords)
     player_here = coords == Player.coords
     is_map = $gamemode == 'map'
+    Game.input(true); binding.pry if $all_inputs.last == 'o'
     response = player_here ? "I'm standing on " : 'There is '
 
     standing_pixel = case pixel.clone.uncolor.split.join
@@ -597,7 +597,7 @@ class Game
     $stack = []
     # Do not change their color
     $screen_shot_objects.each do |obj|
-      $stack << obj[:instance] if {x: obj[:x], y: obj[:y]} == coords && obj[:instance] != Player
+      $stack << obj[:instance] if obj.filter(:x, :y) == coords.filter(:x, :y) && obj[:instance] != Player
     end
     stacks = $stack.group_by { |item| item.name }
     stack_size = $stack.size

@@ -1,4 +1,5 @@
 class Settings
+  class_accessible :item_range
   @@game_height = (Game::VIEWPORT_HEIGHT + Game::LOGS_GUI_HEIGHT + 4)
   @@game_width = (Game::VIEWPORT_WIDTH + Game::STATS_GUI_WIDTH + 1)
   @@previous_menus = []
@@ -19,6 +20,7 @@ class Settings
   @@selection_objects = []
 
   def self.receive(input)
+    $all_inputs << input
     return false if @@selected_key && override_keypress(input)
     if $gamemode == 'play'
       @@previous_menus = []
@@ -265,7 +267,7 @@ class Settings
   end
 
   def self.flash!(coord)
-    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
     if Dungeon.at(coords) == "  "
       Player.coords = coords
       Game.tick
@@ -279,7 +281,7 @@ class Settings
   end
 
   def self.shoot!(coord)
-    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
     Log.add "Shot #{@@selected_item.name}."
     Player.inventory.delete(@@selected_item)
     Projectile.new(coords, @@selected_item, Player, {speed: @@selected_item.projectile_speed})
@@ -288,7 +290,7 @@ class Settings
   end
 
   def self.cast!(coord)
-    coords = {x: Player.x + coord[0], y: Player.y + coord[1]}
+    coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
     Log.add "Cast #{@@selected_item.name}."
     Player.mana -= @@selected_item.mana_cost
     Projectile.new(coords, @@selected_item, Player, {speed: @@selected_item.projectile_speed})
@@ -494,7 +496,7 @@ class Settings
   def self.build_read_more_menu
     @@title = 'Read More'
     @@selectable = Player.currently_standing_on.count > 0
-    coords = @@scroll && @@scroll_horz ? {x: @@scroll_horz, y: @@scroll} : Player.coords
+    coords = @@scroll && @@scroll_horz ? {x: @@scroll_horz, y: @@scroll, depth: Player.depth} : Player.coords
     word_wrap(Game.describe(Dungeon.at(coords), coords))
   end
 

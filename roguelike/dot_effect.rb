@@ -29,7 +29,7 @@ class DotEffect
   end
 
   def coords
-    {x: self.x, y: self.y}
+    {x: self.x, y: self.y, depth: self.depth}
   end
 
   def destroy

@@ -37,16 +37,16 @@ class Dungeon
     $dungeon[depth]
   end
 
-  def self.at(coord, depth=Player.depth)
-    return nil unless at_level(depth)[coord[:y]]
-    at_level(depth)[coord[:y]][coord[:x]]
+  def self.at(coord)
+    return nil unless at_level(coord[:depth])[coord[:y]]
+    at_level(coord[:depth])[coord[:y]][coord[:x]]
   end
 
   def self.find_open_spaces(allow_landing_items=true)
     if allow_landing_items
-      current.search_for("  ")
+      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })
     else
-      current.search_for("  ")  - (Item.on_board.map(&:coords) + Gold.all.map(&:coords) + Creature.current.map(&:coords) + [Player.coords])
+      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })  - (Item.on_board.map(&:coords) + Gold.all.map(&:coords) + Creature.current.map(&:coords) + [Player.coords])
     end
   end
 

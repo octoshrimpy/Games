@@ -36,10 +36,10 @@ module Item
     $items << self
   end
 
-  def drop(coords, depth)
+  def drop(coords)
     self.x = coords[:x]
     self.y = coords[:y]
-    self.depth = depth
+    self.depth = coords[:depth]
     $screen_shot_objects << {instance: self, x: self.x, y: self.y}
     self
   end
@@ -53,7 +53,7 @@ module Item
   def aoe(radius, script)
     (-radius..radius).map do |rel_y|
       (-radius..radius).map do |rel_x|
-        coord = {x: x + rel_x, y: y + rel_y}
+        coord = {x: x + rel_x, y: y + rel_y, depth: depth}
         if Dungeon.current[y + rel_y] && Dungeon.current[y + rel_y][rel_x + x]
           eval(script)
         end
@@ -128,7 +128,7 @@ module Item
 
   def coords
     return nil unless x && y
-    {x: x, y: y}
+    {x: x, y: y, depth: depth}
   end
 
   def pickup

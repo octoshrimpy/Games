@@ -27,7 +27,7 @@ class Gems
   end
 
   def coords
-    {x: @x, y: @y}
+    {x: @x, y: @y, depth: @depth}
   end
 
   def name

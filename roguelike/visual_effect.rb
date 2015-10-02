@@ -1,10 +1,11 @@
 class VisualEffect
-  attr_accessor :icon, :life, :x, :y, :name
+  attr_accessor :icon, :life, :x, :y, :name, :depth
 
   def initialize(name, icon, coords)
     self.icon = icon
     self.x = coords[:x]
     self.y = coords[:y]
+    self.depth = coords[:depth]
     self.name = name
     $visual_effects << self
   end

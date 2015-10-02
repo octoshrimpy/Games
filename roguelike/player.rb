@@ -70,8 +70,8 @@ class Player
   @@stunned_for = 0
 
   def self.name; "me"; end
-  def self.coords; {x: Player.x, y: Player.y}; end
-  def self.coords=(coord); {x: Player.x = coord[:x], y: Player.y = coord[:y]}; end
+  def self.coords; {x: Player.x, y: Player.y, depth: Player.depth}; end
+  def self.coords=(coord); {x: Player.x = coord[:x] || x, y: Player.y = coord[:y] || y, depth: Player.depth = coord[:depth] || depth}; end
 
   def self.last_hit_by
     return false unless last_hit_id
@@ -289,7 +289,7 @@ class Player
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
         is_creature = false
         Creature.current.map do |creature|
-          if creature.coords == {x: self.x + x_dest, y: self.y + y_dest}
+          if creature.coords == {x: self.x + x_dest, y: self.y + y_dest, depth: self.depth}
             is_creature = true
             if self.energy > 0
               loss = (rand(10) == 0 ? 1 : 0)
@@ -352,7 +352,7 @@ class Player
   end
 
   def self.pickup_gems
-    Gems.all.select { |g| g.coords == coords}.each do |g|
+    Gems.all.select { |g| g.coords == coords }.each do |g|
       g.pickup
       g.destroy
     end
@@ -361,10 +361,10 @@ class Player
   def self.try_pickup_items(method="key_press")
     picked_up_something = false
     increase = 0
-    Gold.all.select {|g| g.coords == coords}.each do |gold_piece|
+    Gold.all.select { |g| g.coords == coords }.each do |gold_piece|
       increase += gold_piece.value
       Player.gold += gold_piece.value
-      gold_piece.destroy
+      gold_piece.pickup
       picked_up_something = true
     end
     Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
@@ -452,8 +452,6 @@ class Player
     return false unless inven_by_array[inven_item_slot] && items_to_swap_from_ground.first
     drop_many(inven_by_array[inven_item_slot].last)
     items_to_swap_from_ground.each do |item|
-      $screen_shot_objects.delete({instance: item, x: item.x, y: item.y})
-      item.x, item.y, item.depth = nil
     end
     pickup_items(items_to_swap_from_ground, inven_item_slot)
     true
@@ -583,7 +581,7 @@ class Player
 
   def self.drop(item, show_log=true)
     Log.add "Dropped #{item.name}." if show_log
-    item.drop(Player.coords, Player.depth)
+    item.drop(Player.coords)
     Player.inventory.delete(item)
     @@skip_pick_up = true
   end

@@ -23,15 +23,20 @@ class Gold
   end
 
   def coords
-    {x: @x, y: @y}
+    {x: @x, y: @y, depth: @depth}
   end
 
-  def drop(coords, depth)
+  def drop(coords)
     self.x = coords[:x]
     self.y = coords[:y]
-    self.depth = depth
-    $screen_shot_objects << {instance: self, x: self.x, y: self.y}
+    self.depth = coords[:depth]
+    $screen_shot_objects << {instance: self, x: self.x, y: self.y, depth: self.depth}
     self
+  end
+
+  def pickup
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
+    self.destroy
   end
 
   def stack_size; 1; end
