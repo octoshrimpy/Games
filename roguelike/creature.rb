@@ -171,14 +171,14 @@ class Creature
   end
 
   def self.[](name)
-    Creature.current.select { |creature| creature.name == name }
+    Creature.on_board.select { |creature| creature.name == name }
   end
 
   def self.count
     $npcs[Player.depth].length
   end
 
-  def self.current
+  def self.on_board
     $npcs[Player.depth]
   end
 
@@ -464,7 +464,7 @@ class Creature
         if corners == false && ([[1, 1], [-1, 1], [1, -1], [-1, -1]]).include?([x, y])
           nil
         elsif Dungeon.current[@y + y] && Dungeon.current[@y + y][@x + x]
-          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.current.map {|m|m.coords}.include?({x: @x + x, y: @y + y, depth: depth})
+          unless Dungeon.current[@y + y][@x + x].is_solid? || Creature.on_board.map {|m|m.coords}.include?({x: @x + x, y: @y + y, depth: depth})
             {x: @x + x, y: @y + y, depth: depth}
           else
             nil

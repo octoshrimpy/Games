@@ -40,7 +40,7 @@ module Item
     self.x = coords[:x]
     self.y = coords[:y]
     self.depth = coords[:depth]
-    $screen_shot_objects << {instance: self, x: self.x, y: self.y}
+    $screen_shot_objects << {instance: self, x: self.x, y: self.y, depth: self.depth}
     self
   end
 
@@ -132,7 +132,7 @@ module Item
   end
 
   def pickup
-    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y})
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
     self.x = nil
     self.y = nil
     self.depth = nil
@@ -182,7 +182,8 @@ module Item
       nil
     end
   end
-  def self.by_name(name); item = all.select {|i| i.name == name }.first; end
+  def self.at(coords); all.select {|i| i.coords == coords}; end
+  def self.by_name(name); all.select {|i| i.name == name }.first; end
   def self.all_by_name(name); item = all.select {|i| i.name == name }; end
   def self.on_board; all.select {|i| i.depth == Player.depth }; end
   def self.melee; all.select {|i| i.class == MeleeWeapon }; end

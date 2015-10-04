@@ -20,6 +20,10 @@ class Projectile
     $projectiles
   end
 
+  def show
+    item ? item.show : 'x'
+  end
+
   def tick
     line = Math.get_line(x, y, destination_x, destination_y).sort_by do |coord|
       -Math.distance_between(coord, destination)

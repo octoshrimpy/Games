@@ -24,6 +24,27 @@ class Visible
     @board.reverse!
   end
 
+  def self.line_until_collision(coords_from, coords_to, return_collision=false)
+    $visible_calculations += 1
+    line_coords = Math.get_line(coords_from[:x], coords_from[:y], coords_to[:x], coords_to[:y]).sort_by do |point|
+      Math.distance_between(coords_from, point)
+    end
+    player_seen = Player.seen[Player.depth]
+    creature_locations = Creature.on_board.map { |creature| creature.coords.filter(:x, :y) }
+
+    last_valid = {}
+    line_coords.each do |coord|
+      landing = Dungeon.at(coord.merge(depth: Player.depth))
+      has_seen_before = player_seen.include?(coord)
+      not_creature = !(creature_locations.include?(coord))
+      is_empty = landing ? !(landing.is_solid?) : false
+      if has_seen_before && not_creature && is_empty
+        last_valid = coord
+      end
+    end
+    last_valid
+  end
+
   def self.in_range(range, coords_from, coords_to)
     if Math.distance_between(coords_from, coords_to) <= range
       line_coords = Math.get_line(coords_from[:x], coords_from[:y], coords_to[:x], coords_to[:y])
@@ -68,9 +89,9 @@ class Visible
     line_coords = Math.get_line(x0, y0, x1, y1).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])
     end
-    line = line_coords.map {|coords| @board[coords[:y]][coords[:x]]}
+    line = line_coords.map { |coords| @board[coords[:y]][coords[:x]] }
 
-    blocks_in_line = line.map {|e| e.is_solid? ? true : nil}
+    blocks_in_line = line.map { |e| e.is_solid? ? true : nil }
     if blocks_in_line.compact.count > 0
       visible = line_coords[0..blocks_in_line.index(true)]
     else

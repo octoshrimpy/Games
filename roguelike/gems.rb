@@ -1,3 +1,4 @@
+# Plural because 'Gem' is reserved by Ruby
 class Gems
   attr_accessor :pickup_script, :x, :y, :coords, :depth
 
@@ -16,14 +17,16 @@ class Gems
 
   def pickup
     eval(pickup_script)
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
+    destroy
   end
 
   def self.count
     all.length
   end
 
-  def self.all
-    $drops[Player.depth].select {|g|g.is_a?(Gems)}
+  def self.on_board
+    $drops[Player.depth].select { |g| g.is_a?(Gems) }
   end
 
   def coords

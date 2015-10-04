@@ -1,3 +1,8 @@
+Oct 3, 2015 v.0.0.52
+
+Oct 2, 2015 v0.0.51
+Refactored Coords hashes. Should see no effect in game.
+
 Oct 1, 2015 v0.0.50
 User can now modify the keybindings in the keybindings ('K' by default) menu
 

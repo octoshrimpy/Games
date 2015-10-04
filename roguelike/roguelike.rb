@@ -1,10 +1,19 @@
 # TODO
 =begin
 
-Show gems in the Map view? Fix pickup method
-Adding to inventory or doing special effects (incrementing gold, gem bonuses, etc) should happen in pickup method of individual items
+if player doesn't move, do not change vision calculations
+  Would it be faster to calculate the changed coordinates?
+  Map the coords of all items on current level, calculate distance to player, if in range, then try to do vision
+    ^^ Is that faster than already having the vision calculations and mapping through?
+
+Create a base object class that everything else inherits from.
+  Has coords, pickup, drop actions, etc.
 
 If flash fails because of obstruction, instead, flash to closest position in line-of-sight
+
+Add Defense items
+
+Throwing items point-blank at an enemy won't hit the enemy
 
 add descriptions for items
 
@@ -24,6 +33,7 @@ Reduce FOV greatly. Allow light sources to be placed. Light sources should store
 
 Collision detection of projectiles seems off
 
+Enemies get strong too fast
 Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
   Monsters should have base damage + small level multiplier
 
@@ -113,8 +123,8 @@ Player.inventory << Item['Standard Bow']
 Player.equipped[:back] = Item["Quiver"]
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire']
+50.times { Player.inventory << Item['Scroll of Flash'] }
 99.times { Player.inventory << Item['Arrow'] }
-5.times { Player.inventory << Item['Scroll of Flash'] }
 Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", nil, nil, nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999

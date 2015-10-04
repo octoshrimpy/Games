@@ -58,9 +58,9 @@ class Game
 
   def self.run_time(time)
     (100 / time).times do |t|
-      Creature.current.each do |creature|
+      Creature.on_board.each do |creature|
         creature.tick if $tick % (100 / creature.run_speed) == 0
-      end if Creature.current
+      end if Creature.on_board
       spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
       Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 / shot.speed) == 0 }
       $tick += 1
@@ -139,15 +139,17 @@ class Game
     end
 
     $screen_shot_objects.each do |obj|
-      in_x = (obj[:x] >= x_offset) && (obj[:x] < x_offset + VIEWPORT_WIDTH)
-      in_y = (obj[:y] >= y_offset) && (obj[:y] < y_offset + VIEWPORT_HEIGHT)
+      obj_coords = obj.coords.filter(:x, :y)
+      x, y = obj_coords.values
+      in_x = (x >= x_offset) && (x < x_offset + VIEWPORT_WIDTH)
+      in_y = (y >= y_offset) && (y < y_offset + VIEWPORT_HEIGHT)
       if in_x && in_y
-        pixel = if {y: obj[:y], x: obj[:x]} == coords
-          "#{obj[:instance].show.uncolor[0]}#{'<'}".color(:white, :blue)
+        pixel = if obj_coords == coords.filter(:x, :y)
+          "#{obj.show.uncolor[0]}#{'<'}".color(:white, :blue)
         else
-          obj[:instance].show
+          obj.show
         end
-        board[obj[:y] - y_offset][obj[:x] - x_offset] = pixel
+        board[y - y_offset][x - x_offset] = pixel
       end
     end
 
@@ -155,10 +157,18 @@ class Game
     puts "Looking at: (#{coords[:x]}, #{coords[:y]})"
   end
 
+  def self.ground_objects
+     (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all)
+  end
+
+  def self.ground_objects_at(coords)
+     (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all).select { |obj| obj.coords == coords }
+  end
+
   def self.draw(board=$level)
     Player.verify_stats
     system 'clear' or system 'cls'
-    if Creature.current && Creature.count == 0 && $spawn_creatures == true
+    if Creature.on_board && Creature.count == 0 && $spawn_creatures == true
       $spawn_creatures = false
       Log.add "You have eradicated all forms of life on this floor."
     end
@@ -210,16 +220,16 @@ class Game
     puts "FPS: #{fps}"
     puts "Average FPS: #{avg_fps}"
     puts "Depth: #{Player.depth}"
-    puts "Creatures left: #{Creature.count if Creature.current}"
+    puts "Creatures left: #{Creature.count if Creature.on_board}"
     puts "My location: (#{Player.x}, #{Player.y})"
     puts "Vision Calculations: #{$visible_calculations}"
     $visible_calculations = 0
     print "Creature locations: "
-    Creature.current.each do |creature|
+    Creature.on_board.each do |creature|
       foreground = creature.player_in_range? ? :red : nil
       background = creature.name == 'Slime' ? :green : nil
       print " (#{creature.x}, #{creature.y}) ".color(foreground, background)
-    end if Creature.current
+    end if Creature.on_board
     puts
   end
 
@@ -472,45 +482,14 @@ class Game
     visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
     visible.each do |in_sight|
       Player.seen[Player.depth] << in_sight unless Player.seen[Player.depth].include?(in_sight)
-        # This makes the current visibility white.
-      if Dungeon.current[in_sight[:y]][in_sight[:x]] == "  "
-        $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = ". "
-      else
-        floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
-        $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor
-      end
-      Gold.all.each do |gold|
-        if gold.x == in_sight[:x] && gold.y == in_sight[:y]
-          $level[gold.y - y_offset][gold.x - x_offset] = Gold.show
-        end
-      end if Gold.all
-      Item.on_board.each do |item|
-        if item.coords
-          if item.x == in_sight[:x] && item.y == in_sight[:y]
-            $level[item.y - y_offset][item.x - x_offset] = item.show
-          end
+      # This makes the current visibility white.
+      floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
+      $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor == "  " ? ". " : floor
+      ground_objects.each do |item_on_board|
+        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y)
+          $level[item_on_board.y - y_offset][item_on_board.x - x_offset] = item_on_board.show
         end
       end
-      Projectile.all.each do |shot|
-        if shot.x == in_sight[:x] && shot.y == in_sight[:y]
-          $level[shot.y - y_offset][shot.x - x_offset] = shot.item.show
-        end
-      end
-      Creature.current.each do |creature|
-        if creature.x == in_sight[:x] && creature.y == in_sight[:y]
-          $level[creature.y - y_offset][creature.x - x_offset] = creature.show
-        end
-      end if Creature.current
-      VisualEffect.all.each do |effect|
-        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
-          $level[effect.y - y_offset][effect.x - x_offset] = effect.show
-        end
-      end if VisualEffect.all
-      Gems.all.each do |effect|
-        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
-          $level[effect.y - y_offset][effect.x - x_offset] = effect.show
-        end
-      end if Gems.all
     end
     $level[Player.y - y_offset][Player.x - x_offset] = Player.show
   end
@@ -533,56 +512,24 @@ class Game
     end
     visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
     visible.each do |in_sight|
-        # This makes the current visibility white.
-      if Dungeon.current[in_sight[:y]][in_sight[:x]] == "  "
-        $screen_shot[in_sight[:y]][in_sight[:x]] = ". "
-        $screen_shot_visible << {x: in_sight[:x], y: in_sight[:y]}
-      else
-        floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
-        $screen_shot[in_sight[:y]][in_sight[:x]] = floor
-        $screen_shot_visible << {x: in_sight[:x], y: in_sight[:y]}
-      end
-      Gold.all.each do |gold|
-        if gold.x == in_sight[:x] && gold.y == in_sight[:y]
-          $screen_shot_objects << {instance: gold, x: gold.x, y: gold.y}
+      $screen_shot_visible << in_sight.filter(:x, :y)
+      # This makes the current visibility white.
+      floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
+      $screen_shot[in_sight[:y]][in_sight[:x]] = floor == "  " ? ". " : floor
+      ground_objects
+       (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all).each do |item_on_board|
+        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y)
+          $screen_shot_objects << item_on_board
         end
       end
-      Item.on_board.each do |item|
-        if item.coords
-          if item.x == in_sight[:x] && item.y == in_sight[:y]
-            $screen_shot_objects << {instance: item, x: item.x, y: item.y}
-          end
-        end
-      end
-      Projectile.all.each do |shot|
-        if shot.x == in_sight[:x] && shot.y == in_sight[:y]
-          $screen_shot_objects << {instance: shot.item, x: shot.x, y: shot.y}
-        end
-      end
-      Creature.current.each do |creature|
-        if creature.x == in_sight[:x] && creature.y == in_sight[:y]
-          $screen_shot_objects << {instance: creature, x: creature.x, y: creature.y}
-        end
-      end if Creature.current
-      VisualEffect.all.each do |effect|
-        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
-          $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
-        end
-      end if VisualEffect.all
-      Gems.all.each do |effect|
-        if effect.x == in_sight[:x] && effect.y == in_sight[:y]
-          $screen_shot_objects << {instance: effect, x: effect.x, y: effect.y}
-        end
-      end if Gems.all
     end
-    $screen_shot_objects << {instance: Player, x: Player.x, y: Player.y}
+    $screen_shot_objects << Player
     $screen_shot
   end
 
   def self.describe(pixel, coords)
     player_here = coords == Player.coords
     is_map = $gamemode == 'map'
-    Game.input(true); binding.pry if $all_inputs.last == 'o'
     response = player_here ? "I'm standing on " : 'There is '
 
     standing_pixel = case pixel.clone.uncolor.split.join
@@ -596,20 +543,29 @@ class Game
     end
     $stack = []
     # Do not change their color
-    $screen_shot_objects.each do |obj|
-      $stack << obj[:instance] if obj.filter(:x, :y) == coords.filter(:x, :y) && obj[:instance] != Player
+    Game.input(true); binding.pry if $all_inputs.last == 'o'
+    drops = $drops.flatten.compact.select { |drop| drop.coords == coords }
+    (Item.at(coords) + drops).each do |obj|
+      $stack << obj if obj.coords.filter(:x, :y) == coords.filter(:x, :y) && obj != Player
     end
     stacks = $stack.group_by { |item| item.name }
     stack_size = $stack.size
 
     if standing_pixel =~ /staircase/
       response << standing_pixel
-      response << (stack_size > 0 ? 'and some other things' : '')
+      response << (stack_size > 0 ? ' and some other things' : '')
     else
       response << case stacks.size
       when 0 then standing_pixel
       when 1 then (stack_size == 1 || $stack.first.stack_size == 1) ? "#{$stack.first.name.articlize}" : "a stack of #{$stack.first.name.articlize}"
-      when 2 then "#{$stack.last.stack_size == 1 ? $stack.last.name.articlize : "a stack of #{$stack.last.name.articlize}"} on #{$stack.first.stack_size == 1 ? $stack.first.name.articlize : "a stack of #{$stack.first.name.articlize}"}"
+      when 2
+        top_stack, bottom_stack = stacks.to_a.first[1], stacks.to_a.last[1]
+        top_item, bottom_item = top_stack.first, bottom_stack.first
+        line = ''
+        line << (top_item.stack_size == 1 || top_stack.size == 1 ? "#{top_item.name.articlize}" : "a stack of #{top_item.name.articlize}")
+        line << " on "
+        line << (bottom_item.stack_size == 1 || bottom_stack.size == 1 ? "#{bottom_item.name.articlize}" : "a stack of #{bottom_item.name.articlize}")
+        line
       else player_here ? "#{stack_size} things" : "\b\b\bare #{stack_size} things"
       end
     end

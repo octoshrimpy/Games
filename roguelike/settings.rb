@@ -268,11 +268,14 @@ class Settings
 
   def self.flash!(coord)
     coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
-    if Dungeon.at(coords) == "  "
-      Player.coords = coords
+    last_valid = nil
+
+    flash_to = Visible.line_until_collision(Player.coords.filter(:x, :y), coords.filter(:x, :y))
+    if flash_to
+      Player.coords = flash_to
       Game.tick
     else
-      Log.add "Flash failed. There is a wall there."
+      Log.add "Flash failed. Nowhere to land."
     end
   end
 
@@ -356,7 +359,7 @@ class Settings
       max = $height - 1
       @@scroll = @@scroll > max ? max : @@scroll
       @@scroll = @@scroll < 0 ? 0 : @@scroll
-      Game.show({x: @@scroll_horz, y: @@scroll})
+      Game.show({x: @@scroll_horz, y: @@scroll, depth: Player.depth})
       false
     else
       lines = case $gamemode

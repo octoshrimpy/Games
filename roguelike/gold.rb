@@ -11,6 +11,7 @@ class Gold
   end
 
   def destroy
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
     $drops[Player.depth].delete(self)
   end
 
@@ -18,8 +19,8 @@ class Gold
     all.length
   end
 
-  def self.all
-    $drops[Player.depth].select {|g|g.is_a?(Gold)}
+  def self.on_board
+    $drops[Player.depth].select { |g| g.is_a?(Gold) }
   end
 
   def coords
@@ -35,7 +36,7 @@ class Gold
   end
 
   def pickup
-    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
+    Player.gold += self.value
     self.destroy
   end
 

@@ -46,7 +46,7 @@ class Dungeon
     if allow_landing_items
       (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })
     else
-      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })  - (Item.on_board.map(&:coords) + Gold.all.map(&:coords) + Creature.current.map(&:coords) + [Player.coords])
+      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })  - (Item.on_board.map(&:coords) + Gold.on_board.map(&:coords) + Creature.on_board.map(&:coords) + [Player.coords])
     end
   end
 

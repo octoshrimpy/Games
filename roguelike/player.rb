@@ -282,13 +282,16 @@ class Player
       system 'clear' or system 'cls'
       Game.input(true)
       Dungeon.current.each { |row| puts row.join('') }
+    when '.'
+      Player.coords = Dungeon.current.search_for('> ').first.merge({depth: Player.depth})
+      Game.draw
       # --------------------------------------------------- / CHEATS ---------------------------
     end
 
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
         is_creature = false
-        Creature.current.map do |creature|
+        Creature.on_board.map do |creature|
           if creature.coords == {x: self.x + x_dest, y: self.y + y_dest, depth: self.depth}
             is_creature = true
             if self.energy > 0
@@ -323,7 +326,7 @@ class Player
     end
 
     try_pickup_items('auto') if autopickup && !(@@skip_pick_up)
-    pickup_gems
+    pickup_drops
     standing_on_message = Game.describe(Dungeon.at(Player.coords), Player.coords)
     if standing_on_message.length > 0 && !(standing_on_message =~ /I don't know what this is./)
       $message = standing_on_message if $message && $message.length == 0
@@ -351,23 +354,18 @@ class Player
     end
   end
 
-  def self.pickup_gems
-    Gems.all.select { |g| g.coords == coords }.each do |g|
-      g.pickup
-      g.destroy
+  def self.pickup_drops
+    increase = 0
+    $drops[Player.depth].select { |drop| drop.coords == coords }.each do |drop|
+      if drop.respond_to?(:value)
+        increase += drop.value
+      end
+      drop.pickup
     end
+    Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
   end
 
   def self.try_pickup_items(method="key_press")
-    picked_up_something = false
-    increase = 0
-    Gold.all.select { |g| g.coords == coords }.each do |gold_piece|
-      increase += gold_piece.value
-      Player.gold += gold_piece.value
-      gold_piece.pickup
-      picked_up_something = true
-    end
-    Log.add("Gained #{increase} gold! (#{Player.gold})") if increase > 0
     items_to_pickup = Item.on_board.select { |i| i.coords == coords }
     if items_to_pickup.count > 0
       picked_up_items = pickup_items(items_to_pickup)
