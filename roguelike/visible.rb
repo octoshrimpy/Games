@@ -38,9 +38,7 @@ class Visible
       has_seen_before = player_seen.include?(coord)
       not_creature = !(creature_locations.include?(coord))
       is_empty = landing ? !(landing.is_solid?) : false
-      if has_seen_before && not_creature && is_empty
-        last_valid = coord
-      end
+      last_valid = coord if has_seen_before && not_creature && is_empty
     end
     last_valid
   end

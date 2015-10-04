@@ -59,7 +59,7 @@ class Game
   def self.run_time(time)
     (100 / time).times do |t|
       Creature.on_board.each do |creature|
-        creature.tick if $tick % (100 / creature.run_speed) == 0
+        creature.tick if (creature.birth + $tick) % (100 / creature.run_speed) == 0
       end if Creature.on_board
       spawn_creature if ($time % SPAWN_RATE == 0 && Creature.count < MAX_ENEMIES && $spawn_creatures == true)
       Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 / shot.speed) == 0 }

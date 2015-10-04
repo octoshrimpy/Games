@@ -1,7 +1,7 @@
 class Creature
   attr_accessor :x, :y, :health, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :accuracy, :defense, :verbs,
-                :tick_script, :attracted_to, :sense_range, :can_move
+                :tick_script, :attracted_to, :sense_range, :can_move, :birth
 
   def initialize(type, creature_color)
     @mask = "#{type} "
@@ -9,6 +9,7 @@ class Creature
     @can_move = true
     @destination = nil
     @depth = Player.depth
+    @birth = $time + 1
     @id = $ids; $ids += 1
     stats = case type
     when "a"

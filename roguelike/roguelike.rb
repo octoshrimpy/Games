@@ -13,6 +13,8 @@ If flash fails because of obstruction, instead, flash to closest position in lin
 
 Add Defense items
 
+shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
+
 Throwing items point-blank at an enemy won't hit the enemy
 
 add descriptions for items
