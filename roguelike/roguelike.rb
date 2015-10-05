@@ -11,8 +11,6 @@ Create a base object class that everything else inherits from.
 
 If flash fails because of obstruction, instead, flash to closest position in line-of-sight
 
-Add Defense items
-
 shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
 
 Throwing items point-blank at an enemy won't hit the enemy

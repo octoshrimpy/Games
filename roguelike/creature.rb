@@ -333,15 +333,24 @@ class Creature
     {x: self.x, y: self.y, depth: self.depth}
   end
 
-  def hit(raw_damage, source)
-    self.hurt(raw_damage - self.defense)
+  def hit(raw_damage, type_of_damage)
+    damage = case type_of_damage
+    when 'physical' then raw_damage - self.defense
+    when 'magic' then raw_damage - self.magic_resist
+    else raw_damage
+    end
+    self.hurt(damage, type_of_damage)
   end
 
   def hurt(damage=1, src="")
-    @health -= damage.round
     src += ' ' if src.length > 0
-    Log.add("#{damage.round} #{src}damage was dealt to #{colored_name}.")
-    self.destroy(src) if @health <= 0
+    if damage <= 0
+      Log.add("#{Math.greater_of(0, damage.round)} #{src}damage was dealt to #{colored_name}.")
+    else
+      @health -= damage.round
+      Log.add("#{damage.round} #{src}damage was dealt to #{colored_name}.")
+      self.destroy(src) if @health <= 0
+    end
   end
 
   def colored_name(str=self.name)
@@ -406,7 +415,7 @@ class Creature
         Log.add "#{colored_name} missed you!"
       else
         Player.last_hit_id = @id
-        Player.hurt(damage, 'physical')
+        Player.hit(damage, 'physical')
       end
     elsif move_to
       @x = move_to[:x]

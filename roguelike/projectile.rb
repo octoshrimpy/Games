@@ -1,10 +1,12 @@
 class Projectile
-  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item, :power, :source, :speed, :dob
+  attr_accessor :x, :y, :depth, :destination_x, :destination_y, :item,
+                :power, :source, :speed, :dob, :type
 
-  def initialize(destination, item, source, options={})
+  def initialize(destination, item, source, type, options={})
     self.dob = $time
     self.speed = options[:speed] || 80
     self.source = source
+    self.type = type
     self.x ||= source.x
     self.y ||= source.y
     self.depth ||= source.depth
@@ -51,7 +53,7 @@ class Projectile
     if stop
       collided_with_item = collided_with || spot
       if collided_with
-        collided_with.hit(item.collided_damage(power), self) if item.collided_damage(power) > 0
+        collided_with.hit(item.collided_damage(power), type) if item.collided_damage(power) > 0
         self.item.x, self.item.y, self.item.depth = collided_with.x, collided_with.y, collided_with.depth
       else
         self.item.x, self.item.y, self.item.depth = x, y, depth if self.item

@@ -287,7 +287,7 @@ class Settings
     coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
     Log.add "Shot #{@@selected_item.name}."
     Player.inventory.delete(@@selected_item)
-    Projectile.new(coords, @@selected_item, Player, {speed: @@selected_item.projectile_speed})
+    Projectile.new(coords, @@selected_item, Player, 'physical', {speed: @@selected_item.projectile_speed})
     clear_settings
     Game.tick
   end
@@ -296,7 +296,7 @@ class Settings
     coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
     Log.add "Cast #{@@selected_item.name}."
     Player.mana -= @@selected_item.mana_cost
-    Projectile.new(coords, @@selected_item, Player, {speed: @@selected_item.projectile_speed})
+    Projectile.new(coords, @@selected_item, Player, @@selected_item.type, {speed: @@selected_item.projectile_speed})
     clear_settings
     Game.tick
   end

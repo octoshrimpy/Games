@@ -12,7 +12,7 @@ class DotEffect
   def self.tick
     DotEffect.all.each do |dot|
       if dot && dot.effector.is_a?(Creature) && dot.effector.health > 0 && dot.duration > 0
-        dot.effector.hurt(dot.damage_per_tick, dot.damage_type)
+        dot.effector.hit(dot.damage_per_tick, dot.damage_type)
         dot.duration -= 1
       else
         dot.destroy

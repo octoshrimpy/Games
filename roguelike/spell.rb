@@ -14,7 +14,7 @@
 class Spell
   include Item
 
-  attr_accessor :mana_cost, :range, :collided_action, :is_projectile, :projectile_speed, :non_projectile_script
+  attr_accessor :mana_cost, :range, :collided_action, :is_projectile, :projectile_speed, :non_projectile_script, :type
 
   def cast!(needs_verify=false)
     if needs_verify
@@ -46,7 +46,9 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
+      type: 'fire',
       projectile_speed: 20,
+      on_hit_damage: 0,
       collided_action: Evals.explode(1, 20, 'fire'),
       mana_cost: 5
     })
@@ -57,6 +59,7 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
+      type: 'fire',
       projectile_speed: 20,
       on_hit_damage: 0,
       collided_action: Evals.explode(0, 10, 'fire'),
@@ -69,6 +72,7 @@ class Spell
       destroy_on_collision_with: 'a',
       range: 10,
       is_projectile: true,
+      type: 'poison',
       projectile_speed: 20,
       on_hit_damage: 0,
       collided_action: Evals.new_dot(5, 2, 'poison'),

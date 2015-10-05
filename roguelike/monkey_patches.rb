@@ -179,18 +179,10 @@ module Math
     y = y0
     ystep = nil
 
-    if y0 < y1
-      ystep = 1
-    else
-      ystep = -1
-    end
+    ystep = y0 < y1 ? 1 : -1
 
     for x in x0..x1
-      if steep
-        points << {:x => y, :y => x}
-      else
-        points << {:x => x, :y => y}
-      end
+      points << (steep ? {:x => y, :y => x} : {:x => x, :y => y})
       error -= deltay
       if error < 0
         y += ystep

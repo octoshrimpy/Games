@@ -147,12 +147,17 @@ class Player
     end
   end
 
-  def self.hit(raw_damage, source)
-    self.hurt(raw_damage - self.defense)
+  def self.hit(raw_damage, type_of_damage)
+    damage = case type_of_damage
+    when 'physical' then raw_damage - self.defense
+    when 'magic' then raw_damage - self.magic_resist
+    else raw_damage
+    end
+    self.hurt(damage, type_of_damage)
   end
 
   def self.hurt(damage=1, type="")
-    if Player.invincible?
+    if Player.invincible? || damage <= 0
       last_hit = Player.last_hit_by
       Log.add "#{last_hit.colored_name} #{last_hit.verbs.sample} you, but you receive no damage."
     else
@@ -167,6 +172,7 @@ class Player
   end
 
   def self.heal(regenerate=1, src="You got healed by an unknown source.")
+    return false if regenerate <= 0
     self.health += regenerate
     Log.add(src) if src
   end
@@ -303,7 +309,7 @@ class Player
               elsif damage < 0
                 Log.add "You missed #{creature.colored_name}."
               else
-                creature.hurt(damage, 'physical')
+                creature.hit(damage, 'physical')
                 Player.equipped.each do |slot, item|
                   collided_with = creature
                   eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect) && item.on_hit_effect
@@ -574,7 +580,7 @@ class Player
     else
       Log.add "Threw #{item.name}."
     end
-    Projectile.new({x: Player.x + x, y: Player.y + y}, item, Player)
+    Projectile.new({x: Player.x + x, y: Player.y + y}, item, Player, 'physical')
   end
 
   def self.drop(item, show_log=true)

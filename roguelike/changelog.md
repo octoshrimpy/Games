@@ -1,4 +1,20 @@
+Oct 5, 2015, v0.0.54
+Refactored damage to factor in defense
+  * Defense only works against physical damage. If other types of damage is done (magic) then specific resistances will come into play instead.
+  
+
+Oct 4, 2015 v0.0.53
+Creatures now have birth times, which are used to control the timing of the motion.
+  Prevents similar creatures from moving at the same time.
+
 Oct 3, 2015 v.0.0.52
+Refactored the way items on the board are drawn
+Renamed selection methods to be more clear
+Refactored Flashing
+  * Flashing now can only jump to where a player has previously seen.
+    - (This will avoid accidentally flashing into holes that cannot be escaped from)
+  * Flashing will always succeed
+   - Will jump to the furthest possible location based on range, previously seen open spaces, walls, and enemies
 
 Oct 2, 2015 v0.0.51
 Refactored Coords hashes. Should see no effect in game.

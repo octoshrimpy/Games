@@ -107,7 +107,7 @@ module Item
   end
 
   def collided_damage(power)
-    on_hit_damage || power
+    on_hit_damage || Math.less_of((weight * power), power)
   end
 
   def collide(collided_with)
@@ -165,7 +165,7 @@ module Item
     unless Dungeon.at(coord).is_solid?
       VisualEffect.new("Fire Blast Effect", "* ".color(:light_red), coord) # refactor this to be more expandable
       Creature.at(coord).each do |creature|
-        creature.hurt(damage, type)
+        creature.hit(damage, type)
       end
     end
   end
