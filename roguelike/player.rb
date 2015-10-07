@@ -376,7 +376,7 @@ class Player
   end
 
   def self.try_pickup_items(method="key_press")
-    items_to_pickup = Item.on_board.select { |i| i.coords == coords }
+    items_to_pickup = Item.on_board.select { |i| i.coords == coords && (method == 'auto' ? i.auto_pickup : true) }
     if items_to_pickup.count > 0
       picked_up_items = pickup_items(items_to_pickup)
       Log.add "My inventory is full." if picked_up_items.count == 0

@@ -5,8 +5,6 @@ Add torches
   Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
   Torches should update their current lighting if a solid object is modified within range
 
-Add can_auto_pickup to items. Torches should not be picked up automatically
-
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
   Map the coords of all items on current level, calculate distance to player, if in range, then try to do vision

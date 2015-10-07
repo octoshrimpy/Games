@@ -50,6 +50,7 @@ class LightSource
       name: 'Torch',
       icon: 'i',
       weight: 0.1,
+      auto_pickup: false,
       equipment_slot: :off_hand,
       color: :light_yellow,
       range: 4,
