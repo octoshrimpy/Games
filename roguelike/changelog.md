@@ -1,7 +1,10 @@
+Oct 6, 2015 v0.0.55
+Renamed 'Right' and 'Left' hands to 'Main' and 'Off' Hands.
+Added Light Sources that diminish over time
+
 Oct 5, 2015, v0.0.54
 Refactored damage to factor in defense
   * Defense only works against physical damage. If other types of damage is done (magic) then specific resistances will come into play instead.
-  
 
 Oct 4, 2015 v0.0.53
 Creatures now have birth times, which are used to control the timing of the motion.

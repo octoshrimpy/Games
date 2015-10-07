@@ -12,7 +12,7 @@ class Gold
 
   def destroy
     $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
-    $drops[Player.depth].delete(self)
+    $drops[self.depth].delete(self)
   end
 
   def self.count

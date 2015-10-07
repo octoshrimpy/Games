@@ -1,6 +1,15 @@
 # TODO
 =begin
 
+Add torches
+  Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
+  Torches should update their current lighting if a solid object is modified within range
+
+Player should have a vision radius and a lit radius.
+
+Pixels should be lit/unlit
+Whether items are shown should be lit && visible_by_player
+
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
   Map the coords of all items on current level, calculate distance to player, if in range, then try to do vision
@@ -8,8 +17,6 @@ if player doesn't move, do not change vision calculations
 
 Create a base object class that everything else inherits from.
   Has coords, pickup, drop actions, etc.
-
-If flash fails because of obstruction, instead, flash to closest position in line-of-sight
 
 shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
 
@@ -96,6 +103,7 @@ require './log.rb'
 require './gold.rb'
 require './gems.rb'
 require './item.rb'
+require './light_source.rb'
 require './visual_effect.rb'
 require './dot_effect.rb'
 require './consumable.rb'

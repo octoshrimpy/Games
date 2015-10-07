@@ -22,7 +22,7 @@ class MeleeWeapon
     new({
       name: 'Excalibur',
       icon: '†',
-      equipment_slot: :right_hand,
+      equipment_slot: :main_hand,
       color: :light_yellow,
       weight: 12,
       bonus_health: 50,
@@ -33,7 +33,7 @@ class MeleeWeapon
     new({
       name: 'Rusty Dagger',
       icon: '†',
-      equipment_slot: :right_hand,
+      equipment_slot: :main_hand,
       weight: 4,
       bonus_strength: 1
     })
@@ -41,7 +41,7 @@ class MeleeWeapon
       name: 'Fire Sword',
       icon: '†',
       color: :red,
-      equipment_slot: :right_hand,
+      equipment_slot: :main_hand,
       weight: 4,
       bonus_strength: 1,
       on_hit_effect: Evals.new_dot(5, 2, 'fire', false)

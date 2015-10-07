@@ -84,6 +84,7 @@ class Visible
   def in_linear_view(x0,y0,x1,y1) #0..@radius*2
     # TODO Check Quadrant, do not sort unless necessary.
     $visible_calculations += 1
+    # Game.input(true); binding.pry if $visible_calculations > 100
     line_coords = Math.get_line(x0, y0, x1, y1).sort_by do |coord|
       distance_from_center(coord[:x], coord[:y])
     end

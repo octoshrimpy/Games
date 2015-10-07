@@ -1,14 +1,15 @@
 class Player
-  class_accessible :x, :y, :seen, :depth, :vision_radius, :health, :mana,
+  class_accessible :x, :y, :seen, :depth, :lit_radius, :health, :mana,
   :raw_max_health, :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected,
   :quickbar, :energy, :raw_max_energy, :visible, :raw_defense, :equipped,
   :inventory, :autopickup, :last_hit_id, :raw_self_regen, :bonus_stats,
   :raw_accuracy, :raw_magic_power, :invisibility_ticks, :sleeping,
-  :inventory_size, :stunned_for, :live, :invincibility
+  :inventory_size, :stunned_for, :live, :invincibility, :vision_radius
 
   @@x = 0
   @@y = 0
-  @@vision_radius = 2
+  @@lit_radius = 1
+  @@vision_radius = 7
 
   @@depth = 1
   @@dungeon_level = 1 #0 for town?
@@ -26,8 +27,8 @@ class Player
     head: nil,
     torso: nil,
     back: nil,
-    left_hand: nil,
-    right_hand: nil,
+    off_hand: nil,
+    main_hand: nil,
     ring1: nil,
     ring2: nil,
     ring3: nil,
@@ -291,6 +292,8 @@ class Player
     when '.'
       Player.coords = Dungeon.current.search_for('> ').first.merge({depth: Player.depth})
       Game.draw
+    when 't'
+      LightSource.new(4, 1000, coords)
       # --------------------------------------------------- / CHEATS ---------------------------
     end
 

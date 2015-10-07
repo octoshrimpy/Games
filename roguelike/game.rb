@@ -10,32 +10,40 @@ class Game
   def self.start(seed)
     $seed = seed
     srand($seed.to_i)
-    $items = []
-    $ids = 1
-    $visual_effects = []
-    $dot_effects = []
-    $projectiles = []
     $message = "Welcome! Press '#{$key_mapping[:open_help]}' at any time to view how to play."
     $previous_message = ''
-    $all_inputs = []
+
+    $items = []
+    $light_sources = []
+    $drops = []
+    $projectiles = []
+    $visual_effects = []
+    $dot_effects = []
+
     $gamemode = "play"
     $gameover = false
-    $spawn_creatures = true
+
     $screen_shot = nil
     $screen_shot_objects = []
     $screen_shot_visible = []
-    $stack = []
     $world = []
+    $dungeon = []
+    $stack = []
+
+    $all_inputs = []
     $time = 0
     $milli_tick = 0
+    $visible_calculations = 0
+
+    $ids = 1
+    $spawn_creatures = true
     $npcs = []
-    $drops = []
-    $dungeon = []
+
     $fps = []
     $tick = 1
     $skip = 0
-    $visible_calculations = 0
     $sleep_condition = ''
+
     Item.generate
     Log.new
     Log.add "Welcome to the game!"
@@ -65,6 +73,7 @@ class Game
       Projectile.all.each { |shot| shot.tick if ($tick - shot.dob) % (100 / shot.speed) == 0 }
       $tick += 1
     end
+    LightSource.tick
     Player.verify_stats
     $time += 1
   end
@@ -479,14 +488,16 @@ class Game
   end
 
   def self.find_currently_visible(x_offset, y_offset)
-    visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
-    visible.each do |in_sight|
+    currently_lit = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.lit_radius).find_visible
+    currently_lit += LightSource.find_visible
+    currently_lit.each do |in_sight|
       Player.seen[Player.depth] << in_sight unless Player.seen[Player.depth].include?(in_sight)
+      next unless $level[in_sight[:y] - y_offset] && $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset]
       # This makes the current visibility white.
       floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
       $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor == "  " ? ". " : floor
       ground_objects.each do |item_on_board|
-        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y)
+        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y) && Visible.in_range(Player.vision_radius, in_sight, Player.coords)
           $level[item_on_board.y - y_offset][item_on_board.x - x_offset] = item_on_board.show
         end
       end
@@ -510,15 +521,15 @@ class Game
         end
       end
     end
-    visible = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.vision_radius).find_visible
-    visible.each do |in_sight|
+    currently_lit = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.lit_radius).find_visible
+    currently_lit += LightSource.find_visible
+    currently_lit.each do |in_sight|
       $screen_shot_visible << in_sight.filter(:x, :y)
       # This makes the current visibility white.
       floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
       $screen_shot[in_sight[:y]][in_sight[:x]] = floor == "  " ? ". " : floor
-      ground_objects
-       (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all).each do |item_on_board|
-        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y)
+      ground_objects.each do |item_on_board|
+        if item_on_board.coords.filter(:x, :y) == in_sight.filter(:x, :y) && Visible.in_range(Player.vision_radius, in_sight, Player.coords)
           $screen_shot_objects << item_on_board
         end
       end

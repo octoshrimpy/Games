@@ -378,8 +378,8 @@ class Settings
       when 'equip_head' then build_inventory_by('head')
       when 'equip_torso' then build_inventory_by('torso')
       when 'equip_back' then build_inventory_by('back')
-      when 'equip_left_hand' then build_inventory_by('left_hand')
-      when 'equip_right_hand' then build_inventory_by('right_hand')
+      when 'equip_off_hand' then build_inventory_by('off_hand')
+      when 'equip_main_hand' then build_inventory_by('main_hand')
       when 'equip_ring1' then build_inventory_by('ring1')
       when 'equip_ring2' then build_inventory_by('ring2')
       when 'equip_ring3' then build_inventory_by('ring3')
@@ -524,7 +524,7 @@ class Settings
     lines = ['']
     @@selectable = true
     @@title = "Equipment #{15.times.map{' '}.join}Weight: #{Player.equipped_weight}"
-    %w( head torso back left_hand right_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
+    %w( head torso back off_hand main_hand ring1 ring2 ring3 ring4 waist leggings feet ).each do |slot|
       slot_name = humanize_slot(slot)
       space = (20 - slot_name.length).times.map{' '}.join
       lines << "#{slot_name}:#{space}#{Player.equipped[slot.to_sym] ? "#{Player.equipped[slot.to_sym].name}: #{item_specs(Player.equipped[slot.to_sym])}" : 'Empty'}"
@@ -583,8 +583,8 @@ class Settings
     when 'head' then "Head"
     when 'torso' then "Torso"
     when 'back' then "Back"
-    when 'left_hand' then "Left Hand"
-    when 'right_hand' then "Right Hand"
+    when 'off_hand' then "Off Hand"
+    when 'main_hand' then "Main Hand"
     when 'ring1' then "Ring 1"
     when 'ring2' then "Ring 2"
     when 'ring3' then "Ring 3"
@@ -596,7 +596,7 @@ class Settings
   end
 
   def self.confirm_selection
-    selects = %w( item_options read_spellbook equip_head equip_torso equip_back equip_left_hand equip_right_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
+    selects = %w( item_options read_spellbook equip_head equip_torso equip_back equip_off_hand equip_main_hand equip_ring1 equip_ring2 equip_ring3 equip_ring4 equip_waist equip_leggings equip_feet )
     menus = %w( equipment inventory )
     select_selection if selects.include?($gamemode)
     redirect_selection if menus.include?($gamemode)
@@ -719,8 +719,8 @@ class Settings
     when 0 then 'equip_head'
     when 1 then 'equip_torso'
     when 2 then 'equip_back'
-    when 3 then 'equip_left_hand'
-    when 4 then 'equip_right_hand'
+    when 3 then 'equip_off_hand'
+    when 4 then 'equip_main_hand'
     when 5 then 'equip_ring1'
     when 6 then 'equip_ring2'
     when 7 then 'equip_ring3'
