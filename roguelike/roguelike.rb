@@ -5,7 +5,7 @@ Add torches
   Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
   Torches should update their current lighting if a solid object is modified within range
 
-Allow Torches to be added to the quickbar
+Add can_auto_pickup to items. Torches should not be picked up automatically
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
@@ -126,10 +126,10 @@ Player.inventory << Item['Standard Bow']
 Player.equipped[:back] = Item["Quiver"]
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire']
-50.times { Player.inventory << Item['Scroll of Flash'] }
-# 99.times { Player.inventory << Item['Arrow'] }
-10.times { Player.inventory << Item['Torch'] }
-Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", nil, nil, nil, 'Scroll of Flash']
+5.times { Player.inventory << Item['Scroll of Flash'] }
+99.times { Player.inventory << Item['Arrow'] }
+2.times { Player.inventory << Item['Torch'] }
+Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", nil, "Torch", nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
 

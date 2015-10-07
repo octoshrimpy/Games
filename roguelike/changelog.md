@@ -1,3 +1,10 @@
+Oct 7, 2015 v0.0.56
+Fixed bug that caused Torches to be destroyed unexpectedly.
+Torches have a light of at least 1 until they burn out.
+Equipment Items can now be added to the Quick bar.
+Light Sources show their duration and range where other items show their specs
+Added a description for Torches
+
 Oct 6, 2015 v0.0.55
 Renamed 'Right' and 'Left' hands to 'Main' and 'Off' Hands.
 Added Light Sources that diminish over time

@@ -14,7 +14,7 @@ class LightSource
     until this_range == 1
       val *= percentage
       this_range -= 1
-      times[this_range.to_s] = val
+      times[this_range.to_s] = val.round
     end
     times
   end
@@ -37,7 +37,7 @@ class LightSource
     @times.each do |time, tick|
       next if time.to_i > range
       next if time.to_i < range
-      if self.duration <= tick
+      if self.duration <= tick && range > 1
         self.range -= 1
         self.update_vision
       end
@@ -54,7 +54,8 @@ class LightSource
       color: :light_yellow,
       range: 4,
       stack_size: 99,
-      duration: 300
+      duration: 2000,
+      description: "Torches Light the way. Equip a torch to increase the vision around the Player. \nPlace torches on the ground to light the area.\n Torches last a certain duration, determined by movement ticks from the Player. The light produced from a torch will diminish as the duration decreases. Upon reaching 0, a torch will be destroyed."
     })
   end
 end

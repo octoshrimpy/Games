@@ -46,6 +46,10 @@ module Item
 
   def destroy
     Player.inventory.delete(self)
+    if self.respond_to?(:equipment_slot) && self.equipment_slot
+      slot = Player.equipped[self.equipment_slot]
+      Player.equipped[self.equipment_slot] = slot == self ? nil : slot
+    end
     $items.delete(self)
     $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
     true

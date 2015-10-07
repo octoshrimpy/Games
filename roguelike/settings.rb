@@ -539,20 +539,17 @@ class Settings
     verb = case
     when @@selected_item.class == Consumable then 'Consume'
     when @@selected_item.class == SpellBook then 'Read'
-    when @@selected_item.respond_to?(:equipment_slot) && @@selected_item.equipment_slot then 'Equip'
+    when @@selected_item.respond_to?(:equipment_slot) && @@selected_item.equipment_slot
+      slot = @@selected_item.equipment_slot
+      specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
+      "Equip - #{humanize_slot(@@selected_item.equipment_slot)}: #{specs}"
     else 'Use'
     end
     lines << verb
     lines << 'Throw'
     lines << 'Drop'
     lines << 'Drop Stack'
-    if @@selected_item.equipment_slot
-      slot = @@selected_item.equipment_slot
-      specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)
-      lines << "Equip - #{humanize_slot(@@selected_item.equipment_slot)}: #{specs}"
-    else
-      lines << "Assign to Quick Bar"
-    end
+    lines << "Assign to Quick Bar"
     lines << ''
     lines
   end
@@ -574,6 +571,9 @@ class Settings
     stats.each do |stat, abbreviation|
       change = compared_to ? (item.method(stat).call.to_i - compared_to.method(stat).call.to_i) : item.method(stat).call.to_i
       specs << "#{abbreviation}#{change > 0 ? '+' + change.to_s : change} " if change != 0
+    end
+    if item.is_a?(LightSource)
+      specs << "Light: #{item.range} Ticks: #{item.duration}"
     end
     specs
   end
@@ -654,14 +654,10 @@ class Settings
     when 3 # Drop all
       Player.drop_many(@@stack)
     when 4
-      if @@selected_item.equipment_slot
-        Player.equip(@@selected_item)
-      else
-        $message = "Enter the number to assign #{@@selected_item.name} to."
-        $gamemode = 'query_quickbar'
-        tick = false; play = false; clear = false
-        Game.redraw
-      end
+      $message = "Enter the number to assign #{@@selected_item.name} to."
+      $gamemode = 'query_quickbar'
+      tick = false; play = false; clear = false
+      Game.redraw
     end
     $gamemode = 'play' if play
     clear_settings if clear
@@ -848,6 +844,7 @@ Type 'x' then hit enter to cancel.
     lines << "Weight: #{item.weight.or('N/A')}"
     lines << "Slot: #{humanize_slot(item.equipment_slot).or('N/A')}"
     lines << ""
+    lines << "Duration: #{item.duration}" if item.is_a?(LightSource)
     lines += ["Range: #{item.range.or('N/A')}", ""] if item.respond_to?(:range)
     lines << "Bonus Stats:"
     lines << "   #{columnize(padding, ["Health:", "#{item.bonus_health.or('N/A')}"])}"
