@@ -1,6 +1,9 @@
 Oct 6, 2015 v0.0.55
 Renamed 'Right' and 'Left' hands to 'Main' and 'Off' Hands.
 Added Light Sources that diminish over time
+Light Sources can be held, lighting an area around the player.
+Light Sources can be placed on the ground, lighting the area on the ground
+Items and enemies are only revealed if they are both within light AND within a certain radius of the player
 
 Oct 5, 2015, v0.0.54
 Refactored damage to factor in defense

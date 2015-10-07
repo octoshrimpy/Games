@@ -14,7 +14,6 @@ class Game
     $previous_message = ''
 
     $items = []
-    $light_sources = []
     $drops = []
     $projectiles = []
     $visual_effects = []
@@ -490,9 +489,9 @@ class Game
   def self.find_currently_visible(x_offset, y_offset)
     currently_lit = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.lit_radius).find_visible
     currently_lit += LightSource.find_visible
-    currently_lit.each do |in_sight|
+    currently_lit.compact.flatten.each do |in_sight|
       Player.seen[Player.depth] << in_sight unless Player.seen[Player.depth].include?(in_sight)
-      next unless $level[in_sight[:y] - y_offset] && $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset]
+      next unless $level && $level[in_sight[:y] - y_offset] && $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset]
       # This makes the current visibility white.
       floor = Dungeon.current[in_sight[:y]][in_sight[:x]]
       $level[in_sight[:y] - y_offset][in_sight[:x] - x_offset] = floor == "  " ? ". " : floor

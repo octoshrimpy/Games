@@ -47,6 +47,7 @@ module Item
   def destroy
     Player.inventory.delete(self)
     $items.delete(self)
+    $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
     true
   end
 
@@ -130,6 +131,12 @@ module Item
     return nil unless x && y
     {x: x, y: y, depth: depth}
   end
+  def coords=(new_coords)
+    self.x = new_coords[:x]
+    self.y = new_coords[:y]
+    self.depth = new_coords[:depth]
+    coords
+  end
 
   def pickup
     $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
@@ -159,6 +166,7 @@ module Item
      SpellBook.generate
      Spell.generate
      StaticItem.generate
+     LightSource.generate
   end
 
   def self.damage_to_coord(coord, damage, type)
@@ -182,15 +190,16 @@ module Item
       nil
     end
   end
-  def self.at(coords); all.select {|i| i.coords == coords}; end
-  def self.by_name(name); all.select {|i| i.name == name }.first; end
-  def self.all_by_name(name); item = all.select {|i| i.name == name }; end
-  def self.on_board; all.select {|i| i.depth == Player.depth }; end
-  def self.melee; all.select {|i| i.class == MeleeWeapon }; end
-  def self.ranged; all.select {|i| i.class == RangedWeapon }; end
-  def self.magic; all.select {|i| i.class == MagicWeapon }; end
-  def self.equipment; all.select {|i| i.class == Equipment }; end
-  def self.consumable; all.select {|i| i.class == Consumable }; end
+  def self.at(coords); all.select { |i| i.coords == coords }; end
+  def self.by_name(name); all.select { |i| i.name == name }.first; end
+  def self.all_by_name(name); all.select { |i| i.name == name }; end
+  def self.on_board; all.select { |i| i.depth == Player.depth }; end
+  def self.melee; all.select { |i| i.class == MeleeWeapon }; end
+  def self.ranged; all.select { |i| i.class == RangedWeapon }; end
+  def self.magic; all.select { |i| i.class == MagicWeapon }; end
+  def self.equipment; all.select { |i| i.class == Equipment }; end
+  def self.consumable; all.select { |i| i.class == Consumable }; end
+  def self.light_sources; all.select { |i| i.class == LightSource }; end
 
   def self.equippable
     [

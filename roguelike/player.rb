@@ -1,5 +1,5 @@
 class Player
-  class_accessible :x, :y, :seen, :depth, :lit_radius, :health, :mana,
+  class_accessible :x, :y, :seen, :depth, :health, :mana,
   :raw_max_health, :raw_max_mana, :raw_strength, :raw_speed, :gold, :selected,
   :quickbar, :energy, :raw_max_energy, :visible, :raw_defense, :equipped,
   :inventory, :autopickup, :last_hit_id, :raw_self_regen, :bonus_stats,
@@ -8,7 +8,6 @@ class Player
 
   @@x = 0
   @@y = 0
-  @@lit_radius = 1
   @@vision_radius = 7
 
   @@depth = 1
@@ -129,6 +128,8 @@ class Player
     self.mana += mana_gain if energy >= 10
 
     $sleep_condition = 'true' if energy <= 0 # Out of energy. Stop sleeping
+
+    Player.equipped.each { |slot, item| item.tick if item.respond_to?(:tick) }
 
     Player.invincibility -= 1 if Player.invincibility >= 1
     Player.invisibility_ticks -= 1
@@ -566,6 +567,10 @@ class Player
       Player.equipped[slot] = item
       Log.add "Equipped #{item.name}."
     end
+  end
+
+  def self.lit_radius
+    Player.equipped.map { |slot, item| item.is_a?(LightSource) ? item.range : 0 }.sort.last
   end
 
   def self.throw_item(item, direction_coords)

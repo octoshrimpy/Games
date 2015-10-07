@@ -4,6 +4,7 @@ class LightSource
   attr_accessor :range, :duration, :is_lighting
 
   def update_vision
+    return false unless coords && range
     self.is_lighting = Visible.new(Dungeon.current, {x: x, y: y}, range).find_visible
   end
 
@@ -11,37 +12,27 @@ class LightSource
     this_range, val = self.range, self.duration
     times = {this_range.to_s => val}
     until this_range == 1
-      this_range -= 1
       val *= percentage
+      this_range -= 1
       times[this_range.to_s] = val
     end
     times
   end
 
-  def initialize(range, duration, coords)
-    self.range = range
-    self.duration = duration
-    @times = calculate_times(0.3)
-    self.x = coords[:x]
-    self.y = coords[:y]
-    self.depth = coords[:depth]
-    self.update_vision
-    $light_sources[depth] ||= []
-    $light_sources[depth] << self
-  end
-
-  def self.all; $light_sources.compact.flatten; end
-  def self.on_board; $light_sources[Player.depth] || []; end
-  def self.find_visible; on_board.map { |light| light.is_lighting }.flatten; end
-
-  def self.tick; all.select { |light| light && !([light.x, light.y, light.depth] == [nil]*3) }.each(&:tick); end
-
-  def destroy
+  def pickup
     $screen_shot_objects.delete({instance: self, x: self.x, y: self.y, depth: self.depth})
-    $light_sources[depth].delete(self)
+    self.is_lighting = []
+    self.x = nil
+    self.y = nil
+    self.depth = nil
+    self
   end
+
+  def self.find_visible; Item.light_sources.map { |light| light.is_lighting }.flatten; end
+  def self.tick; Item.light_sources.select { |light| light && !([light.x, light.y, light.depth] == [nil]*3) }.each(&:tick); end
 
   def tick
+    @times ||= calculate_times(0.3)
     self.duration -= 1
     @times.each do |time, tick|
       next if time.to_i > range
@@ -52,5 +43,18 @@ class LightSource
       end
     end
     self.destroy if duration <= 0
+  end
+
+  def self.generate
+    new({
+      name: 'Torch',
+      icon: 'i',
+      weight: 0.1,
+      equipment_slot: :off_hand,
+      color: :light_yellow,
+      range: 4,
+      stack_size: 99,
+      duration: 300
+    })
   end
 end

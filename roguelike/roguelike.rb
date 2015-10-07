@@ -5,10 +5,7 @@ Add torches
   Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
   Torches should update their current lighting if a solid object is modified within range
 
-Player should have a vision radius and a lit radius.
-
-Pixels should be lit/unlit
-Whether items are shown should be lit && visible_by_player
+Allow Torches to be added to the quickbar
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
@@ -19,8 +16,6 @@ Create a base object class that everything else inherits from.
   Has coords, pickup, drop actions, etc.
 
 shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
-
-Throwing items point-blank at an enemy won't hit the enemy
 
 add descriptions for items
 
@@ -132,7 +127,8 @@ Player.equipped[:back] = Item["Quiver"]
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire']
 50.times { Player.inventory << Item['Scroll of Flash'] }
-99.times { Player.inventory << Item['Arrow'] }
+# 99.times { Player.inventory << Item['Arrow'] }
+10.times { Player.inventory << Item['Torch'] }
 Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", nil, nil, nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
