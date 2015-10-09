@@ -11,7 +11,16 @@ class Object
 end
 
 class Item < Object
+
+  def iam
+    puts 'hello'
+    super
+  end
 end
 
 i = Item.new
+# i.iam
+# => hello
+# => Item
+# => nil
 binding.pry
