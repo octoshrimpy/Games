@@ -12,9 +12,9 @@ class Module
       end
     end
   end
-  end
+end
 
-  class Player
+class Player
   class_accessible :x, :y
 
   @@x = 5

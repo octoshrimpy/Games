@@ -50,7 +50,7 @@ end
 class Hash
   def filter(*syms)
     new_hash = {}
-    syms.each do |sym|
+    syms.flatten.each do |sym|
       new_hash[sym] = self[sym] if self[sym]
     end
     new_hash
