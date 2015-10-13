@@ -1,12 +1,13 @@
 require './walker.rb'
 require './arena.rb'
 require './automata_cave.rb'
+require './maze.rb'
 
 class Dungeon
 
   def self.presets(preset)
     case preset
-    when 'maze' then {distance_between_rooms: 100, split_every: 50, room_size: 6, tunnel_thickness: 3, tunnel_density: 90}
+    when 'default' then {distance_between_rooms: 100, split_every: 50, room_size: 6, tunnel_thickness: 3, tunnel_density: 90}
     when 'cavernous' then {distance_between_rooms: 100, split_every: 20, room_size: 6, tunnel_thickness: 3, tunnel_density: 90}
     when 'tunnels' then {distance_between_rooms: 50, split_every: 20, room_size: 2, tunnel_thickness: 2, tunnel_density: 30}
     when 'open' then {distance_between_rooms: 50, split_every: 20, room_size: 2, tunnel_thickness: 10, tunnel_density: 80}
@@ -15,7 +16,7 @@ class Dungeon
     end
   end
 
-  def initialize(preset='maze')
+  def initialize(preset='default')
     options = Dungeon.presets(preset)
     $preset = preset
     @empty_space = '  '
@@ -46,7 +47,15 @@ class Dungeon
     if allow_landing_items
       (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })
     else
-      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth })  - (Item.on_board.map(&:coords) + Gold.on_board.map(&:coords) + Creature.on_board.map(&:coords) + [Player.coords])
+      (current.search_for("  ").each { |xy_coord| xy_coord[:depth] = Player.depth }) - (Item.on_board.map(&:coords) + Gold.on_board.map(&:coords) + Creature.on_board.map(&:coords) + [Player.coords])
+    end
+  end
+
+  def build!(preset)
+    case preset
+    when 'boss' then open_cave_build(50)
+    when 'maze' then maze_build(20)
+    else standard_build(300)
     end
   end
 
@@ -63,6 +72,11 @@ class Dungeon
   def open_cave_build(size, depth=Player.depth)
     srand($seed + depth)
     AutomataCave.new(size, size, 53).generate!
+  end
+
+  def maze_build(size, depth=Player.depth)
+    srand($seed + depth)
+    Maze.new(size, size).to_array
   end
 
   def create_dungeon(arena, walk_length, have_stairs = true, walker = Walker.new)

@@ -347,15 +347,12 @@ class Game
     when Player.depth == 0 then 'outside'
     when Player.depth % 10 == 0 then 'boss'
     when Player.depth % 7 == 0 then 'cavernous'
+    when Player.depth % 5 == 0 then 'maze'
     when Player.depth % 3 == 0 then 'tunnels'
     else 'maze'
     end
     until (dungeon_up ||= false) && (dungeon_down ||= false)
-      if preset == 'boss'
-        dungeon = Dungeon.new(preset).open_cave_build(50)
-      else
-        dungeon = Dungeon.new('tunnels').standard_build(300)
-      end
+      dungeon = Dungeon.new(preset).build!(preset)
       dungeon_up = dungeon.search_for("< ").first
       dungeon_down = dungeon.search_for("> ").first
     end

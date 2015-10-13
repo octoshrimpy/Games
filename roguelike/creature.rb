@@ -14,11 +14,11 @@ class Creature
     stats = case type
     when "a"
       {
-        health: (3 * (1 + @depth * 0.3)).round,
+        health: (1 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + @depth * 0.3)).round,
+        strength: (2 + (@depth * 0.3)).round,
         run_speed: 6,
         verbs: %w( bit clawed cut ),
         drops: (%w( b b bb g )*5).sample(rand(5)),
@@ -27,11 +27,11 @@ class Creature
       }
     when "b"
       {
-        health: (2 * (1 + @depth * 0.3)).round,
+        health: (1 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 20,
         vision: 15,
-        strength: (1 * (1 + @depth * 0.3)).round,
+        strength: (1 + (@depth * 0.3)).round,
         run_speed: 11,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
         drops: (%w( b b b b g )*3).sample(rand(3)),
@@ -43,12 +43,12 @@ class Creature
     when "e"
     when "f"
       {
-        health: (3 * (1 + @depth * 0.3)).round,
+        health: (2 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (1 * (1 + @depth * 0.3)).round,
-        run_speed: 7,
+        strength: (2 + (@depth * 0.3)).round,
+        run_speed: 8,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
         drops: (%w( b b bb g g )*5).sample(rand(5)),
         name: "Possessed Fox",
@@ -62,11 +62,11 @@ class Creature
     when "l"
     when "m"
       {
-        health: (1 * (1 + @depth * 0.3)).round,
+        health: (1 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
         vision: 2,
-        strength: (1 * (1 + @depth * 0.3)).round,
+        strength: (1 + (@depth * 0.3)).round,
         run_speed: 4,
         color: :light_green,
         verbs: %w( slimed ),
@@ -82,11 +82,11 @@ class Creature
     when "q"
     when "r"
       {
-        health: (3 * (1 + @depth * 0.3)).round,
+        health: (2 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 60,
         vision: 10,
-        strength: (1 * (1 + @depth * 0.3)).round,
+        strength: (2 + (@depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( bit clawed slammed tore\ at shredded ),
         drops: (%w( b b bb bb g )*5).sample(rand(5)),
@@ -95,11 +95,11 @@ class Creature
       }
     when "s"
       {
-        health: (2 * (1 + @depth * 0.3)).round,
+        health: (2 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (3 * (1 + @depth * 0.3)).round,
+        strength: (4 + (@depth * 0.3)).round,
         run_speed: 3,
         verbs: %w( bit struck whipped choked ),
         drops: (%w( b b b g )*5).sample(rand(5)),
@@ -112,11 +112,11 @@ class Creature
     when "w"
     when "x"
       {
-        health: (5 * (1 + @depth * 0.3)).round,
+        health: (5 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
         vision: 10,
-        strength: (4 * (1 + @depth * 0.3)).round,
+        strength: (4 + (@depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
         drops: (%w( b g )*5).sample(rand(5)),

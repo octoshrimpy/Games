@@ -1,5 +1,6 @@
 # TODO
 =begin
+http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 Add torches
   Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
@@ -24,12 +25,8 @@ Able to transcribe scrolls into books if the element matches
 
 Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1) Left and Up has issues. Right and Down do not.
 
-http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
-
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
-
-Reduce FOV greatly. Allow light sources to be placed. Light sources should store coordinates so that they do not continually have to calculate it, since they are static
 
 Collision detection of projectiles seems off
 
