@@ -461,8 +461,8 @@ class Creature
   def player_in_range?
     return false unless Player.visible
     in_range = Visible.in_range(self.vision, self.coords, Player.coords)
-    if in_range && $gamemode == 'sleep'
-      $sleep_condition = 'true'
+    if in_range && ($gamemode == 'sleep' ||  $gamemode == 'auto-pilot')
+      $auto_pilot_condition = 'true' # Cancel auto-pilot
       $message = "I hear a sound nearby."
     end
     in_range

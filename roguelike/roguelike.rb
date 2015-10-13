@@ -4,6 +4,19 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 Torches should update their current lighting if a solid object is modified within range
 
+Add Berserk/Fury, which greatly increases damage, increass speed, and greatly increases the amount of energy taken.
+  Changes character color to red
+  Cost 5 mana to use
+  Damage increases by 50%?
+  Costs 1 energy per tick extra to everything else
+  Increase speed by 5
+How should the player use it?
+
+Scroll- 1 time use spell, no mana
+SpellBook - infinite use spell, costs mana
+Potion - 1 time use, no mana
+Medallion - infinite use, costs mana/energy
+
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
   Map the coords of all items on current level, calculate distance to player, if in range, then try to do vision
@@ -15,6 +28,8 @@ Create a base object class that everything else inherits from.
 shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
 
 add descriptions for items
+
+Fix Sleeping menu - don't display instructions below game screen
 
 Fix Map resetting to top of scroll
 
@@ -130,7 +145,7 @@ system 'clear' or system 'cls'
 Game.draw
 
 while(true)
-  if $gamemode != 'sleep'
+  if $gamemode != 'sleep' || $gamemode != 'auto-pilot'
     input = Input.read_single_key
     if input
       $milli_tick = Time.now.to_f
@@ -143,13 +158,15 @@ while(true)
       end
     end
   else
-    if eval($sleep_condition)
-      Log.add "You have awoken."
+    if eval($auto_pilot_condition)
+      if Player.sleeping
+        Player.sleeping = false
+        Log.add "You have awoken."
+      end
       $gamemode = 'play'
       Game.redraw
     else
-      Player.tick
-      Game.run_time(Player.speed)
+      Game.tick(false)
     end
   end
 end

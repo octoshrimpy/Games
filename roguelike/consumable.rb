@@ -4,10 +4,14 @@ class Consumable
   attr_accessor :restore_energy, :restore_mana, :restore_health, :usage_verb
   attr_accessor :execution_script
 
+  def usage_word
+    usage_verb || 'used'
+  end
+
   def consume
     tick = false
     if Player.inventory.delete(self)
-      Log.add "You have #{usage_verb || 'used'} #{name}."
+      Log.add "You have #{usage_word} #{name}."
       Player.energize(self.restore_energy.to_i, nil)
       Player.restore(self.restore_mana.to_i, nil)
       Player.heal(self.restore_health.to_i, nil)
