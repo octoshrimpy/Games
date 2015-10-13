@@ -5,12 +5,11 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 Torches should update their current lighting if a solid object is modified within range
 
 Add Berserk/Fury, which greatly increases damage, increass speed, and greatly increases the amount of energy taken.
-  Changes character color to red
-  Cost 5 mana to use
-  Damage increases by 50%?
-  Costs 1 energy per tick extra to everything else
-  Increase speed by 5
 How should the player use it?
+  Cost 5 mana to use if from medallion
+  Or achieved via potion
+
+Have a ground item that displays a message but cannot be picked up
 
 Scroll- 1 time use spell, no mana
 SpellBook - infinite use spell, costs mana
@@ -134,6 +133,7 @@ Player.inventory << Item['Standard Bow']
 Player.equipped[:back] = Item["Quiver"]
 Player.inventory << Item['Fire Sword']
 Player.inventory << Item['Book of Fire']
+Player.inventory << Item['Potion of Rage']
 5.times { Player.inventory << Item['Scroll of Flash'] }
 99.times { Player.inventory << Item['Arrow'] }
 2.times { Player.inventory << Item['Torch'] }

@@ -529,7 +529,7 @@ class Game
       end
       currently_lit = Visible.new(Dungeon.current, {x: Player.x, y: Player.y}, Player.lit_radius).find_visible
       currently_lit += LightSource.find_visible
-      currently_lit.each do |in_sight|
+      currently_lit.compact.each do |in_sight|
         $screen_shot_visible << in_sight.filter(:x, :y)
         # This makes the current visibility white.
         floor = Dungeon.current[in_sight[:y]][in_sight[:x]]

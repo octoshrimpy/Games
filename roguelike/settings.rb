@@ -545,7 +545,7 @@ class Settings
       @@title = "What would you like to do with #{@@selected_item.name}?"
       @@selectable = true
       verb = case
-      when @@selected_item.class == Consumable then @@selected_item.usage_word.chomp('d').capitalize
+      when @@selected_item.class == Consumable then @@selected_item.usage_verb.capitalize
       when @@selected_item.class == SpellBook then 'Read'
       when @@selected_item.respond_to?(:equipment_slot) && @@selected_item.equipment_slot
         slot = @@selected_item.equipment_slot

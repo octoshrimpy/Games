@@ -1,17 +1,19 @@
 class Consumable
   include Item
 
-  attr_accessor :restore_energy, :restore_mana, :restore_health, :usage_verb
+  attr_accessor :restore_energy, :restore_mana, :restore_health, :usage_verb, :usage_verb_past
   attr_accessor :execution_script
 
-  def usage_word
-    usage_verb || 'used'
+  def initialize(options)
+    @usage_verb ||= 'use'
+    @usage_verb_past ||= 'used'
+    super(options)
   end
 
   def consume
     tick = false
     if Player.inventory.delete(self)
-      Log.add "You have #{usage_word} #{name}."
+      Log.add "You have #{usage_verb_past} #{name}."
       Player.energize(self.restore_energy.to_i, nil)
       Player.restore(self.restore_mana.to_i, nil)
       Player.heal(self.restore_health.to_i, nil)
@@ -26,19 +28,10 @@ class Consumable
 
   def self.generate
     new({
-      name: "Bread of Invisibility",
-      weight: 0.1,
-      usage_verb: 'consumed',
-      restore_energy: 10,
-      stack_size: 10,
-      icon: '`',
-      execution_script: Evals.player_invisible(10),
-      description: "Restores 10 energy on consume. You will become invisible to enemies for 10 ticks."
-    })
-    new({
       name: "Bread Scrap",
       weight: 0.1,
-      usage_verb: 'consumed',
+      usage_verb: 'consume',
+      usage_verb_past: 'consumed',
       restore_energy: 2,
       stack_size: 20,
       icon: '`',
@@ -47,7 +40,8 @@ class Consumable
     new({
       name: "Bread Chunk",
       weight: 0.3,
-      usage_verb: 'consumed',
+      usage_verb: 'consume',
+      usage_verb_past: 'consumed',
       restore_energy: 10,
       stack_size: 10,
       icon: '`',
@@ -56,7 +50,8 @@ class Consumable
     new({
       name: "Bread Loaf",
       weight: 0.5,
-      usage_verb: 'consumed',
+      usage_verb: 'consume',
+      usage_verb_past: 'consumed',
       restore_energy: 30,
       stack_size: 5,
       icon: '`',
@@ -83,11 +78,33 @@ class Consumable
       name: 'Potion of Resurrection',
       weight: 1,
       stack_size: 1,
+      usage_verb: 'quaff',
+      usage_verb_past: 'quaffed',
       icon: 'u',
       color: :magenta,
       usable_after_death: true,
       execution_script: Evals.resurrect_player,
       description: 'Usable after death, will bring the Player back to life with full health.'
+    })
+    new({
+      name: "Potion of Invisibility",
+      weight: 0.1,
+      usage_verb: 'quaff',
+      usage_verb_past: 'quaffed',
+      stack_size: 10,
+      icon: 'u',
+      execution_script: Evals.player_invisible(10),
+      description: "Grants invisibility for 10 ticks"
+    })
+    new({
+      name: "Potion of Rage",
+      weight: 0.1,
+      usage_verb: 'quaff',
+      usage_verb_past: 'quaffed',
+      stack_size: 10,
+      icon: 'u',
+      execution_script: Evals.player_berserk(50),
+      description: "Grants berserk for 50 ticks"
     })
   end
 end
