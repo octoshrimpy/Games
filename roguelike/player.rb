@@ -5,7 +5,7 @@ class Player
   :inventory, :autopickup, :last_hit_id, :raw_self_regen, :bonus_stats,
   :raw_accuracy, :raw_magic_power, :invisibility_ticks, :sleeping,
   :inventory_size, :stunned_for, :live, :invincibility, :vision_radius,
-  :destination
+  :destination, :berserk_ticks
 
   @@x = 0
   @@y = 0
@@ -61,9 +61,10 @@ class Player
   @@raw_speed = 10
   @@raw_self_regen = 1
   @@live = true
+
   @@invincibility = 0
   @@invisibility_ticks = 0
-
+  @@berserk_ticks = 0
   @@visible = true
   @@sleeping = false
   @@autopickup = true
@@ -134,6 +135,15 @@ class Player
 
       Player.equipped.each { |slot, item| item.tick if item.respond_to?(:tick) }
 
+      Player.visibility_tick!
+      Player.berserk_tick!
+
+      while inventory_by_stacks.count > inventory_size
+        drop_many(inventory_by_stacks.to_a.last[1])
+      end
+    end
+
+    def visibility_tick!
       Player.invincibility -= 1 if Player.invincibility >= 1
       Player.invisibility_ticks -= 1
       if Player.invisibility_ticks > 0
@@ -146,10 +156,27 @@ class Player
         Log.add "You have become visible." unless Player.visible
         Player.visible = true
       end
+    end
 
-      while inventory_by_stacks.count > inventory_size
-        drop_many(inventory_by_stacks.to_a.last[1])
+    def berserk_tick!
+      if Player.berserk?
+        if Player.energy > 1
+          Player.energy -= 1
+          Player.berserk_ticks -= 1
+        else
+          Player.berserk_ticks = 0
+        end
       end
+    end
+
+    def berserk!(ticks=1000)
+      if Player.energy > 5
+        Player.berserk_ticks = ticks
+      end
+    end
+
+    def berserk?
+      Player.berserk_ticks > 0 && Player.energy > 0
     end
 
     def hit(raw_damage, type_of_damage)
@@ -210,6 +237,7 @@ class Player
       foreground = :light_blue
       background = :black
       foreground, background = :blue, :white unless Player.visible
+      foreground = :red if Player.berserk?
       foreground = :yellow if Player.invincible?
       "@".color(foreground, background) + " "
     end
@@ -383,17 +411,17 @@ class Player
       end
     end
 
-    def strength; raw_strength + bonus(:strength); end
-    def magic_power; raw_magic_power + bonus(:magic_power); end
-    def defense; raw_defense + bonus(:defense); end
-    def accuracy; raw_accuracy + bonus(:accuracy); end
-    def speed; (raw_speed + bonus(:speed)) / (energy > 0 ? 1 : 2); end
-    def max_health; raw_max_health + bonus(:health); end
-    def max_mana; raw_max_mana + bonus(:mana); end
-    def max_energy; raw_max_energy + bonus(:energy); end
-    def self_regen; raw_self_regen + bonus(:self_regen); end
+    def strength; (raw_strength + equipped_bonus(:strength) * (Player.berserk? ? 1.5 : 1)).round; end
+    def magic_power; raw_magic_power + equipped_bonus(:magic_power); end
+    def defense; raw_defense + equipped_bonus(:defense); end
+    def accuracy; raw_accuracy + equipped_bonus(:accuracy); end
+    def speed; (raw_speed + equipped_bonus(:speed) + (Player.berserk? ? 3 : 0)) / (energy > 0 ? 1 : 2); end
+    def max_health; raw_max_health + equipped_bonus(:health); end
+    def max_mana; raw_max_mana + equipped_bonus(:mana); end
+    def max_energy; raw_max_energy + equipped_bonus(:energy); end
+    def self_regen; raw_self_regen + equipped_bonus(:self_regen); end
 
-    def bonus(stat)
+    def equipped_bonus(stat)
       bonus_stat = 0
       equipped.each do |location, equipment|
         if equipment
