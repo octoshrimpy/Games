@@ -1,4 +1,12 @@
-Oct 8, 2015 v.0.0.57
+Oct 13, 2015 v0.0.58
+Refactored Class methods to be easier to read/write
+Added Berserk mode for the Player
+  Going berserk costs 1 energy per tick
+  Gains 50% strength
+  Gains 3 speed
+  Lasts a certain amount of time or until the Player runs out of energy.
+
+Oct 12, 2015 v.0.0.57
 Bonuses are made to be faster in code
 Added a Maze level every 5 levels
 
