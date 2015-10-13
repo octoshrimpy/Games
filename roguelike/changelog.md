@@ -1,3 +1,7 @@
+Oct 8, 2015 v.0.0.57
+Bonuses are made to be faster in code
+Added a Maze level every 5 levels
+
 Oct 7, 2015 v0.0.56
 Fixed bug that caused Torches to be destroyed unexpectedly.
 Torches have a light of at least 1 until they burn out.

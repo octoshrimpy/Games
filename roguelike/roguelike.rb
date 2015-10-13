@@ -2,9 +2,7 @@
 =begin
 http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
-Add torches
-  Torches can be made/found/purchased and can be placed to create areas of light. Lit areas allow the player to see anything in that area if within the Player's vision radius
-  Torches should update their current lighting if a solid object is modified within range
+Torches should update their current lighting if a solid object is modified within range
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?

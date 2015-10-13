@@ -11,7 +11,7 @@ class Player
   @@vision_radius = 7
 
   @@depth = 1
-  @@dungeon_level = 1 #0 for town?
+  @@dungeon_level = 1 # 0 for town?
   @@seen = []
 
   @@selected = 0
@@ -211,56 +211,49 @@ class Player
     "@".color(foreground, background) + " "
   end
 
+  def self.get_direction(input)
+    case input
+    when "UP", $key_mapping[:move_up] then [0, -1]
+    when "LEFT", $key_mapping[:move_left] then [-1, 0]
+    when "DOWN", $key_mapping[:move_down] then [0, 1]
+    when "RIGHT", $key_mapping[:move_right] then [1, 0]
+    when $key_mapping[:move_up_left] then [-1, -1]
+    when $key_mapping[:move_up_right] then [1, -1]
+    when $key_mapping[:move_down_right] then [1, 1]
+    when $key_mapping[:move_down_left] then [-1, 1]
+    when "Shift-Up", $key_mapping[:move_up].capitalize then [0, -10]
+    when "Shift-Left", $key_mapping[:move_left].capitalize then [-10, 0]
+    when "Shift-Down", $key_mapping[:move_down].capitalize then [0, 10]
+    when "Shift-Right", $key_mapping[:move_right].capitalize then [10, 0]
+    when $key_mapping[:move_up_left].capitalize then [-10, -10]
+    when $key_mapping[:move_up_right].capitalize then [10, -10]
+    when $key_mapping[:move_down_right].capitalize then [10, 10]
+    when $key_mapping[:move_down_left].capitalize then [-10, 10]
+    end
+  end
+
   def self.try_action(input)
     return false unless $gamemode == 'play'
     return true unless @@stunned_for == 0
     x_dest = 0
     y_dest = 0
     tick = false
-    case input
-    when ("1".."9") then use_quickbar(input.to_i - 1)
-      # Movement
-    when "UP", $key_mapping[:move_up]
+    case
+    when ("1".."9").include?(input) then use_quickbar(input.to_i - 1)
+    when Game.movement_keys.include?(input) then tick = true; dest = get_direction(input)
+    when input == $key_mapping[:move_nowhere]
       tick = true
-      y_dest = -1
-    when "LEFT", $key_mapping[:move_left]
-      tick = true
-      x_dest = -1
-    when "DOWN", $key_mapping[:move_down]
-      tick = true
-      y_dest = 1
-    when "RIGHT", $key_mapping[:move_right]
-      tick = true
-      x_dest = 1
-    when $key_mapping[:move_up_left]
-      tick = true
-      y_dest = -1
-      x_dest = -1
-    when $key_mapping[:move_up_right]
-      tick = true
-      y_dest = -1
-      x_dest = 1
-    when $key_mapping[:move_down_right]
-      tick = true
-      y_dest = 1
-      x_dest = 1
-    when $key_mapping[:move_down_left]
-      tick = true
-      y_dest = 1
-      x_dest = -1
-    when $key_mapping[:move_nowhere]
-      tick = true
-    when $key_mapping[:pickup_items]
+    when input == $key_mapping[:pickup_items]
       try_pickup_items
       tick = true
-    when $key_mapping[:down_stairs]
+    when input == $key_mapping[:down_stairs]
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "> "
         Game.use_stairs("DOWN")
         $spawn_creatures = true
         Log.add "You go down the stairs..."
         tick = true
       end
-    when $key_mapping[:up_stairs]
+    when input == $key_mapping[:up_stairs]
       if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
         Game.use_stairs("UP")
         $spawn_creatures = true
@@ -268,16 +261,16 @@ class Player
         tick = true
       end
       # --------------------------------------------------- CHEATS ----------------------------
-    when "="
+    when input == "="
       blow_walls
       Game.redraw
-    when "v"
+    when input == "v"
       print "\nUp: "
       Dungeon.current.search_for("< ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }
       print "Down: "
       Dungeon.current.search_for("> ").each { |d| print "(#{d[:x]}, #{d[:y]}) " }
       puts
-    when "V"
+    when input == "V"
       Dungeon.current.each_with_index do |row, y|
         row.each_with_index do |col, x|
           seen[depth] << {x: x, y: y}
@@ -286,17 +279,18 @@ class Player
       seen.uniq!
       Log.add "Cheat activated: Full vision."
       Game.redraw
-    when '+'
+    when input == '+'
       system 'clear' or system 'cls'
       Game.input(true)
       Dungeon.current.each { |row| puts row.join('') }
-    when '.'
+    when input == '.'
       Player.coords = Dungeon.current.search_for('> ').first.merge({depth: Player.depth})
       Game.draw
-    when 't'
+    when input == 't'
       LightSource.new(4, 1000, coords)
       # --------------------------------------------------- / CHEATS ---------------------------
     end
+    x_dest, y_dest = dest[0], dest[1] if dest
 
     if (x_dest != 0 || y_dest != 0)
       unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?

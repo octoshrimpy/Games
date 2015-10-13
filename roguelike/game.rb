@@ -63,6 +63,14 @@ class Game
     end
   end
 
+  def self.movement_keys
+    cardinal = [$key_mapping[:move_up], $key_mapping[:move_left], $key_mapping[:move_right], $key_mapping[:move_down]]
+    diagonal = [$key_mapping[:move_up_left], $key_mapping[:move_up_right], $key_mapping[:move_down_left], $key_mapping[:move_down_right]]
+    standard_directions = [cardinal.map(&:capitalize), diagonal.map(&:capitalize), cardinal, diagonal].flatten
+    arrow_keys = %w( Shift-Up Shift-Left Shift-Right Shift-DOWN UP LEFT RIGHT DOWN )
+    standard_directions + arrow_keys
+  end
+
   def self.run_time(time)
     (100 / time).times do |t|
       Creature.on_board.each do |creature|
@@ -349,7 +357,7 @@ class Game
     when Player.depth % 7 == 0 then 'cavernous'
     when Player.depth % 5 == 0 then 'maze'
     when Player.depth % 3 == 0 then 'tunnels'
-    else 'maze'
+    else 'default'
     end
     until (dungeon_up ||= false) && (dungeon_down ||= false)
       dungeon = Dungeon.new(preset).build!(preset)
