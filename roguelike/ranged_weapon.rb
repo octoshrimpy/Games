@@ -1,23 +1,3 @@
-# RangedWeapon.new({
-#   name: 'string',
-#   icon: 'string-single character',
-#   color: :symbol,
-#   range: integer,
-#   thrown: boolean,
-#   weight: integer,
-#   projectile_speed: integer,
-#   collided_action: 'script',
-#   ammo_type: 'String',
-#   bonus_strength: integer(optional),
-#   bonus_defense: integer(optional),
-#   bonus_accuracy: integer(optional),
-#   bonus_speed: integer(optional),
-#   bonus_health: integer(optional),
-#   bonus_mana: integer(optional),
-#   bonus_energy: integer(optional),
-#   bonus_self_regen: integer(optional)
-# })
-
 class RangedWeapon
   include Item
 

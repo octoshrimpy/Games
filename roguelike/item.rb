@@ -1,28 +1,3 @@
-#  Item.new({
-#   weight: ,
-#   name: ,
-#   icon: ,
-#   color: ,
-#   x: ,
-#   y: ,
-#   depth: ,
-#   equipment_slot: ,
-#   stack_size: ,
-#   description: ,
-#   destroy_on_collision_with: ,
-#   usable_after_death: ,
-#   on_hit_effect: ,
-#   on_hit_damage: ,
-#   bonus_strength: ,
-#   bonus_defense: ,
-#   bonus_accuracy: ,
-#   bonus_speed: ,
-#   bonus_health: ,
-#   bonus_mana: ,
-#   bonus_energy: ,
-#   bonus_self_regen: ,
-#   bonus_magic_power:
-#  })
 module Item
   attr_accessor :weight, :name, :icon, :color, :x, :y, :depth, :auto_pickup,
   :equipment_slot, :stack_size, :description, :destroy_on_collision_with, :usable_after_death, :on_hit_effect, :on_hit_damage,

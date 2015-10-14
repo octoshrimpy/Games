@@ -1,5 +1,6 @@
 class Evals
   def self.player_invisible(num); "Player.visibility(#{num})"; end
+  def self.summon_stone; "Dungeon.current[coords[:y]][coords[:x]] = ': '"; end
   def self.player_berserk(num); "Player.berserk!(#{num}); Log.add(\"You've gone berserk!\")"; end
   def self.unstable_teleportation; "sleep(0.3); Player.coords = Dungeon.find_open_spaces(false).sample; Game.tick; true"; end
   def self.flash(distance=5); "Settings.item_range = #{distance}; $gamemode = 'direct_flash'; $message = \"Click the direction you would like to flash. '#{$key_mapping[:select_position]}' to choose coordinate.\"; false"; end

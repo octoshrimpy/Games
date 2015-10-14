@@ -54,7 +54,7 @@ class SpellBook
       color: :red,
       weight: 1,
       element: 'physical',
-      castable_spells: ['Berserk']
+      castable_spells: ['Berserk', 'Summon Stone']
     })
   end
 end

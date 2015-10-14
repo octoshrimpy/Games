@@ -4,9 +4,13 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 Torches should update their current lighting if a solid object is modified within range
 
+When quick walking, sometimes the player does not pick up items below him
+
+When activating the map or targeting, the first frame does not show the target
+
 Have a ground item that displays a message but cannot be picked up
 
-Create Spells that can be cast immediately at target location
+Spells should be able to be cast from a Scroll or from a Spell Book the same way.
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
@@ -120,6 +124,7 @@ seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] 
 Game.start(seed)
 
 Player.equipped[:back] = Item["Quiver"]
+Player.equipped[:off_hand] = Item['Torch']
 Player.equipped[:main_hand] = Item['Fire Sword']
 Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Book of Fire']
@@ -127,7 +132,7 @@ Player.inventory << Item['Amulet of Power']
 5.times { Player.inventory << Item['Scroll of Flash'] }
 99.times { Player.inventory << Item['Arrow'] }
 2.times { Player.inventory << Item['Torch'] }
-Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", nil, "Torch", nil, 'Scroll of Flash']
+Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", "Summon Stone", "Torch", nil, 'Scroll of Flash']
 Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
 

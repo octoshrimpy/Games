@@ -150,7 +150,14 @@ class Game
             end
             if y == coords[:y] && x == coords[:x]
               $message = Game.describe(pixel, coords)
-              pixel = "#{pixel.uncolor[0]}#{'<'}".color(:white, :blue)
+              pixel_color = if coords[:range].to_i > 0
+                in_range_x = (coords[:x] - Player.x).abs <= coords[:range]
+                in_range_y = (coords[:y] - Player.y).abs <= coords[:range]
+                in_range_x && in_range_y ? :blue : :red
+              else
+                :blue
+              end
+              pixel = "#{pixel.uncolor[0]}#{'<'}".color(:white, pixel_color)
             end
             board[y - y_offset][x - x_offset] = pixel
           end
@@ -177,11 +184,11 @@ class Game
     end
 
     def ground_objects
-       (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all)
+     (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all)
     end
 
     def ground_objects_at(coords)
-       (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all).select { |obj| obj.coords == coords }
+     (Gold.on_board + Item.on_board + Creature.on_board + Gems.on_board + Projectile.all + VisualEffect.all).select { |obj| obj.coords == coords }
     end
 
     def draw(board=$level)

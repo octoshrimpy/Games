@@ -1,16 +1,3 @@
-# Spell.new({
-#   name: 'string',
-#   icon: 'string-single character',
-#   color: :symbol,
-#   destroy_on_collision_with: '',
-#   range: integer,
-#   mana_cost: integer,
-#   collided_action: 'script'
-#   is_projectile: boolean,
-#   projectile_speed: integer,
-#   non_projectile_script: 'script'
-# })
-
 class Spell
   include Item
 
@@ -84,6 +71,16 @@ class Spell
       color: :red,
       is_projectile: false,
       non_projectile_script: Evals.player_berserk(50),
+      type: 'physical',
+      mana_cost: 5
+    })
+    new({
+      name: 'Summon Stone',
+      icon: '#',
+      color: :red,
+      is_projectile: false,
+      range: 5,
+      non_projectile_script: Evals.summon_stone,
       type: 'physical',
       mana_cost: 5
     })

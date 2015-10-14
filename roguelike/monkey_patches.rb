@@ -137,6 +137,7 @@ class String
     %w(
       #
       ▒
+      :
     ).include?(self.uncolor.split.join)
   end
 

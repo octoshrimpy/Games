@@ -9,6 +9,10 @@ Added a berserk potion
 Player can now 'quick-walk'
   Quick walk by holding shift and clicking a direction
   Quick walk will go for 10 spaces or until you hit a wall or get seen by an enemy
+Non-projectile spells can now be cast
+  Spells without range will automatically be cast on the Player
+  Spells with range will automatically open in the Targeting menu
+Added a range indicator to the targeting menu
 
 Oct 12, 2015 v.0.0.57
 Bonuses are made to be faster in code

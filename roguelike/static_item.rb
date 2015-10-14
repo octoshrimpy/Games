@@ -1,13 +1,3 @@
-# MagicWeapon.new({
-#   name: 'string',
-#   icon: 'string-single character',
-#   color: :symbol,
-#   weight: integer,
-#   stack_size: integer,
-#   usage_script: 'script',
-#   description: 'string'
-# })
-
 class StaticItem
   include Item
 

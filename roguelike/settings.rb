@@ -7,6 +7,7 @@ class Settings
     has_ground_item: false
   }
   @@title = ""
+  @@skip = 0
   @@confirmed = true
   @@item_range = 0
   @@selected_key = nil
@@ -135,7 +136,7 @@ class Settings
           Game.show
         end
       when $key_mapping[:confirm]
-        if $gamemode[0..5] == 'target'
+        if $gamemode[0..5] == 'target' && @@skip == 0
           callback = "#{$gamemode[7..$gamemode.length]}!".to_sym
           do_in_direction([@@scroll_horz, @@scroll], method(callback))
         end
@@ -215,6 +216,7 @@ class Settings
         end
         Game.redraw
       end
+      @@skip -= 1 if @@skip > 0
       if show_full_map
         Game.input(true)
         system 'clear' or system 'cls'
@@ -275,12 +277,15 @@ class Settings
         $gamemode = 'play'
         Game.redraw
       else
-        @@selected_item = spell
-        $message = "Select the position you would like to cast to."
         $screen_shot = nil
+        @@selected_item = spell
+        @@selectable = false
+        @@item_range = spell_range
+        @@skip = 2
+        $message = "Select the position you would like to cast to."
+        $gamemode = 'target_cast'
         @@scroll_horz = Player.x
         @@scroll = Player.y
-        $gamemode = 'target_cast'
         Game.show
       end
     end
@@ -315,13 +320,18 @@ class Settings
       coords = {x: Player.x + coord[0], y: Player.y + coord[1], depth: Player.depth}
       Log.add "Cast #{@@selected_item.name}."
       Player.mana -= @@selected_item.mana_cost
-      Projectile.new(coords, @@selected_item, Player, @@selected_item.type, {speed: @@selected_item.projectile_speed})
+      if @@selected_item.is_projectile
+        Projectile.new(coords, @@selected_item, Player, @@selected_item.type, {speed: @@selected_item.projectile_speed})
+      else
+        eval(@@selected_item.non_projectile_script)
+      end
       clear_settings
       Game.tick
     end
 
     def clear_settings
       @@title = ""
+      @@item_range = 0
       @@select, @@selected_item, @@selected_select, @@scroll, @@scroll_horz, @@selectable = nil
       @@selection_objects = @@stack = []
     end
@@ -378,7 +388,7 @@ class Settings
         max = $height - 1
         @@scroll = @@scroll > max ? max : @@scroll
         @@scroll = @@scroll < 0 ? 0 : @@scroll
-        Game.show({x: @@scroll_horz, y: @@scroll, depth: Player.depth})
+        Game.show({x: @@scroll_horz, y: @@scroll, depth: Player.depth, range: @@item_range})
         false
       else
         lines = case $gamemode
@@ -887,10 +897,10 @@ HELP - exit by pressing ESCAPE or the '#{$key_mapping[:open_help]}' key once aga
 View and edit keys by hitting the '#{$key_mapping[:open_keybindings]}' key.
 
 -------------------------------------------------------------------------------- #{'Movement'.color(:red)}
-Each frame takes place on every interval of the speed of the Player(you). Monster may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. If the player moves at a speed of 10 and a monster moves at a speed of 15, the monsters position will only update every time the player moves. Every other turn the monster will appear to move 2 spaces because of the extra speed.
+Each frame takes place on every interval of the speed of the Player(you). Monsters may move faster or slower than you. Speed is calculated by a single number, 1-100. 1 being the slowest, 100 being the fastest. The game will update only when the player moves. Monsters will move based on their relative speed to the Player. If the player moves at a speed of 10 and a monster moves at a speed of 15, every other turn the monster will appear to move 2 spaces because of the extra speed.
 
 -------------------------------------------------------------------------------- #{'Targeting'.color(:red)}
-When using a spell or ability, or throwing/shooting a projectile, you can quick cast by hitting the corresponding directional key. By hitting '#{$key_mapping[:select_position]}', you are able to scroll around using normal movement keys to select a specific place to target. If the range is less than the max range of the projectile, it will stop on the selected position. If the target is beyond the range of the projectile, it will stop at its' max range.
+When using a spell or ability, or throwing/shooting a projectile, you can quick cast by hitting the corresponding directional key. By hitting '#{$key_mapping[:select_position]}', you are able to scroll around using normal movement keys to select a specific place to target. If the target's distance is less than the max range of the projectile, it will stop at the selected position. If the target is beyond the range of the projectile, it will stop at its' max range.
 )
     end
 
