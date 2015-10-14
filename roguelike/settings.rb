@@ -268,10 +268,21 @@ class Settings
       $message = "Click the direction you would like to #{verb}. '#{$key_mapping[:select_position]}' to choose coordinate."
     end
 
-    def ready_cast(spell)
-      @@selected_item = spell
-      $gamemode = 'direct_cast'
-      $message = "Click the direction you would like to cast. '#{$key_mapping[:select_position]}' to choose coordinate."
+    def ready_cast(spell, spell_range)
+      if spell_range == 0
+        eval(spell.non_projectile_script)
+        clear_settings
+        $gamemode = 'play'
+        Game.redraw
+      else
+        @@selected_item = spell
+        $message = "Select the position you would like to cast to."
+        $screen_shot = nil
+        @@scroll_horz = Player.x
+        @@scroll = Player.y
+        $gamemode = 'target_cast'
+        Game.show
+      end
     end
 
     def flash!(coord)
@@ -512,7 +523,7 @@ class Settings
     end
 
     def build_spellbook_menu
-      @@title = "Reading #{@@selected_item.name}"
+      @@title = "Viewing #{@@selected_item.name}"
       @@selectable = true
       lines = ["Sort Spells - Press '#{$key_mapping[:pickup_items]}' to assign to quickbar."]
       @@selected_item.castable_spells.each do |spell|
@@ -545,8 +556,7 @@ class Settings
       @@title = "What would you like to do with #{@@selected_item.name}?"
       @@selectable = true
       verb = case
-      when @@selected_item.class == Consumable then @@selected_item.usage_verb.capitalize
-      when @@selected_item.class == SpellBook then 'Read'
+      when @@selected_item.class == Consumable || @@selected_item.class == SpellBook then @@selected_item.usage_verb.capitalize
       when @@selected_item.respond_to?(:equipment_slot) && @@selected_item.equipment_slot
         slot = @@selected_item.equipment_slot
         specs = Player.equipped[slot] ? item_specs(@@selected_item, Player.equipped[slot]) : item_specs(@@selected_item)

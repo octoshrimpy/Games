@@ -441,7 +441,7 @@ class Player
     def magic_power; raw_magic_power + equipped_bonus(:magic_power); end
     def defense; raw_defense + equipped_bonus(:defense); end
     def accuracy; raw_accuracy + equipped_bonus(:accuracy); end
-    def speed; (raw_speed + equipped_bonus(:speed) + (Player.berserk? ? 3 : 0)) / (energy > 0 ? 1 : 2); end
+    def speed; (raw_speed + equipped_bonus(:speed) + (Player.berserk? ? 5 : 0)) / (energy > 0 ? 1 : 2); end
     def max_health; raw_max_health + equipped_bonus(:health); end
     def max_mana; raw_max_mana + equipped_bonus(:mana); end
     def max_energy; raw_max_energy + equipped_bonus(:energy); end

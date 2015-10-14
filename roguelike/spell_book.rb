@@ -1,24 +1,12 @@
-# SpellBook.new({
-#   name: 'string',
-#   icon: 'string-single character',
-#   color: :symbol,
-#   weight: integer,
-#   element: 'string',
-#   castable_spells: ['strings'],
-#   bonus_strength: integer(optional),
-#   bonus_defense: integer(optional),
-#   bonus_accuracy: integer(optional),
-#   bonus_speed: integer(optional),
-#   bonus_health: integer(optional),
-#   bonus_mana: integer(optional),
-#   bonus_energy: integer(optional),
-#   bonus_self_regen: integer(optional)
-# })
-
 class SpellBook
   include Item
 
-  attr_accessor :element, :castable_spells
+  attr_accessor :element, :castable_spells, :usage_verb
+
+  def initialize(options)
+    @usage_verb = 'read'
+    super(options)
+  end
 
   def cast_spell(spell_name)
     spell = Item[spell_name]
@@ -58,6 +46,15 @@ class SpellBook
       weight: 3,
       element: 'poison',
       castable_spells: ['Poison Blast']
+    })
+    new({
+      name: 'Amulet of Power',
+      icon: 'o',
+      usage_verb: 'use',
+      color: :red,
+      weight: 1,
+      element: 'physical',
+      castable_spells: ['Berserk']
     })
   end
 end

@@ -28,7 +28,7 @@ class Spell
       if is_projectile
         Settings.ready('cast', self, self.range)
       else
-        Settings.ready_cast(self, self.range)
+        Settings.ready_cast(self, self.range || 0)
       end
     else
       Log.add "Not enough Mana."
@@ -77,6 +77,15 @@ class Spell
       on_hit_damage: 0,
       collided_action: Evals.new_dot(5, 2, 'poison'),
       mana_cost: 2
+    })
+    new({
+      name: 'Berserk',
+      icon: 'x',
+      color: :red,
+      is_projectile: false,
+      non_projectile_script: Evals.player_berserk(50),
+      type: 'physical',
+      mana_cost: 5
     })
   end
 end

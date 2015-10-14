@@ -4,17 +4,9 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 Torches should update their current lighting if a solid object is modified within range
 
-Add Berserk/Fury, which greatly increases damage, increass speed, and greatly increases the amount of energy taken.
-How should the player use it?
-  Cost 5 mana to use if from medallion
-  Or achieved via potion
-
 Have a ground item that displays a message but cannot be picked up
 
-Scroll- 1 time use spell, no mana
-SpellBook - infinite use spell, costs mana
-Potion - 1 time use, no mana
-Medallion - infinite use, costs mana/energy
+Create Spells that can be cast immediately at target location
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
@@ -127,11 +119,11 @@ require './visible.rb'
 seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join.to_i
 Game.start(seed)
 
-Player.inventory << Item['Standard Bow']
 Player.equipped[:back] = Item["Quiver"]
-Player.inventory << Item['Fire Sword']
+Player.equipped[:main_hand] = Item['Fire Sword']
+Player.inventory << Item['Standard Bow']
 Player.inventory << Item['Book of Fire']
-Player.inventory << Item['Potion of Rage']
+Player.inventory << Item['Amulet of Power']
 5.times { Player.inventory << Item['Scroll of Flash'] }
 99.times { Player.inventory << Item['Arrow'] }
 2.times { Player.inventory << Item['Torch'] }
