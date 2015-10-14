@@ -5,6 +5,9 @@ http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 Torches should update their current lighting if a solid object is modified within range
 
 When quick walking, sometimes the player does not pick up items below him
+Sometimes Player doesn't stop when seen by enemy
+
+Show mana costs and range for spells and spell books on usage screens
 
 When activating the map or targeting, the first frame does not show the target
 

@@ -5,7 +5,7 @@ Added Berserk mode for the Player
   Gains 50% strength
   Gains 3 speed
   Lasts a certain amount of time or until the Player runs out of energy.
-Added a berserk potion
+Added a berserk potion and spell
 Player can now 'quick-walk'
   Quick walk by holding shift and clicking a direction
   Quick walk will go for 10 spaces or until you hit a wall or get seen by an enemy

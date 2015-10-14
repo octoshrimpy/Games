@@ -6,7 +6,8 @@ require './roguelike/monkey_patches.rb'
 
 DEFAULT_SCHEMA = {
   name: 'TEXT',
-  weight: 'INTEGER'
+  weight: 'INTEGER',
+  my_array: 'TEXT'
 }
 
 class BaseObject
@@ -139,7 +140,9 @@ end
 
 class Schema
   def self.reset
-    File.delete("test.db")
+    if File.file?('test.db')
+      File.delete("test.db")
+    end
     $sqldb = SQLite3::Database.new "test.db"
     $sqldb.results_as_hash = true
     $sqldb.execute "CREATE TABLE constants(item_ids INTEGER)"
@@ -167,7 +170,7 @@ class Schema
 end
 
 
-Schema.load
+Schema.reset
 
 item = Item.create(name: 'Hello', power: 50, coord: {x: 5, y: 9}, is_big: true)
 binding.pry
