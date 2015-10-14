@@ -132,15 +132,77 @@ class Player
       self.mana += mana_gain if energy >= 10
 
       $auto_pilot_condition = 'true' if energy <= 0 # Out of energy. Stop sleeping
+      if $auto_pilot_condition.include?('destination = ')
+        destination = {}
+        eval($auto_pilot_condition)
+        try_move(destination) if destination.size > 0
+      end
 
       Player.equipped.each { |slot, item| item.tick if item.respond_to?(:tick) }
 
       Player.visibility_tick!
       Player.berserk_tick!
 
+      try_pickup_items('auto') if autopickup && !(@@skip_pick_up)
       while inventory_by_stacks.count > inventory_size
         drop_many(inventory_by_stacks.to_a.last[1])
       end
+    end
+
+    def try_move(destination)
+      tick = true
+      x_dest = destination[:x] <=> Player.x
+      y_dest = destination[:y] <=> Player.y
+
+      if (x_dest != 0 || y_dest != 0)
+        if Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
+          tick = false
+          $auto_pilot_condition = 'true'
+        else
+          is_creature = false
+          Creature.on_board.map do |creature|
+            if creature.coords == {x: self.x + x_dest, y: self.y + y_dest, depth: self.depth}
+              is_creature = true
+              if self.energy > 0
+                loss = (rand(10) == 0 ? 1 : 0)
+                self.energy -= loss
+                damage = (0..100).to_a.sample > accuracy ? -1 : (strength + (-1..1).to_a.sample)
+                if damage == 0
+                  Log.add "#{creature.colored_name} blocked your attack."
+                elsif damage < 0
+                  Log.add "You missed #{creature.colored_name}."
+                else
+                  creature.hit(damage, 'physical')
+                  Player.equipped.each do |slot, item|
+                    collided_with = creature
+                    eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect) && item.on_hit_effect
+                  end
+                end
+              else
+                Log.add("I'm out of energy!")
+              end
+            end
+          end
+          if is_creature
+            $auto_pilot_condition = 'true'
+          else
+            loss = (rand(30) == 0 ? 1 : 0)
+            self.energy -= loss
+            self.x += x_dest
+            self.y += y_dest
+            if Player.coords.filter(:x, :y) == destination
+              $auto_pilot_condition = 'true'
+            else
+              $gamemode = 'auto-pilot'
+              $auto_pilot_condition = "destination = #{destination}; Player.coords.filter(:x, :y) == destination"
+            end
+          end
+        end
+      else
+        $auto_pilot_condition = 'true'
+        tick = false
+      end
+      tick
     end
 
     def visibility_tick!
@@ -250,16 +312,16 @@ class Player
       when "RIGHT", $key_mapping[:move_right] then [1, 0]
       when $key_mapping[:move_up_left] then [-1, -1]
       when $key_mapping[:move_up_right] then [1, -1]
-      when $key_mapping[:move_down_right] then [1, 1]
       when $key_mapping[:move_down_left] then [-1, 1]
+      when $key_mapping[:move_down_right] then [1, 1]
       when "Shift-Up", $key_mapping[:move_up].capitalize then [0, -10]
       when "Shift-Left", $key_mapping[:move_left].capitalize then [-10, 0]
       when "Shift-Down", $key_mapping[:move_down].capitalize then [0, 10]
       when "Shift-Right", $key_mapping[:move_right].capitalize then [10, 0]
       when $key_mapping[:move_up_left].capitalize then [-10, -10]
       when $key_mapping[:move_up_right].capitalize then [10, -10]
-      when $key_mapping[:move_down_right].capitalize then [10, 10]
       when $key_mapping[:move_down_left].capitalize then [-10, 10]
+      when $key_mapping[:move_down_right].capitalize then [10, 10]
       end
     end
 
@@ -323,44 +385,8 @@ class Player
       end
       x_dest, y_dest = dest[0], dest[1] if dest
 
-      if (x_dest != 0 || y_dest != 0)
-        unless Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
-          is_creature = false
-          Creature.on_board.map do |creature|
-            if creature.coords == {x: self.x + x_dest, y: self.y + y_dest, depth: self.depth}
-              is_creature = true
-              if self.energy > 0
-                loss = (rand(10) == 0 ? 1 : 0)
-                self.energy -= loss
-                damage = (0..100).to_a.sample > accuracy ? -1 : (strength + (-1..1).to_a.sample)
-                if damage == 0
-                  Log.add "#{creature.colored_name} blocked your attack."
-                elsif damage < 0
-                  Log.add "You missed #{creature.colored_name}."
-                else
-                  creature.hit(damage, 'physical')
-                  Player.equipped.each do |slot, item|
-                    collided_with = creature
-                    eval(item.on_hit_effect) if item.respond_to?(:on_hit_effect) && item.on_hit_effect
-                  end
-                end
-              else
-                Log.add("I'm out of energy!")
-              end
-            end
-          end
-          unless is_creature
-            loss = (rand(30) == 0 ? 1 : 0)
-            self.energy -= loss
-            self.x += x_dest
-            self.y += y_dest
-          end
-        else
-          tick = false
-        end
-      end
+      tick = true if try_move({x: Player.x + x_dest, y: Player.y + y_dest})
 
-      try_pickup_items('auto') if autopickup && !(@@skip_pick_up)
       pickup_drops
       standing_on_message = Game.describe(Dungeon.at(Player.coords), Player.coords)
       if standing_on_message.length > 0 && !(standing_on_message =~ /I don't know what this is./)

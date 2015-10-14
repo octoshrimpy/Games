@@ -35,6 +35,8 @@ class Input
       "RIGHT"
     when "\e[D"
       "LEFT"
+    # when "\e[Z"
+    #   "Shift-Tab"
     when "\e[1;2A"
       "Shift-Up"
     when "\e[1;2B"

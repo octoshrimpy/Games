@@ -24,8 +24,6 @@ if player doesn't move, do not change vision calculations
 Create a base object class that everything else inherits from.
   Has coords, pickup, drop actions, etc.
 
-shift + direction should 'quick-move' in that direction. Follow same rules as sleep- if an enemy sees you, stop.
-
 add descriptions for items
 
 Fix Sleeping menu - don't display instructions below game screen
@@ -145,7 +143,18 @@ system 'clear' or system 'cls'
 Game.draw
 
 while(true)
-  if $gamemode != 'sleep' || $gamemode != 'auto-pilot'
+  if $gamemode == 'sleep' || $gamemode == 'auto-pilot'
+    if eval($auto_pilot_condition)
+      if Player.sleeping
+        Player.sleeping = false
+        Log.add "You have awoken."
+      end
+      $gamemode = 'play'
+      Game.redraw
+    else
+      Game.tick(false)
+    end
+  else
     input = Input.read_single_key
     if input
       $milli_tick = Time.now.to_f
@@ -156,17 +165,6 @@ while(true)
         $skip -= 1
         $skip = $skip < 0 ? 0 : $skip
       end
-    end
-  else
-    if eval($auto_pilot_condition)
-      if Player.sleeping
-        Player.sleeping = false
-        Log.add "You have awoken."
-      end
-      $gamemode = 'play'
-      Game.redraw
-    else
-      Game.tick(false)
     end
   end
 end

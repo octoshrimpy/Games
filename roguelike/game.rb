@@ -58,7 +58,8 @@ class Game
         Player.tick
         Game.run_time(Player.speed)
 
-        Game.redraw if draw
+        Game.update_level
+        Game.draw if draw
         VisualEffect.tick if VisualEffect.all
         DotEffect.tick if DotEffect.all
         sleep 0.03 if draw && $fps.last > 50
@@ -69,7 +70,7 @@ class Game
       cardinal = [$key_mapping[:move_up], $key_mapping[:move_left], $key_mapping[:move_right], $key_mapping[:move_down]]
       diagonal = [$key_mapping[:move_up_left], $key_mapping[:move_up_right], $key_mapping[:move_down_left], $key_mapping[:move_down_right]]
       standard_directions = [cardinal.map(&:capitalize), diagonal.map(&:capitalize), cardinal, diagonal].flatten
-      arrow_keys = %w( Shift-Up Shift-Left Shift-Right Shift-DOWN UP LEFT RIGHT DOWN )
+      arrow_keys = %w( Shift-Up Shift-Left Shift-Right Shift-Down UP LEFT RIGHT DOWN )
       standard_directions + arrow_keys
     end
 
