@@ -3,8 +3,6 @@
 http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     BUGS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Torches should update their current lighting if a solid object is modified within range
-
 When quick walking, sometimes the player does not pick up items below him
 Sometimes Player doesn't stop when seen by enemy
 
@@ -19,14 +17,6 @@ Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but 
 Collision detection of projectiles seems off
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Fix Flash Description
-Fix Arrow Description
-
-Spells need descriptions
-Should be able to 'read more' for spells in the Spell Book
-
-add descriptions for items
-
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
 

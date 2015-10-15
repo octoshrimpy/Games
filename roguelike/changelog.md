@@ -2,6 +2,9 @@ Oct 14, 205 v0.0.59
 Added type, mana, and range for spells when casting them
 Can now 'Read More' on Spell in the SpellBook/Amulets
 'Read More' only shows stats when it's equipment and shows spells if it can cast spells
+Added Descriptions for Items
+Items can now reference a specific item instead of instantiating a new item each time.
+When placing a solid object, light sources update their lighting values
 
 Oct 13, 2015 v0.0.58
 Refactored Class methods to be easier to read/write

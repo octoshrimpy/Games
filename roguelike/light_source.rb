@@ -28,6 +28,16 @@ class LightSource
     self
   end
 
+  def self.reevaluate_at(coord)
+    Item.light_sources.each do |light_source|
+      light_source.is_lighting.to_a.each do |lighting|
+        if lighting.filter(:x, :y) == coord.filter(:x, :y)
+          light_source.update_vision
+        end
+      end
+    end
+  end
+
   def self.find_visible; Item.light_sources.map { |light| light.is_lighting }.flatten; end
   def self.tick; Item.light_sources.select { |light| light && !([light.x, light.y, light.depth] == [nil]*3) }.each(&:tick); end
 

@@ -150,7 +150,7 @@ class Player
     end
 
     def try_move(destination)
-      tick = true
+      tick = nil
       x_dest = destination[:x] <=> Player.x
       y_dest = destination[:y] <=> Player.y
 
@@ -200,7 +200,6 @@ class Player
         end
       else
         $auto_pilot_condition = 'true'
-        tick = false
       end
       tick
     end
@@ -385,7 +384,8 @@ class Player
       end
       x_dest, y_dest = dest[0], dest[1] if dest
 
-      tick = true if try_move({x: Player.x + x_dest, y: Player.y + y_dest})
+      tick_from_move = try_move({x: Player.x + x_dest, y: Player.y + y_dest})
+      tick = tick_from_move unless tick_from_move == nil
 
       pickup_drops
       standing_on_message = Game.describe(Dungeon.at(Player.coords), Player.coords)
