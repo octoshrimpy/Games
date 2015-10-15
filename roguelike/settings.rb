@@ -267,7 +267,7 @@ class Settings
       false
     end
 
-    def ready(verb, item, distance, src=nil)
+    def ready(verb, item, distance)
       @@item_range = distance
       @@selected_item = item
       $gamemode = "direct_#{verb}"
@@ -542,7 +542,7 @@ class Settings
       lines = ["Sort Spells - Press '#{$key_mapping[:pickup_items]}' to assign to quickbar."]
       @@selection_objects = []
       @@selected_item.castable_spells.each do |spell_name|
-        spell = Item[spell_name]
+        spell = Item.reference(spell_name)
         @@selection_objects << spell
         line = "#{spell_name}: Type: #{spell.type.capitalize}"
         line << " | Mana Cost: #{spell.mana_cost}" if spell.mana_cost && spell.mana_cost > 0
@@ -798,7 +798,7 @@ class Settings
     def clicked_space
       if $gamemode == 'read_spellbook'
         item_name = @@selected_item.castable_spells[@@select - 1]
-        item = Item[item_name] if item_name
+        item = Item.reference(item_name) if item_name
         if @@select >= 1 && item
           @@selected_item = item
           $message = "Enter the number to assign #{@@selected_item.name} to."
@@ -887,7 +887,7 @@ Type 'x' then hit enter to cancel.
       if item.respond_to?(:castable_spells)
         lines << "Castable Spells:"
         item.castable_spells.each do |spell_name|
-          spell = Item[spell_name]
+          spell = Item.reference(spell_name)
           line = ["#{spell_name}-"]
           line << "Type: #{spell.type.capitalize}"
           line << "Mana Cost: #{spell.mana_cost}" if spell.mana_cost && spell.mana_cost > 0

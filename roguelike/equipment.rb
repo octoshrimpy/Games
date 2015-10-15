@@ -11,7 +11,8 @@ class Equipment
       size: 99,
       equipment_slot: :back,
       color: :green,
-      weight: 6
+      weight: 6,
+      description: "While equipped, allows 1 stack of arrows to stack up to 99 instead of 15."
     })
   end
 end

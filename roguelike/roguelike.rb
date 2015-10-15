@@ -51,10 +51,6 @@ Create a base object class that everything else inherits from.
 
 refactor heal/hurt sources to objects instead of strings
 
-Every time Item[""] is called, it creates a new instance of the item. This is crazy data overflow
-  ? Create a Item.find("") method that will do a first_or_create
-  ? Create a scaffold that will return the default data from the object and then throw the object away
-
 dodged/blocked only when necessary. Some items (magic spells) won't do damage on collision, but should show a status effect.
 "{} has been poisoned/burned/etc"
 
@@ -78,6 +74,10 @@ Incorporate two handed weapons
 (2-handed weapons grant speed reduction if there is an item in the other hand)
 
 Add different default keyboard layouts
+
+Add knockback, slow, and stun spells
+
+Add holes that 'fall' to the next floor
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

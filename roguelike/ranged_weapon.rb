@@ -1,20 +1,20 @@
 class RangedWeapon
   include Item
 
-  attr_accessor :range, :thrown, :ammo_type, :projectile_speed, :collided_action, :shoot_damage
+  attr_accessor :range, :thrown, :ammo_types, :projectile_speed, :collided_action, :shoot_damage
   attr_accessor :mana_cost, :range
 
   def fire!
     if thrown
       Settings.ready('throw', self, self.range)
     else
-      if Player.has(ammo_type)
-        ammo = Player.item_in_inventory_by_name(ammo_type)
-        ammo.on_hit_damage = Item[ammo_type].on_hit_damage + (self.shoot_damage || 0)
-        ammo.range = (Item[ammo_type].range || 0) + (self.range || 0)
-        Settings.ready('shoot', ammo, ammo.range, Player.item_in_inventory_by_name(ammo_type))
+      if ammo = Player.item_in_inventory_by_names(ammo_types)
+        item_reference = Item.reference(ammo.name)
+        ammo.on_hit_damage = item_reference.on_hit_damage + (self.shoot_damage || 0)
+        ammo.range = (item_reference.range || 0) + (self.range || 0)
+        Settings.ready('shoot', ammo, ammo.range)
       else
-        Log.add "Out of ammo. Need more #{ammo_type}."
+        Log.add "Out of ammo. Need more #{ammo_types.first}."
       end
     end
     false
@@ -35,9 +35,8 @@ class RangedWeapon
       range: 20,
       projectile_speed: 80,
       on_hit_damage: 3,
-      thrown: true,
       weight: 0.3,
-      description: "This is an arrow"
+      description: "An ammo item that can be used as a projectile from a Standard Bow. When fired, gains additional range and damage when compared to bing thrown."
     })
   end
 
@@ -45,12 +44,13 @@ class RangedWeapon
     new({
       name: 'Standard Bow',
       icon: '}',
-      ammo_type: 'Arrow',
+      ammo_types: ['Arrow'],
       color: :white,
       range: 10,
       shoot_damage: 5,
       thrown: false,
-      weight: 3
+      weight: 3,
+      description: "When used, if the Player has the appropriate ammo, fires the ammo as a projectile. Projectiles get an addition 5 damage from being fired."
     })
   end
 end

@@ -9,7 +9,7 @@ class SpellBook
   end
 
   def cast_spell(spell_name)
-    spell = Item[spell_name]
+    spell = Item.reference(spell_name)
     if self.castable_spells.include?(spell_name)
       spell.cast!
     end
@@ -37,7 +37,8 @@ class SpellBook
       color: :blue,
       weight: 3,
       element: 'fire',
-      castable_spells: ['Fire Ball', 'Fire Blast']
+      castable_spells: ['Fire Ball', 'Fire Blast'],
+      description: "A Spell Book with inscribed Fire Spells. Spells can be listed by viewing the book and then selecting a spell. Spells can be equipped to the Quickbar by pressing Space while hovering on a Spell in the view menu."
     })
     new({
       name: 'Book of Poison',
@@ -45,7 +46,8 @@ class SpellBook
       color: :blue,
       weight: 3,
       element: 'poison',
-      castable_spells: ['Poison Blast']
+      castable_spells: ['Poison Blast'],
+      description: "A Spell Book with inscribed Poison Spells. Spells can be listed by viewing the book and then selecting a spell. Spells can be equipped to the Quickbar by pressing Space while hovering on a Spell in the view menu."
     })
     new({
       name: 'Amulet of Power',
@@ -54,7 +56,8 @@ class SpellBook
       color: :red,
       weight: 1,
       element: 'physical',
-      castable_spells: ['Berserk', 'Summon Stone']
+      castable_spells: ['Berserk', 'Summon Stone'],
+      description: "An mysterious glowing amulet. Grants power to the user. Spells can be listed by viewing the amulet and then selecting a spell. Spells can be equipped to the Quickbar by pressing Space while hovering on a Spell in the view menu."
     })
   end
 end

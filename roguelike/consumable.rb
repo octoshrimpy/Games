@@ -72,7 +72,7 @@ class Consumable
       icon: '%',
       color: :yellow,
       execution_script: Evals.flash(5),
-      description: 'Teleports the player up to 5 spaces away in any direction. Will fail if the space is not available for landing.'
+      description: 'Teleports the player up to 5 spaces away in any direction. Can only land on an open space that has been seen previously. Will teleport to the furthest open location.'
     })
     new({
       name: 'Potion of Resurrection',
@@ -84,7 +84,7 @@ class Consumable
       color: :magenta,
       usable_after_death: true,
       execution_script: Evals.resurrect_player,
-      description: 'Usable after death, will bring the Player back to life with full health.'
+      description: 'Usable after death, will bring the Player back to life with full health and 3 ticks of invincibility.'
     })
     new({
       name: "Potion of Invisibility",
@@ -94,7 +94,7 @@ class Consumable
       stack_size: 10,
       icon: 'u',
       execution_script: Evals.player_invisible(10),
-      description: "Grants invisibility for 10 ticks"
+      description: "Grants invisibility for 10 ticks. While invisibile, enemies will not attack the Player because of agro, however, they will still attack the Player if they run into you."
     })
     new({
       name: "Potion of Rage",
@@ -103,8 +103,8 @@ class Consumable
       usage_verb_past: 'quaffed',
       stack_size: 10,
       icon: 'u',
-      execution_script: Evals.player_berserk(50),
-      description: "Grants berserk for 50 ticks"
+      execution_script: Evals.player_berserk(100),
+      description: "Grants berserk for 100 ticks. While Berserk, the Player will have +3 speed and +50% strength. Berserk will cost 1 energy per tick and will cancel early if the Player runs out of energy."
     })
   end
 end

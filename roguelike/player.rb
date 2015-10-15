@@ -156,8 +156,8 @@ class Player
 
       if (x_dest != 0 || y_dest != 0)
         if Dungeon.current[self.y + y_dest][self.x + x_dest].is_solid?
-          tick = false
           $auto_pilot_condition = 'true'
+          tick = false
         else
           is_creature = false
           Creature.on_board.map do |creature|
@@ -397,11 +397,12 @@ class Player
     end
 
     def use_quickbar(input)
-      item = item_in_inventory_by_name(quickbar[input])
+      item = item_in_inventory_by_names(quickbar[input])
       unless item
-        temp_item = Item[quickbar[input]]
+        item_name = quickbar[input]
+        temp_item = Item.reference(item_name)
         is_spell = temp_item.class == Spell
-        item = temp_item if is_spell
+        item = Item[item_name] if is_spell
       end
 
       if item
@@ -572,8 +573,8 @@ class Player
       item.stack_size
     end
 
-    def item_in_inventory_by_name(name)
-      self.inventory.select { |item| item.name == name }.first
+    def item_in_inventory_by_names(names)
+      self.inventory.select { |item| [names].flatten.include?(item.name) }.first
     end
 
     def equippable_inventory(slot)

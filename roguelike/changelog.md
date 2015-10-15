@@ -1,6 +1,7 @@
 Oct 14, 205 v0.0.59
 Added type, mana, and range for spells when casting them
-
+Can now 'Read More' on Spell in the SpellBook/Amulets
+'Read More' only shows stats when it's equipment and shows spells if it can cast spells
 
 Oct 13, 2015 v0.0.58
 Refactored Class methods to be easier to read/write

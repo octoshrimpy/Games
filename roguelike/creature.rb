@@ -398,7 +398,7 @@ class Creature
       if attraction == 'Player' && player_in_range?
         found_destination = Player.coords.clone
       end
-      if Item[attraction]
+      if Item.reference(attraction)
         item = find_nearest_item_in_range(attraction)
         found_destination = item.coords if item
       end

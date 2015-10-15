@@ -300,7 +300,7 @@ class Game
         print " "
         Player.quickbar.map { |name|
           item = Item.by_name(name)
-          item_ammo = Item.by_name(item.ammo_type) if item.respond_to?(:ammo_type)
+          item_ammo = Item.by_name(item.ammo_types) if item.respond_to?(:ammo_types)
           ammo = item_ammo ? "#{item_ammo.show}\b" : ' '
           item ? "#{item.show}\b#{ammo.override_background_with(:light_black)}\e[100;30m" : "  "
         }.join("")
@@ -449,9 +449,9 @@ class Game
 
       case current_depth
       when 1
-        coord = Dungeon.find_open_spaces.sample
+        coord = Dungeon.find_open_spaces.sample.merge({depth: current_depth})
         sword = Item["Rusty Dagger"]
-        sword.drop({x: coord[:x], y: coord[:y], depth: current_depth})
+        sword.drop(coord)
       end
       if current_depth % 10 == 0
         coord = Dungeon.find_open_spaces.sample

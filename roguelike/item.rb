@@ -161,8 +161,9 @@ module Item
 
   def self.all; $items; end
   def self.count; all.count; end
+  def self.reference(name); all.select {|i| i.name == name }.first.freeze; end
   def self.[](name)
-    item = all.select {|i| i.name == name }.first
+    item = reference(name)
     if item
       new_item = item.dup
       $items << new_item
