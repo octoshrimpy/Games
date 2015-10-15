@@ -18,9 +18,9 @@ After shooting an arrow, the arrow retains it's extra damage? -> Minor, but the 
 
 Sometimes explosions are not shown
 
-Targeting uses 2 clicks
+Targeting uses 2 clicks -> Only for casting spells with auto-targeting
 
-Dropping items instead of throwing them.
+Map isn't showing creatures/players
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Greatly reduce magic damage, scale magic damage with magic power
@@ -121,15 +121,15 @@ require './visible.rb'
 seed = 40.times.map {|a| (rand_seed ||= Random.new_seed.to_s)[a] ? rand_seed[a] : 1}.join.to_i
 Game.start(seed)
 
-Player.equipped[:back] = Item["Quiver"]
+# Player.equipped[:back] = Item["Quiver"]
 Player.equipped[:off_hand] = Item['Torch']
-Player.equipped[:main_hand] = Item['Fire Sword']
-Player.inventory << Item['Standard Bow']
-Player.inventory << Item['Book of Fire']
-Player.inventory << Item['Amulet of Power']
-5.times { Player.inventory << Item['Scroll of Flash'] }
-99.times { Player.inventory << Item['Arrow'] }
-2.times { Player.inventory << Item['Torch'] }
+# Player.equipped[:main_hand] = Item['Fire Sword']
+# Player.inventory << Item['Standard Bow']
+# Player.inventory << Item['Book of Fire']
+# Player.inventory << Item['Amulet of Power']
+# 5.times { Player.inventory << Item['Scroll of Flash'] }
+# 99.times { Player.inventory << Item['Arrow'] }
+5.times { Player.inventory << Item['Torch'] }
 Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", "Summon Stone", "Torch", nil, 'Scroll of Flash']
 # Player.invincibility = 999999999
 

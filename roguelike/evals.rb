@@ -27,13 +27,17 @@ class Evals
     end
 
     def try_to_split_slime
-      "chance = self.health >= 10 ? 1 : (10 - self.health) * 2
+      "chance = self.strength >= 10 ? 1 : (10 - self.strength) * 2
       if rand(chance) == 0 && Creature.count < Game::MAX_ENEMIES
         coord = self.possible_moves(false).sample
         if coord
           slime = Creature.new('m', :light_green).spawn(coord)
-          slime.health += (self.health / 2).ceil
-          self.health = (self.health / 2).ceil
+          total_hp = slime.health + self.health
+          total_str = slime.strength + self.strength
+          slime.health = Math.greater_of((total_hp.to_f / 2).ceil, 1)
+          slime.strength = Math.greater_of((total_str.to_f / 2).ceil, 1)
+          self.health = Math.greater_of((total_hp.to_f / 2).ceil, 1)
+          self.strength = Math.greater_of((total_str.to_f / 2).ceil, 1)
         end
         @can_move = !coord
       end"
@@ -43,8 +47,8 @@ class Evals
       "slimes = Item.all_by_name('Slime Ball').select { |i| self.depth == i.depth && self.coords == i.coords }
       slimes.each do |slime|
         slime.destroy
-        self.strength += Player.depth
-        self.health += Player.depth
+        self.strength += 1
+        self.health += 1
       end"
     end
   end

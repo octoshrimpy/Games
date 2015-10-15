@@ -6,7 +6,11 @@ Fixed game-crashing bug caused when trying to look at a slime in any targeting m
 Player no longer picks up all of the items he dropped if he performs an activity in the same spot
 Fixed Map jumping to the top of the screen when exiting the read more menu
 Added skeletons, which come back to life if their corpse is left on the ground
-
+Made enemies weaker, so they scale slower
+Fixed bug making Slimes way too strong
+  Slimes now balance their strength with newly spawned slimes
+Fixed Gold not picking up when Quick walking
+Fixed Items not getting thrown
 
 Oct 14, 2015 v0.0.59
 Added type, mana, and range for spells when casting them

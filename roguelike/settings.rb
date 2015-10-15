@@ -688,6 +688,7 @@ class Settings
           Log.add "I don't have the energy to do that."
         else
           $message = "Click the direction you would like to throw. '#{$key_mapping[:select_position]}' to choose coordinate."
+          @@item_range = Math.greater_of(Player.raw_strength, 10)
           $gamemode = 'direct_throw'
           @@selectable = false
           clear = false; play = false

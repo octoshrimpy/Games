@@ -144,6 +144,7 @@ class Player
       Player.berserk_tick!
 
       try_pickup_items('auto') if autopickup && !(@@skip_pick_up)
+      pickup_drops
       while inventory_by_stacks.count > inventory_size
         drop_many(inventory_by_stacks.to_a.last[1])
       end
@@ -388,7 +389,6 @@ class Player
       tick_from_move = try_move({x: Player.x + x_dest, y: Player.y + y_dest})
       tick = tick_from_move unless tick_from_move == nil
 
-      pickup_drops
       standing_on_message = Game.describe(Dungeon.at(Player.coords), Player.coords)
       if standing_on_message.length > 0 && !(standing_on_message =~ /I don't know what this is./)
         $message = standing_on_message if $message && $message.length == 0
