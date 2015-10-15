@@ -16,6 +16,14 @@ Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but 
 
 Collision detection of projectiles seems off
 
+After shooting an arrow, the arrow retains it's extra damage? -> Minor, but the arrow will do much more damage when thrown.
+
+Sometimes explosions are not shown
+
+Targeting uses 2 clicks
+
+Dropping items instead of throwing them.
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
@@ -46,6 +54,8 @@ dodged/blocked only when necessary. Some items (magic spells) won't do damage on
 
 Save data
   At startup, request user to select a load file or to create a new one.
+
+Should be able to select specific item from Inventory stacks if the items are different in any way. (Torches)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   FEATURES  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 More advanced books have more spells

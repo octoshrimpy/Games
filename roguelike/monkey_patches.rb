@@ -128,7 +128,11 @@ class String
 
   def uncolor
     while self.include?("\e")
-      self[self.index("\e")..self.index("m")] = "" if self.include?("\e")
+      if self.include?("\e")
+        instances = (0 ... self.length).find_all { |i| self[i] == 'm' }
+        index = instances.first == 0 ? instances[1] : instances[0]
+        self[self.index("\e")..index] = ""
+      end
     end
     self
   end

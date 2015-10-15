@@ -190,6 +190,7 @@ class Player
             self.energy -= loss
             self.x += x_dest
             self.y += y_dest
+            @@skip_pick_up = false
             if Player.coords.filter(:x, :y) == destination
               $auto_pilot_condition = 'true'
             else
@@ -392,7 +393,6 @@ class Player
       if standing_on_message.length > 0 && !(standing_on_message =~ /I don't know what this is./)
         $message = standing_on_message if $message && $message.length == 0
       end
-      @@skip_pick_up = false
       tick
     end
 

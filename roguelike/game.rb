@@ -439,7 +439,11 @@ class Game
       Dungeon.current.each_with_index do |y, ypos|
         y.each_with_index do |x, xpos|
           unless Dungeon.current[ypos][xpos].is_unbreakable? || rand(100) > 0
-            Gold.new({x: xpos, y: ypos, value: rand(1..3)})
+            depth = Player.depth
+            low_val = (depth / 5).ceil + 1
+            high_val = (depth / 4).ceil + 1
+            gold_value = rand(low_val..high_val)
+            Gold.new({x: xpos, y: ypos, depth: depth, value: gold_value.ceil})
             Game.input true; binding.pry if ypos == 0
             Dungeon.current[ypos][xpos] = "  "
           end

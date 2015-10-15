@@ -17,11 +17,14 @@ class Evals
   end
 
   def self.try_to_split_slime
-    "distance = Math.distance_between(coords, Player.coords)
-    chance = distance < 10 ? 5 : 30
+    "chance = self.health >= 10 ? 1 : (10 - self.health) * 2
     if rand(chance) == 0 && Creature.count < Game::MAX_ENEMIES
       coord = self.possible_moves(false).sample
-      Creature.new('m', :light_green).spawn(coord) if coord
+      if coord
+        slime = Creature.new('m', :light_green).spawn(coord)
+        slime.health += (self.health / 2).ceil
+        self.health = (self.health / 2).ceil
+      end
       @can_move = !coord
     end"
   end

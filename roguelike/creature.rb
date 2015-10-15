@@ -70,7 +70,7 @@ class Creature
         run_speed: 4,
         color: :light_green,
         verbs: %w( slimed ),
-        drops: (%w( i i i i i i g )*5).sample(rand(5)),
+        drops: %w( i ),
         attracted_to: ['Slime Ball', 'Player'],
         sense_range: {'Slime Ball' => 7},
         tick_script: 'eval(Evals.try_to_split_slime); eval(Evals.pickup_slime)',
@@ -317,14 +317,24 @@ class Creature
     end.flatten.compact
     self.drops.each do |d|
       spot = drop_locations.sample
+      depth = Player.depth
+      low_val = (depth / 5).ceil + 1
+      high_val = (depth / 4).ceil + 1
+      gold_value = rand(low_val..high_val)
       item = case d
-      when "g" then Gold.new({value: rand(Player.depth..(Player.depth * 1.6).round)})
+      when "g" then Gold.new({value: gold_value.ceil})
       when 'b' then Item['Bread Scrap']
-      when 'i' then Item['Slime Ball']
+      when 'i' then 'Slime Ball'
       when 'bb' then Item['Bread Chunk']
       else "o "
       end
-      item.drop(spot)
+      if item == 'Slime Ball'
+        self.strength.times do
+          Item[item].drop(drop_locations.sample)
+        end
+      else
+        item.drop(spot)
+      end
     end
     $npcs[Player.depth].delete(self)
   end
@@ -368,6 +378,7 @@ class Creature
     @y = coord[:y]
     $npcs[Player.depth] ||= []
     $npcs[Player.depth] << self
+    self
   end
 
   def random_open_space
