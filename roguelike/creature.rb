@@ -62,11 +62,11 @@ class Creature
     when "l"
     when "m"
       {
-        health: (1 + (@depth * 0.3)).round,
+        health: (1 + (@depth * 0.5)).round,
         defense: 0,
         accuracy: 90,
         vision: 2,
-        strength: (1 + (@depth * 0.3)).round,
+        strength: (1 + (@depth * 0.2)).round,
         run_speed: 4,
         color: :light_green,
         verbs: %w( slimed ),
@@ -206,7 +206,7 @@ class Creature
       '7' => %w( a b b s m ),
       '8' => %w( b b s ),
       '9' => %w( b b s ),
-      '10' => %w( b b s ),
+      '10' => %w( ),
       '11' => %w( b b m ),
       '12' => %w( b b ),
       '13' => %w( b b m ),

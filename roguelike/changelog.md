@@ -1,3 +1,7 @@
+Oct 14, 205 v0.0.59
+Added type, mana, and range for spells when casting them
+
+
 Oct 13, 2015 v0.0.58
 Refactored Class methods to be easier to read/write
 Added Berserk mode for the Player

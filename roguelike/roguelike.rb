@@ -2,18 +2,44 @@
 =begin
 http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     BUGS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Torches should update their current lighting if a solid object is modified within range
 
 When quick walking, sometimes the player does not pick up items below him
 Sometimes Player doesn't stop when seen by enemy
 
-Show mana costs and range for spells and spell books on usage screens
-
 When activating the map or targeting, the first frame does not show the target
 
-Have a ground item that displays a message but cannot be picked up
+Fix Sleeping menu - don't display instructions below game screen
 
-Spells should be able to be cast from a Scroll or from a Spell Book the same way.
+Fix Map resetting to top of scroll
+
+Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1) Left and Up has issues. Right and Down do not.
+
+Collision detection of projectiles seems off
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fix Flash Description
+Fix Arrow Description
+
+Spells need descriptions
+Should be able to 'read more' for spells in the Spell Book
+
+add descriptions for items
+
+Greatly reduce magic damage, scale magic damage with magic power
+Allow purchase of items to increase defense and power
+
+Enemies get strong too fast
+Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
+  Monsters should have base damage + small level multiplier
+
+Character Experience/levels
+Scaling for enemies
+Enemy special abilities?
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   FUNCTION  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Have a ground item that displays a message but cannot be picked up
 
 if player doesn't move, do not change vision calculations
   Would it be faster to calculate the changed coordinates?
@@ -23,46 +49,28 @@ if player doesn't move, do not change vision calculations
 Create a base object class that everything else inherits from.
   Has coords, pickup, drop actions, etc.
 
-add descriptions for items
+refactor heal/hurt sources to objects instead of strings
 
-Fix Sleeping menu - don't display instructions below game screen
-
-Fix Map resetting to top of scroll
-
-More advanced books have more spells
-Able to transcribe scrolls into books if the element matches
-
-Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1) Left and Up has issues. Right and Down do not.
-
-Greatly reduce magic damage, scale magic damage with magic power
-Allow purchase of items to increase defense and power
-
-Collision detection of projectiles seems off
-
-Enemies get strong too fast
-Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
-  Monsters should have base damage + small level multiplier
-
-Ranged enemies
+Every time Item[""] is called, it creates a new instance of the item. This is crazy data overflow
+  ? Create a Item.find("") method that will do a first_or_create
+  ? Create a scaffold that will return the default data from the object and then throw the object away
 
 dodged/blocked only when necessary. Some items (magic spells) won't do damage on collision, but should show a status effect.
 "{} has been poisoned/burned/etc"
 
-Character Experience/levels
-Scaling for enemies
-Enemy special abilities?
+Save data
+  At startup, request user to select a load file or to create a new one.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   FEATURES  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+More advanced books have more spells
+Able to transcribe scrolls into books if the element matches
+
+Ranged enemies
 
 Every 10 levels, spawn a BOSS.
   Downstairs should be hidden until Boss has been defeated.
 
 Build the town to buy/sell stuff.
-
-Save data
-
-Configure defense of player and creatures to reduce damage taken.
-change Player.hurt -> Player.hit, calculate damage based on opponents strength and self.defense
-
-refactor heal/hurt sources to objects instead of strings
 
 Allow Player to level up and increase stats
 Have skill levels for different types of weapons
@@ -71,18 +79,8 @@ Incorporate two handed weapons
 
 Add different default keyboard layouts
 
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Saving data -
-
-Assign a seed value
-Use that value for everything in the game
-
-At startup, request user to select a load file or to create a new one.
-
-This should save all variables.
-Save something like this:
-"$dungeon=#{$dungeon}"
 
 How many lines?
 >> run in irb.

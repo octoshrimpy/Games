@@ -114,6 +114,10 @@ class Settings
             @@selected_item = @@select < 2 ? nil : @@selection_objects[@@select - 2]
             $gamemode = 'read_about'
             Settings.show
+          when $gamemode == 'read_spellbook'
+            @@selected_item = @@select < 1 ? nil : @@selection_objects[@@select - 1]
+            $gamemode = 'read_about'
+            Settings.show
           end
         end
       when $key_mapping[:inspect_surroundings]
@@ -536,8 +540,14 @@ class Settings
       @@title = "Viewing #{@@selected_item.name}"
       @@selectable = true
       lines = ["Sort Spells - Press '#{$key_mapping[:pickup_items]}' to assign to quickbar."]
-      @@selected_item.castable_spells.each do |spell|
-        lines << spell
+      @@selection_objects = []
+      @@selected_item.castable_spells.each do |spell_name|
+        spell = Item[spell_name]
+        @@selection_objects << spell
+        line = "#{spell_name}: Type: #{spell.type.capitalize}"
+        line << " | Mana Cost: #{spell.mana_cost}" if spell.mana_cost && spell.mana_cost > 0
+        line << " | Range: #{spell.range}" if spell.range && spell.range > 0
+        lines << line
       end
       lines
     end
@@ -701,9 +711,9 @@ class Settings
       show
     end
 
-    def columnize(padding, cols)
-      cols.map do |col|
-        "#{col}#{Array.new(padding - col.length).join(' ')}"
+    def columnize(padding, *cols)
+      cols.flatten.map do |col|
+        col.ljust(padding)
       end.join
     end
 
@@ -871,19 +881,32 @@ Type 'x' then hit enter to cancel.
       lines << "Icon: #{item.icon.or('N/A')}"
       lines << "Weight: #{item.weight.or('N/A')}"
       lines << "Slot: #{humanize_slot(item.equipment_slot).or('N/A')}"
-      lines << ""
       lines << "Duration: #{item.duration}" if item.is_a?(LightSource)
-      lines += ["Range: #{item.range.or('N/A')}", ""] if item.respond_to?(:range)
-      lines << "Bonus Stats:"
-      lines << "   #{columnize(padding, ["Health:", "#{item.bonus_health.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Mana:", "#{item.bonus_mana.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Energy:", "#{item.bonus_energy.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Strength:", "#{item.bonus_strength.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Magic Power:", "#{item.bonus_magic_power.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Defense:", "#{item.bonus_defense.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Speed:", "#{item.bonus_speed.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Accuracy:", "#{item.bonus_accuracy.or('N/A')}"])}"
-      lines << "   #{columnize(padding, ["Regeneration:", "#{item.bonus_self_regen.or('N/A')}"])}"
+      lines << "Range: #{item.range.or('N/A')}" if item.respond_to?(:range)
+      lines << ""
+      if item.respond_to?(:castable_spells)
+        lines << "Castable Spells:"
+        item.castable_spells.each do |spell_name|
+          spell = Item[spell_name]
+          line = ["#{spell_name}-"]
+          line << "Type: #{spell.type.capitalize}"
+          line << "Mana Cost: #{spell.mana_cost}" if spell.mana_cost && spell.mana_cost > 0
+          line << "Range: #{spell.range}" if spell.range && spell.range > 0
+          lines << "   #{columnize(padding, line)}"
+        end
+      end
+      if item.respond_to?(:equipment_slot) && item.equipment_slot != nil
+        lines << "Bonus Stats:"
+        lines << "   #{columnize(padding, "Health:", "#{item.bonus_health.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Mana:", "#{item.bonus_mana.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Energy:", "#{item.bonus_energy.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Strength:", "#{item.bonus_strength.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Magic Power:", "#{item.bonus_magic_power.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Defense:", "#{item.bonus_defense.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Speed:", "#{item.bonus_speed.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Accuracy:", "#{item.bonus_accuracy.or('N/A')}")}"
+        lines << "   #{columnize(padding, "Regeneration:", "#{item.bonus_self_regen.or('N/A')}")}"
+      end
       lines << ""
       lines << " Description:"
       lines += word_wrap(item.description || "N/A")
@@ -907,15 +930,15 @@ When using a spell or ability, or throwing/shooting a projectile, you can quick 
     def char_stats_text
       padding = 40
       lines = ['']
-      lines << "   #{columnize(padding, ['Health:', "#{Player.max_health}"])}"
-      lines << "   #{columnize(padding, ['Mana:', "#{Player.max_mana}"])}"
-      lines << "   #{columnize(padding, ['Energy:', "#{Player.max_energy}"])}"
-      lines << "   #{columnize(padding, ['Health Regeneration:', "#{Player.self_regen}"])}"
-      lines << "   #{columnize(padding, ['Strength:', "#{Player.strength}"])}"
-      lines << "   #{columnize(padding, ['Magic Power:', "#{Player.magic_power}"])}"
-      lines << "   #{columnize(padding, ['Defense:', "#{Player.defense}"])}"
-      lines << "   #{columnize(padding, ['Accuracy:', "#{Player.accuracy}"])}"
-      lines << "   #{columnize(padding, ['Speed:', "#{Player.speed}"])}"
+      lines << "   #{columnize(padding, 'Health:', "#{Player.max_health}")}"
+      lines << "   #{columnize(padding, 'Mana:', "#{Player.max_mana}")}"
+      lines << "   #{columnize(padding, 'Energy:', "#{Player.max_energy}")}"
+      lines << "   #{columnize(padding, 'Health Regeneration:', "#{Player.self_regen}")}"
+      lines << "   #{columnize(padding, 'Strength:', "#{Player.strength}")}"
+      lines << "   #{columnize(padding, 'Magic Power:', "#{Player.magic_power}")}"
+      lines << "   #{columnize(padding, 'Defense:', "#{Player.defense}")}"
+      lines << "   #{columnize(padding, 'Accuracy:', "#{Player.accuracy}")}"
+      lines << "   #{columnize(padding, 'Speed:', "#{Player.speed}")}"
     end
 
     def dead_menu_text
