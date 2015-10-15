@@ -57,6 +57,7 @@ class Game
       else
         Player.tick
         Game.run_time(Player.speed)
+        Item.tick
 
         Game.update_level
         Game.draw if draw

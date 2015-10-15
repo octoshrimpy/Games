@@ -21,7 +21,7 @@ class Creature
         strength: (2 + (@depth * 0.3)).round,
         run_speed: 6,
         verbs: %w( bit clawed cut ),
-        drops: (%w( b b bb g )*5).sample(rand(5)),
+        drops: (%w( bread bread bread2 gold )*5).sample(rand(5)),
         name: "Giant Ant",
         attracted_to: ['Player']
       }
@@ -34,7 +34,7 @@ class Creature
         strength: (1 + (@depth * 0.3)).round,
         run_speed: 11,
         verbs: %w( bit clawed slammed cut tore\ at shredded),
-        drops: (%w( b b b b g )*3).sample(rand(3)),
+        drops: (%w( bread bread bread bread gold )*3).sample(rand(3)),
         name: "Giant Bat",
         attracted_to: ['Player']
       }
@@ -50,7 +50,7 @@ class Creature
         strength: (2 + (@depth * 0.3)).round,
         run_speed: 8,
         verbs: %w( struck bit clawed kicked slammed tore\ at shredded ),
-        drops: (%w( b b bb g g )*5).sample(rand(5)),
+        drops: (%w( bread bread bread2 gold gold )*5).sample(rand(5)),
         name: "Possessed Fox",
         attracted_to: ['Player']
       }
@@ -70,7 +70,7 @@ class Creature
         run_speed: 4,
         color: :light_green,
         verbs: %w( slimed ),
-        drops: %w( i ),
+        drops: %w( slime ),
         attracted_to: ['Slime Ball', 'Player'],
         sense_range: {'Slime Ball' => 7},
         tick_script: 'eval(Evals.try_to_split_slime); eval(Evals.pickup_slime)',
@@ -89,7 +89,7 @@ class Creature
         strength: (2 + (@depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( bit clawed slammed tore\ at shredded ),
-        drops: (%w( b b bb bb g )*5).sample(rand(5)),
+        drops: (%w( bread bread bread2 bread2 gold )*5).sample(rand(5)),
         name: "Giant Rat",
         attracted_to: ['Player']
       }
@@ -102,11 +102,23 @@ class Creature
         strength: (4 + (@depth * 0.3)).round,
         run_speed: 3,
         verbs: %w( bit struck whipped choked ),
-        drops: (%w( b b b g )*5).sample(rand(5)),
+        drops: (%w( bread bread bread gold )*5).sample(rand(5)),
         name: "Snake",
         attracted_to: ['Player']
       }
     when "t"
+      {
+        health: (2 + (@depth * 0.3)).round,
+        defense: 0,
+        accuracy: 90,
+        vision: 10,
+        strength: (4 + (@depth * 0.3)).round,
+        run_speed: 3,
+        verbs: %w( bit struck whipped choked ),
+        drops: ['cursedbone'] + %w( gold gold  ),
+        name: "Skeleton",
+        attracted_to: ['Player']
+      }
     when "u"
     when "v"
     when "w"
@@ -119,7 +131,7 @@ class Creature
         strength: (4 + (@depth * 0.3)).round,
         run_speed: 4,
         verbs: %w( struck bit clawed kicked slammed slapped whipped pummeled elbowed kneed cut choked tore\ at shredded slugged shot ),
-        drops: (%w( b g )*5).sample(rand(5)),
+        drops: (%w( bread gold )*5).sample(rand(5)),
         name: "Unknown Beast",
         attracted_to: ['Player']
       }
@@ -322,10 +334,11 @@ class Creature
       high_val = (depth / 4).ceil + 1
       gold_value = rand(low_val..high_val)
       item = case d
-      when "g" then Gold.new({value: gold_value.ceil})
-      when 'b' then Item['Bread Scrap']
-      when 'i' then 'Slime Ball'
-      when 'bb' then Item['Bread Chunk']
+      when "gold" then Gold.new({value: gold_value.ceil})
+      when 'bread' then Item['Bread Scrap']
+      when 'slime' then 'Slime Ball'
+      when 'bread2' then Item['Bread Chunk']
+      when 'cursedbone' then Item['Cursed Bone']
       else "o "
       end
       if item == 'Slime Ball'

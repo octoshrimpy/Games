@@ -29,8 +29,7 @@ class Settings
         @@previous_menus = []
       else
         @@previous_menus.pop if @@previous_menus.count > 0 && @@previous_menus.last[:mode] == $gamemode
-        @@previous_menus << {mode: $gamemode, item: @@selected_item, select: @@select}
-        @@previous_menus = [{mode: 'map', item: nil, select: nil}] if $gamemode == 'map'
+        @@previous_menus << {mode: $gamemode, item: @@selected_item, select: @@select, scroll: @@scroll, scroll_horz: @@scroll_horz}
       end
       unless $gamemode == 'play'
         tick = false
@@ -88,8 +87,7 @@ class Settings
         $gamemode == 'play' ? (Game.redraw; clear_settings) : Settings.show
       when $key_mapping[:read_more]
         if @@scroll_horz
-          $gamemode = $gamemode.toggle('read_more', 'map')
-          $gamemode == 'map' ? (@@scroll = @@select; @@select = nil) : (@@select = @@scroll)
+          $gamemode == 'read_more' ? menu_back : $gamemode = 'read_more'
           Settings.show
         else
           case
@@ -348,7 +346,12 @@ class Settings
     def scroll_up_left(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(-amount,-amount); end
     def scroll_down_right(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(amount,amount); end
     def scroll_down_left(amount=1); (@@select && @@selectable) ? (@@select -= amount) : move_coord(-amount,amount); end
-    def move_coord(x,y); @@scroll += y if @@scroll; @@scroll_horz += x if @@scroll_horz; end
+    def move_coord(x,y)
+      unless $gamemode == 'read_more'
+        @@scroll += y if @@scroll
+        @@scroll_horz += x if @@scroll_horz
+      end
+    end
 
     def menu_back
       @@select = 1
@@ -358,6 +361,8 @@ class Settings
         $gamemode = last_menu[:mode]
         @@selected_item = last_menu[:item]
         @@select = last_menu[:select]
+        @@scroll_horz = last_menu[:scroll_horz] if last_menu[:scroll_horz]
+        @@scroll = last_menu[:scroll] if last_menu[:scroll]
       else
         clear_settings
         $gamemode = 'play'

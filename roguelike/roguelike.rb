@@ -10,8 +10,6 @@ When activating the map or targeting, the first frame does not show the target
 
 Fix Sleeping menu - don't display instructions below game screen
 
-Fix Map resetting to top of scroll
-
 Vision calculation is a little off. Radius 2, Player does not see (+2, +1), but sees (-2, +1) Left and Up has issues. Right and Down do not.
 
 Collision detection of projectiles seems off
@@ -79,7 +77,6 @@ Add knockback, slow, and stun spells
 
 Add holes that 'fall' to the next floor
 
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 How many lines?
@@ -134,7 +131,6 @@ Player.inventory << Item['Amulet of Power']
 99.times { Player.inventory << Item['Arrow'] }
 2.times { Player.inventory << Item['Torch'] }
 Player.quickbar = ["Standard Bow", "Bread Scrap",  "Bread Chunk", "Book of Fire", "Fire Blast", "Summon Stone", "Torch", nil, 'Scroll of Flash']
-Creature.new('m', :light_green).spawn
 # Player.invincibility = 999999999
 
 system 'clear' or system 'cls'

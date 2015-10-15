@@ -4,6 +4,8 @@ Changed the way the slimes decide to split
 Slimes now drop the amount of slime balls equal to their strength/size
 Fixed game-crashing bug caused when trying to look at a slime in any targeting menu.
 Player no longer picks up all of the items he dropped if he performs an activity in the same spot
+Fixed Map jumping to the top of the screen when exiting the read more menu
+Added skeletons, which come back to life if their corpse is left on the ground
 
 
 Oct 14, 2015 v0.0.59
