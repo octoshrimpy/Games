@@ -20,8 +20,6 @@ Sometimes explosions are not shown
 
 Targeting uses 2 clicks -> Only for casting spells with auto-targeting
 
-Map isn't showing creatures/players
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
@@ -60,9 +58,6 @@ More advanced books have more spells
 Able to transcribe scrolls into books if the element matches
 
 Ranged enemies
-
-Every 10 levels, spawn a BOSS.
-  Downstairs should be hidden until Boss has been defeated.
 
 Build the town to buy/sell stuff.
 

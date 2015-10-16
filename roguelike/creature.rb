@@ -1,10 +1,12 @@
 class Creature
   attr_accessor :x, :y, :health, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :accuracy, :defense, :verbs,
-                :tick_script, :attracted_to, :sense_range, :can_move, :birth
+                :tick_script, :attracted_to, :sense_range, :can_move, :birth,
+                :is_boss
 
-  def initialize(type, creature_color)
+  def initialize(type, creature_color=nil)
     @mask = "#{type} "
+    @is_boss = false
     @creature_color = creature_color
     @can_move = true
     @destination = nil
@@ -40,6 +42,18 @@ class Creature
       }
     when "c"
     when "d"
+      {
+        health: (10 + (@depth * 0.3)).round,
+        defense: 0,
+        accuracy: 90,
+        vision: 10,
+        strength: (10 + (@depth * 0.1)).round,
+        run_speed: 8,
+        verbs: %w( bit clawed slammed cut tore\ at shredded),
+        drops: (%w( bread2 bread2 bread2 bread2 gold )*3).sample(rand(3)),
+        name: "Drake",
+        attracted_to: ['Player']
+      }
     when "e"
     when "f"
       {
@@ -59,6 +73,18 @@ class Creature
     when "i"
     when "j"
     when "k"
+      {
+        health: (4 + (@depth * 0.3)).round,
+        defense: 0,
+        accuracy: 90,
+        vision: 10,
+        strength: (6 + (@depth * 0.1)).round,
+        run_speed: 8,
+        verbs: %w( haunted clawed tore\ at shredded ),
+        drops: (%w( bread bread bread2 gold gold )*5).sample(rand(5)),
+        name: "Kobold",
+        attracted_to: ['Player']
+      }
     when "l"
     when "m"
       {
@@ -111,10 +137,10 @@ class Creature
         health: (2 + (@depth * 0.3)).round,
         defense: 0,
         accuracy: 90,
-        vision: 10,
+        vision: 8,
         strength: (4 + (@depth * 0.1)).round,
-        run_speed: 3,
-        verbs: %w( bit struck whipped choked ),
+        run_speed: 6,
+        verbs: %w( whacked struck beat slammed ),
         drops: ['cursedbone'] + %w( gold gold  ),
         name: "Skeleton",
         attracted_to: ['Player']
@@ -169,7 +195,7 @@ class Creature
     @vision = stats[:vision]
     @accuracy = stats[:accuracy]
     @strength = stats[:strength]
-    @creature_color = stats[:color] if stats[:color]
+    @creature_color ||= (stats[:color] || :red)
     @tick_script = stats[:tick_script] if stats[:tick_script]
     @run_speed = stats[:run_speed]
     @verbs = stats[:verbs]
@@ -213,31 +239,31 @@ class Creature
       '2' => %w( a b b f r r r s ),
       '3' => %w( a b b f r r s m ),
       '4' => %w( a b b f r s ),
-      '5' => %w( a b b r s ),
-      '6' => %w( a b b s ),
-      '7' => %w( a b b s m ),
-      '8' => %w( b b s ),
-      '9' => %w( b b s ),
-      '10' => %w( ),
-      '11' => %w( b b m ),
-      '12' => %w( b b ),
-      '13' => %w( b b m ),
-      '14' => %w( b b ),
-      '15' => %w( b b ),
-      '16' => %w( b b ),
-      '17' => %w( b b m ),
-      '18' => %w( b ),
-      '19' => %w( b ),
-      '20' => %w( b ),
-      '21' => %w( m ),
-      '22' => %w(),
-      '23' => %w( m ),
-      '24' => %w(),
-      '25' => %w(),
-      '26' => %w(),
-      '27' => %w( m ),
-      '28' => %w(),
-      '29' => %w(),
+      '5' => %w( a b b r s t ),
+      '6' => %w( a b b s t ),
+      '7' => %w( a b b s m t ),
+      '8' => %w( b b s t ),
+      '9' => %w( b b s t ),
+      '10' => %w( m ),
+      '11' => %w( b b m k t ),
+      '12' => %w( b b k t ),
+      '13' => %w( b b m k t ),
+      '14' => %w( b b k t ),
+      '15' => %w( b b k t d ),
+      '16' => %w( b b k t d ),
+      '17' => %w( b b m k t d ),
+      '18' => %w( b k t d ),
+      '19' => %w( b k t d ),
+      '20' => %w( ),
+      '21' => %w( m k t d ),
+      '22' => %w( k t d ),
+      '23' => %w( m k t d ),
+      '24' => %w( k t d ),
+      '25' => %w( k t d ),
+      '26' => %w( k t d ),
+      '27' => %w( m k t d ),
+      '28' => %w( k t d ),
+      '29' => %w( k t d ),
       '30' => %w(),
       '31' => %w( m ),
       '32' => %w(),
@@ -349,6 +375,7 @@ class Creature
         item.drop(spot)
       end
     end
+    Dungeon.current[self.y][self.x] = "> " if is_boss
     $npcs[Player.depth].delete(self)
   end
 

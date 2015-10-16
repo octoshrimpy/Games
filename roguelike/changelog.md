@@ -11,6 +11,11 @@ Fixed bug making Slimes way too strong
   Slimes now balance their strength with newly spawned slimes
 Fixed Gold not picking up when Quick walking
 Fixed Items not getting thrown
+Added a Boss
+  First boss is an extra powerful Slime.
+  Down Staircase does not appear until the boss has been defeated.
+Fixed creature color being set improperly.
+Fixed the Map viewing of objects and creatures being incorrect
 
 Oct 14, 2015 v0.0.59
 Added type, mana, and range for spells when casting them

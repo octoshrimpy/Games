@@ -457,8 +457,15 @@ class Game
         coord = Dungeon.find_open_spaces.sample.merge({depth: current_depth})
         sword = Item["Rusty Dagger"]
         sword.drop(coord)
+      when 10
+        slime_boss = Creature.new('m', :green).spawn
+        slime_boss.health = 50
+        slime_boss.is_boss = true
       end
+
       if current_depth % 10 == 0
+        downstairs = Dungeon.current.search_for("> ").first
+        Dungeon.current[downstairs[:y]][downstairs[:x]] = "  "
         coord = Dungeon.find_open_spaces.sample
         Gems.new(
           pickup_script: 'Log.add("Pickup up Gem. Max Health and Max Mana increased."); Player.raw_max_health += 5; Player.raw_max_mana += 2; Player.revitalize!',
@@ -471,10 +478,10 @@ class Game
     end
 
     def spawn_creature
-      color = :red
       possibilities = []
       type = Creature.creatures_on_level(Player.depth).sample
-      Creature.new(type, color).spawn
+      # creatures on level should be an array-> [icon, color]
+      Creature.new(type).spawn
     end
 
     def update_level
@@ -558,6 +565,7 @@ class Game
     end
 
     def describe(pixel, coords)
+      coords = coords.filter(:x, :y, :depth)
       player_here = coords == Player.coords
       is_map = $gamemode == 'map'
       response = player_here ? "I'm standing on " : 'There is '
@@ -572,14 +580,22 @@ class Game
       else ""
       end
       $stack = []
+      creature_here = nil
       # Do not change their color
       Game.input(true); binding.pry if $all_inputs.last == 'o'
       drops = $drops.flatten.compact.select { |drop| drop.coords == coords }
       (Item.at(coords) + drops).each do |obj|
-        $stack << obj if obj.coords.filter(:x, :y) == coords.filter(:x, :y) && obj != Player
+        $stack << obj if obj.coords == coords && obj != Player
+      end
+      $screen_shot_objects.each do |obj|
+        next unless obj.is_a?(Creature)
+        next unless obj.coords == coords
+        creature_here = obj
       end
       stacks = $stack.group_by { |item| item.name }
       stack_size = $stack.size
+
+      response = "#{creature_here.name} is standing on " if creature_here
 
       if standing_pixel =~ /staircase/
         response << standing_pixel
@@ -596,7 +612,7 @@ class Game
           line << " on "
           line << (bottom_item.stack_size == 1 || bottom_stack.size == 1 ? "#{bottom_item.name.articlize}" : "a stack of #{bottom_item.name.articlize}")
           line
-        else player_here ? "#{stack_size} things" : "\b\b\bare #{stack_size} things"
+        else (player_here || creature_here) ? "#{stack_size} things" : "\b\b\bare #{stack_size} things"
         end
       end
 

@@ -172,7 +172,7 @@ module Item
       nil
     end
   end
-  def self.at(coords); all.select { |i| i.coords == coords }; end
+  def self.at(coords); coords = coords.filter(:x, :y, :depth); all.select { |i| i.coords && i.coords.filter(:x, :y, :range) == coords }; end
   def self.by_name(name); all.select { |i| i.name == name }.first; end
   def self.all_by_name(name); all.select { |i| i.name == name }; end
   def self.on_board; all.select { |i| i.depth == Player.depth }; end
