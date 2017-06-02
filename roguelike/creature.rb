@@ -2,11 +2,12 @@ class Creature
   attr_accessor :x, :y, :health, :run_speed, :name, :strength, :depth, :id,
                 :drops ,:destination, :vision, :accuracy, :defense, :verbs,
                 :tick_script, :attracted_to, :sense_range, :can_move, :birth,
-                :is_boss
+                :is_boss, :affected_by
 
   def initialize(type, creature_color=nil)
     @mask = "#{type} "
     @is_boss = false
+    @affected_by = [] # Should be hash {"conditional string" => "effect (speed / 2)"}
     @creature_color = creature_color
     @can_move = true
     @destination = nil

@@ -20,10 +20,10 @@ def get_average
       # print "      "
       # p storage
     end
-    ping_av = ping_total / count
-    down_av = down_total / count
-    up_av = up_total / count
-    puts "#{type}: {ping: #{ping_av}, down: #{down_av}, up: #{up_av}}"
+    ping_avg = ping_total / count
+    down_avg = down_total / count
+    up_avg = up_total / count
+    puts "#{type}: {ping: #{ping_avg}, down: #{down_avg}, up: #{up_avg}}"
   end
 end
 
@@ -47,11 +47,16 @@ add_speed(15, 57.68, 6.08, 'direct-home-ecf8')
 
 add_speed(20, 47.49, 2.79, 'Orca')
 
-get_average
+add_speed(31, 81.99, 11.97, 'New Direct')
+add_speed(31, 87.09, 12.23, 'New Direct')
+add_speed(31, 85.92, 12.38, 'New Direct')
+add_speed(31, 86.75, 12.31, 'New Direct')
+add_speed(31, 84.93, 12.02, 'New Direct')
 
-puts case 5
-when true then 'a'
-when 'a' == 'a' then 'b'
-when [5, 6] then 'c'
-else 'z'
-end
+add_speed(31, 16.71, 11.13, 'New Wifi')
+add_speed(31, 13.01, 3.00, 'New Wifi')
+add_speed(31, 14.43, 3.03, 'New Wifi')
+add_speed(31, 15.31, 12.10, 'New Wifi')
+add_speed(31, 19.20, 12.06, 'New Wifi')
+
+get_average

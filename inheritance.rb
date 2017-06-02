@@ -1,16 +1,22 @@
-require 'pry-rails'
+module Item
+  def name
+    puts "I am an item"
+  end
+end
 
-class Object
+class Foo
   def talk
     puts 'Hello'
   end
 
   def iam
+    puts "Name: #{my_name}"
     puts self.class
   end
 end
 
-class Item < Object
+class Bar < Foo
+  include Item
 
   def iam
     puts 'hello'
@@ -18,9 +24,16 @@ class Item < Object
   end
 end
 
-i = Item.new
-# i.iam
+class Baz < Bar
+  attr_accessor :my_name
+end
+
+baz = Baz.new
+baz.my_name = "Rocco"
+baz.iam
 # => hello
-# => Item
-# => nil
-binding.pry
+# => Baz
+baz.talk
+# => Hello
+baz.name
+# => "I am an item"

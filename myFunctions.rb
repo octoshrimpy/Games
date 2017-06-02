@@ -1,3 +1,10 @@
+def months_between(date_str1, date_str2)
+  date1 = date_str1.to_datetime
+  date2 = date_str2.to_datetime
+  (date2.year - date1.year) * 12 + date2.month - date1.month - (date2.day >= date1.day ? 0 : 1)
+end
+
+
 @empty = "  "
 @mark = "▒▒"
 # •▒
@@ -99,8 +106,6 @@ pixelartToFunction(art, "0", ".")
 # (2..5).each { |y| [-3, 4].each { |x| coords << [y, x] }}
 # [1, 6].each { |y| [-2, 3].each { |x| coords << [y, x] }}
 # [0].each { |y| (-1..2).each { |x| coords << [y, x] }}
-#
-#
 #
 # 124, -45, 1, 0, 2, 53, 1113246
 # [9].each { |y| [1, 2].each { |x| coords << [y, x] }}

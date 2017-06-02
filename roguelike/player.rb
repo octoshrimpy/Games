@@ -5,7 +5,7 @@ class Player
   :inventory, :autopickup, :last_hit_id, :raw_self_regen, :bonus_stats,
   :raw_accuracy, :raw_magic_power, :invisibility_ticks, :sleeping,
   :inventory_size, :stunned_for, :live, :invincibility, :vision_radius,
-  :destination, :berserk_ticks
+  :destination, :berserk_ticks, :affected_by
 
   @@x = 0
   @@y = 0
@@ -64,6 +64,7 @@ class Player
 
   @@invincibility = 0
   @@invisibility_ticks = 0
+  @@affected_by = []
   @@berserk_ticks = 0
   @@visible = true
   @@sleeping = false

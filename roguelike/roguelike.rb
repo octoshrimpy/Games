@@ -3,8 +3,10 @@
 http://fantasynamegenerators.com/magic-book-names.php#.Ve3efGA_78H
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     BUGS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When quick walking, sometimes the player does not pick up items below him
-Sometimes Player doesn't stop when seen by enemy
+Quick walking
+  Sometimes the player does not pick up items below him
+  Sometimes Player doesn't stop when seen by enemy
+  Sometimes Player does not 'see' around him, especially with 0 lighting, does not
 
 When activating the map or targeting, the first frame does not show the target
 
@@ -23,10 +25,6 @@ Targeting uses 2 clicks -> Only for casting spells with auto-targeting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     TODO    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Greatly reduce magic damage, scale magic damage with magic power
 Allow purchase of items to increase defense and power
-
-Enemies get strong too fast
-Fix scaling for enemies. Scale VERY slowly, and over time switch out monsters.
-  Monsters should have base damage + small level multiplier
 
 Character Experience/levels
 Scaling for enemies
@@ -80,7 +78,7 @@ Dir["./*"].inject(0) {|count, path| count + %x{wc -l < "#{path}"}.to_i}
 
 =end
 
-require 'pry-remote' # TODO Remove this!
+# require 'pry-remote' # TODO Remove this!
 
 require 'io/console'
 require './monkey_patches.rb'

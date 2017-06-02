@@ -8,7 +8,7 @@ class GameOfLife
   end
 
   def tick
-    new_board = Array.new(@board_height) { Array.new(@board_width) {'x'}}
+    new_board = Array.new(@board_height) { Array.new(@board_width) {'x'} }
     @board.each_with_index do |coord, y|
       coord.each_with_index do |pos, x|
         count = count_neighbors(y, x)

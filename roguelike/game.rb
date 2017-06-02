@@ -96,7 +96,7 @@ class Game
 
     def pause
       Game.input(true)
-      binding.pry
+      # binding.pry
     end
 
     def end
@@ -445,7 +445,7 @@ class Game
             high_val = (depth / 4).ceil + 1
             gold_value = rand(low_val..high_val)
             Gold.new({x: xpos, y: ypos, depth: depth, value: gold_value.ceil})
-            Game.input true; binding.pry if ypos == 0
+            # Game.input true; binding.pry if ypos == 0
             Dungeon.current[ypos][xpos] = "  "
           end
         end
@@ -582,7 +582,7 @@ class Game
       $stack = []
       creature_here = nil
       # Do not change their color
-      Game.input(true); binding.pry if $all_inputs.last == 'o'
+      # Game.input(true); binding.pry if $all_inputs.last == 'o'
       drops = $drops.flatten.compact.select { |drop| drop.coords == coords }
       (Item.at(coords) + drops).each do |obj|
         $stack << obj if obj.coords == coords && obj != Player

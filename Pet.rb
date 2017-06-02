@@ -534,7 +534,8 @@ end
 
 def beeper(beeps=1)
   beeps.times do |beep|
-    print "\a"
+    # `say -v Bells "d"`
+    # print "\a"
     sleep 0.1
   end
 end

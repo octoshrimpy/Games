@@ -27,6 +27,7 @@ class Tetris
     @height = 23
     @origin = [1, 3]
     @count = 0
+    @last_step = Time.now
     @board = Array.new(@height) {Array.new(@width) {". "}}
     @width.times do |x|
       @board[@height - 1][x] = "x "
@@ -39,19 +40,19 @@ class Tetris
       random_num = rand(7)
       @live_type = case random_num
       when 0
-        "\e[36mI \e[0m"
+        "\e[46;30m  \e[0m"
       when 1
-        "\e[33mL \e[0m"
+        "\e[43;30m  \e[0m"
       when 2
-        "\e[34mJ \e[0m"
+        "\e[44;30m  \e[0m"
       when 3
-        "\e[93mO \e[0m"
+        "\e[103;30m  \e[0m"
       when 4
-        "\e[32mS \e[0m"
+        "\e[42;30m  \e[0m"
       when 5
-        "\e[31mZ \e[0m"
+        "\e[41;30m  \e[0m"
       when 6
-        "\e[35mT \e[0m"
+        "\e[45;30m  \e[0m"
       end
       buildPiece(@pieces[random_num])
       @falling = true
@@ -68,18 +69,22 @@ class Tetris
   end
 
   def step
-    # 20 steps / second
-    @level = (@score / 100) + 1
-    @level = 10 if @level > 10
-    bps = (11 - @level)
-    bps = 1 if @fast
+    delta = Time.now - @last_step
+    if delta > 0.05
+      @last_step = Time.now
+      # 20 steps / second
+      @level = (@score / 100) + 1
+      @level = 10 if @level > 10
+      bps = (11 - @level)
+      bps = 1 if @fast
 
-    if @count >= bps
-      move([1,0])
-      @count = 0
+      if @count >= bps
+        move([1,0])
+        @count = 0
+      end
+      @count += 1
+      draw
     end
-    @count += 1
-    draw
   end
 
   def move(move_to)
@@ -251,7 +256,7 @@ class Tetris
     @running = false
   end
 
-  def keysInput(m)
+  def keys_input(m)
     rotate if m == "w" #Move up
     move([0,-1]) if m == "a" #Move left
     move([0,1]) if m == "d" #Move right
@@ -282,21 +287,21 @@ end
 
 File.new "./Saves/tetris.txt", "w+" if !(File.exists?("./Saves/tetris.txt"))
 old = File.read("./Saves/tetris.txt").to_i
+system "clear" or system "cls"
 puts "The old high score is: #{old}"
-sleep 3
+sleep 1
 game = Tetris.new
 game.makePiece
 
 prompt = Thread.new do
   loop do
-    game.keysInput(s = STDIN.getch)
+    game.keys_input(s = STDIN.getch.downcase)
   end
 end
 
 loop do
   if game.instance_variable_get(:@running) == true
     game.step
-    sleep 0.05
   else
     prompt = 0
     break

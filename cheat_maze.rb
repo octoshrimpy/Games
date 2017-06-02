@@ -1,12 +1,16 @@
 require 'pry-rails'
 
-
 class Maze
   DIRECTIONS = [ [1, 0], [-1, 0], [0, 1], [0, -1] ]
 
-  def initialize(width, height)
-    @seed = ARGV[0] || rand(999)
+  def initialize(width, height, options={})
+    @seed = options[:seed] || rand(9999)
     srand(@seed)
+
+    @start_str = options[:start_str].nil? ? 'o' : options[:start_str][0]
+    @end_str = options[:end_str].nil? ? 'x' : options[:end_str][0]
+    @path = options[:path].nil? ? ' ' : options[:path][0]
+    @wall = options[:wall].nil? ? '#' : options[:wall][0]
 
     @width   = width
     @height  = height
@@ -29,24 +33,24 @@ class Maze
 
   def to_array
     array = []
-    array << @width.times.inject('# ') {|str, x| str << '# # '}.scan(/../)
+    array << @width.times.inject("#{@wall} ") {|str, x| str << "#{@wall} #{@wall} "}.scan(/../)
     end_x, end_y = @dead_ends.sample.to_a.map(&:last)
 
     @height.times do |y|
-      line = @width.times.inject('# ') do |str, x|
+      line = @width.times.inject("#{@wall} ") do |str, x|
         if @start_x == x && @start_y == y
-          str << (@vertical_walls[x][y] ? "\e[32mo\e[0m # " : "\e[32mo\e[0m   ")
+          str << (@vertical_walls[x][y] ? "#{@start_str} #{@wall} " : "#{@start_str}   ")
         else
-          str << (@vertical_walls[x][y] ? '  # ' : '    ')
+          str << (@vertical_walls[x][y] ? "  #{@wall} " : '    ')
         end
       end
       array << line.scan(/../)
 
-      array << @width.times.inject('# ') {|str, x| str << (@horizontal_walls[x][y] ? '# # ' : '  # ')}.scan(/../)
+      array << @width.times.inject("#{@wall} ") {|str, x| str << (@horizontal_walls[x][y] ? "#{@wall} #{@wall} " : "  #{@wall} ")}.scan(/../)
     end
     @dead_ends = find_dead_ends(array)
     downstairs_x, downstairs_y = @dead_ends.sample.to_a.map(&:last)
-    array[downstairs_y][downstairs_x] = "\e[31mx\e[0m "
+    array[downstairs_y][downstairs_x] = "#{@end_str} "
     array
   end
 
@@ -60,7 +64,7 @@ class Maze
         count_of_sides = 0
         sides = DIRECTIONS.map do |rel_x, rel_y|
           new_x, new_y = rel_x + x, rel_y + y
-          count_of_sides += 1 if grid[new_y][new_x] == '# '
+          count_of_sides += 1 if grid[new_y][new_x] == "#{@wall} "
           grid[new_y][new_x]
         end
         dead_ends << {x: x, y: y} if count_of_sides == 3
@@ -98,5 +102,17 @@ class Maze
   end
 end
 
-maze = Maze.new(20, 20)
+# maze = Maze.new(20, 20)
+# maze.draw
+params = {}
+    width = params[:width] || (rand(40) + 10)
+    height = params[:height] || (rand(40) + 10)
+    options = {
+      seed: params[:seed],
+      start_str: params[:start_str],
+      end_str: params[:end_str],
+      path: params[:path],
+      wall: params[:wall]
+    }
+    maze = Maze.new(width, height, options)
 maze.draw

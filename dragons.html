@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Dragons</title>
+  </head>
+  <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+  <script src="dragons.js" type="text/javascript"></script>
+  <script type="text/javascript">google.load("jquery", "1.7.1");</script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+
+      var millisecond = 1, second = 1000 * millisecond, minute = 60 * second, hour = 60 * minute, day = 24 * hour, week = 7 * day;
+      if (last_updated > (Date.now() + week)) {
+        $("body").prepend("Last updated over a week ago. Renew?");
+      }
+
+      function unique(array){
+        return array.filter(function(el, index, arr) {
+          return index === arr.indexOf(el);
+        });
+      }
+
+      function parseCurrency(currency) {
+        return parseInt(currency.substr(1, currency.length - 4));
+      }
+
+      function sortByArray(arr, preSortedArray) {
+        // console.log(preSortedArray);
+        return arr.sort(function(a, b) {
+          var idxA = preSortedArray.indexOf(a), idxB = preSortedArray.indexOf(b);
+          // console.log(a + ": " + idxA);
+          // console.log(b + ": " + idxB);
+          idxA = idxA == -1 ? Infinity : idxA;
+          idxB = idxB == -1 ? Infinity : idxB;
+          return idxA - idxB;
+        })
+      }
+
+      function firmnessSort(arr) {
+        var preSortedArray = ["Extra Soft", "Soft", "Medium", "Firm"];
+        return sortByArray(arr, preSortedArray);
+      }
+
+      function sizeSort(arr) {
+        var preSortedArray = ["Mini", "Small", "Medium", "Onesize", "Large", "XL"];
+        return sortByArray(arr, preSortedArray);
+      }
+
+      generateDragonForm = function() {
+        var firmnesses = [], sizes = [], models = [];
+
+        $.each(dragons_js, function(key, dragon) {
+          firmnesses.push(dragon.firmness);
+          sizes.push(dragon.size);
+          models.push(dragon.model);
+        })
+        $("form .firmnesses .form-fields").html("");
+        $("form .sizes .form-fields").html("");
+        $("form .models .form-fields").html("");
+        $(firmnessSort(unique(firmnesses))).each(function() {
+          var name = "firmness_" + this.replace(/\W/g, "_").toLowerCase();
+          var checkbox = $('<input type="checkbox" id="' + name + '" name="' + name + '" checked="checked" value="' + this +  '">');
+          var label = $("<label/>", {for: name}).html(this.toString());
+          $("form .firmnesses .form-fields").append(checkbox, label);
+        })
+        $(sizeSort(unique(sizes))).each(function() {
+          var name = "size_" + this.replace(/\W/g, "_").toLowerCase();;
+          var checkbox = $('<input type="checkbox" id="' + name + '" name="' + name + '" checked="checked" value="' + this +  '">');
+          var label = $("<label/>", {for: name}).html(this.toString());
+          $("form .sizes .form-fields").append(checkbox, label);
+        })
+        $(unique(models).sort()).each(function() {
+          var name = "model_" + this.replace(/\W/g, "_").toLowerCase();;
+          var checkbox = $('<input type="checkbox" id="' + name + '" name="' + name + '" checked="checked" value="' + this +  '">');
+          var label = $("<label/>", {for: name}).html(this.toString());
+          $("form .models .form-fields").append(checkbox, label);
+        })
+        $('.filter-form').removeClass("hidden");
+      }
+      generateDragonForm();
+
+      (function() {
+        $.each(dragons_js, function(key, dragon) {
+          var dragon_row = $("<tr>", {
+            price: dragon.price,
+            size: dragon.size,
+            firmness: dragon.firmness,
+            cum_tube: dragon.cum_tube,
+            suction: dragon.suction,
+            model: dragon.model,
+            color: dragon.color,
+            class: "dragon"
+          });
+          dragon_row.append($("<td>", {"data-type": "price"}).html(dragon.price));
+          dragon_row.append($("<td>", {"data-type": "size"}).html(dragon.size));
+          dragon_row.append($("<td>", {"data-type": "firmness"}).html(dragon.firmness));
+          dragon_row.append($("<td>", {"data-type": "cum_tube"}).html(dragon.cum_tube ? "Cum" : "N"));
+          dragon_row.append($("<td>", {"data-type": "suction"}).html(dragon.suction ? "Suc" : "N"));
+          dragon_row.append($("<td>", {"data-type": "model"}).html(dragon.model));
+          dragon_row.append($("<td>", {"data-type": "color"}).html(dragon.color));
+          dragon_row.append($("<td>").html($('<a class="load-img" data-img-src="' + dragon.img + '">Load Image</a>')));
+          $('.dragon-table tbody').append(dragon_row);
+        })
+      }());
+
+      filterDragons = function() {
+        $('.dragon').each(function() {
+          dragon_permitted = true;
+          var dragon_row = $(this);
+          var dragon = {
+            price: parseCurrency(dragon_row.attr("price")),
+            size: dragon_row.attr("size"),
+            firmness: dragon_row.attr("firmness"),
+            cum_tube: dragon_row.attr("cum_tube"),
+            suction: dragon_row.attr("suction"),
+            model: dragon_row.attr("model"),
+            color: dragon_row.attr("color")
+          }
+          if (parseInt($("#price_min").val()) >= dragon.price) {
+            dragon_permitted = false;
+          }
+          if (parseInt($("#price_max").val()) <= dragon.price) {
+            dragon_permitted = false;
+          }
+          $('.sizes input[type=checkbox]').each(function() {
+            if (this.checked == false && this.value == dragon.size) {
+              dragon_permitted = false;
+            }
+          })
+          $('.firmnesses input[type=checkbox]').each(function() {
+            if (this.checked == false && this.value == dragon.firmness) {
+              dragon_permitted = false;
+            }
+          })
+          $('.models input[type=checkbox]').each(function() {
+            if (this.checked == false && this.value == dragon.model) {
+              dragon_permitted = false;
+            }
+          })
+          if ($("#include_cum_tube").prop("checked") == false && dragon.cum_tube == "true") {
+            dragon_permitted = false;
+          }
+          if ($("#include_no_cum_tube").prop("checked") == false && dragon.cum_tube == "false") {
+            dragon_permitted = false;
+          }
+          if ($("#include_suction").prop("checked") == false && dragon.suction == "true") {
+            dragon_permitted = false;
+          }
+          if ($("#include_no_suction").prop("checked") == false && dragon.suction == "false") {
+            dragon_permitted = false;
+          }
+
+          if (dragon_permitted) {
+            dragon_row.removeClass("hidden")
+          } else {
+            dragon_row.addClass("hidden")
+          }
+        })
+      }
+
+      $(".generate-dragons").click(function(e) {
+        e.preventDefault();
+        return false;
+      })
+
+      $(".filter-form").change(function() {
+        filterDragons();
+      })
+
+      $(".mass-change").change(function() {
+        var dataType = $(this).attr("id");
+        $('.form-fields.' + dataType + ' input[type=checkbox]').prop("checked", this.checked);
+      })
+
+      $(document).on("click", ".load-img", function() {
+        if ($(this).attr("data-image-loaded") != "true") {
+          $(this).parent().append($("<br>"));
+          $(this).parent().append($('<img class="dragon-img" src="' + $(this).attr("data-img-src") + '">'));
+          $(this).html("Hide Image");
+          $(this).attr("data-image-loaded", "true");
+        } else {
+          var img = $(this).siblings(".dragon-img");
+          if (img.hasClass("hidden")) {
+            img.removeClass("hidden");
+            $(this).html("Hide Image");
+          } else {
+            img.addClass("hidden");
+            $(this).html("Show Image");
+          }
+        }
+      }).on("click", "td[data-type]", function() {
+        var sortableDataTypes = ["size", "firmness", "model"]
+        var dataType = $(this).attr("data-type");
+        var tdVal = $(this).text().trim()
+        if (sortableDataTypes.includes(dataType)) {
+          var name = dataType + "_" + tdVal.replace(/\W/g, "_").toLowerCase();
+          console.log(name);
+          var matchingLabel = $("input[name=" + name + "]");
+          matchingLabel.click();
+        } else if (dataType == "cum_tube") {
+          if (tdVal == "N") {
+            $("#include_no_cum_tube").click()
+          } else {
+            $("#include_cum_tube").click()
+          }
+        } else if (dataType == "suction") {
+          if (tdVal == "N") {
+            $("#include_no_suction").click()
+          } else {
+            $("#include_suction").click()
+          }
+        }
+      })
+
+
+    });
+  </script>
+  <style media="screen">
+    form div {
+      width: auto;
+      vertical-align: top;
+    }
+    .form-fields input[type=checkbox] { display: none; }
+    .form-fields label {
+      width: 150px;
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 15px;
+
+      color: red;
+      text-decoration: line-through;
+    }
+    .form-fields input[type=checkbox]:checked + label {
+      color: black;
+      text-decoration: none;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .load-img {
+      text-decoration: none;
+      padding: 5px;
+      background: grey;
+      border: 1px solid black;
+      margin: 2px;
+      width: 120px;
+    }
+    .dragon-table {
+      margin: 20px auto;
+    }
+    .dragon-table td {
+      line-height: 30px;
+    }
+    .dragon-img {
+      display: inline-block;
+      width: 120px;
+    }
+    .form-fields {
+      text-align: center;
+    }
+    .form-fields label {
+      text-align: left;
+    }
+  </style>
+  <body>
+    <form method="remote" class="filter-form">
+      <div class="prices">
+        <h4>Price Filter</h4>
+        <div class="form-fields">
+          <input type="text" id="price_min" name="price_min" placeholder="Min Price"> <br>
+          <input type="text" id="price_max" name="price_max" placeholder="Max Price">
+        </div>
+      </div>
+      <div class="sizes">
+        <h4>
+          <input id="sizes" class="mass-change" checked type="checkbox" name="sizes" value="">
+          <label for="sizes">Size</label>
+        </h4>
+        <div class="form-fields sizes"></div>
+      </div>
+      <div class="firmnesses">
+        <h4>
+          <input id="firmnesses" class="mass-change" checked type="checkbox" name="firmnesses" value="">
+          <label for="firmnesses">Firmness</label>
+        </h4>
+        <div class="form-fields firmnesses"></div>
+      </div>
+      <div class="models">
+        <h4>
+          <input id="models" class="mass-change" checked type="checkbox" name="models" value="">
+          <label for="models">Models</label>
+        </h4>
+        <div class="form-fields models"></div>
+      </div>
+      <div class="cum_tubes">
+        <h4>Cum Tube / Suction Cup</h4>
+        <div class="form-fields">
+          <input type="checkbox" id="include_cum_tube" name="include_cum_tube" checked="checked" value="include_cum_tube">
+          <label for="include_cum_tube">With Cum Tube</label>
+          <input type="checkbox" id="include_no_cum_tube" name="include_no_cum_tube" checked="checked" value="include_no_cum_tube">
+          <label for="include_no_cum_tube">Without Cum Tube</label>
+          <input type="checkbox" id="include_suction" name="include_suction" checked="checked" value="include_suction">
+          <label for="include_suction">With Suction Cup</label>
+          <input type="checkbox" id="include_no_suction" name="include_no_suction" checked="checked" value="include_no_suction">
+          <label for="include_no_suction">Without Suction Cup</label>
+        </div>
+      </div>
+    </form>
+    <!-- <a href="" class="generate-dragons">Generate Dragons!</a> -->
+
+    <table class="dragon-table">
+      <thead>
+        <th>Price</th>
+        <th>Size</th>
+        <th>Firmness</th>
+        <th>Cum</th>
+        <th>Suction</th>
+        <th>Model</th>
+        <th>Color</th>
+        <th>Img</th>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+
+  </body>
+</html>

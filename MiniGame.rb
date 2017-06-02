@@ -19,7 +19,7 @@ class MiniGame
   end
 
   def movement(m)
-  @board[@cy][@cx] = ". "
+    @board[@cy][@cx] = ". "
     if m == "a" #Move left
       @cx = ((@cx - 1) % @boardx)
     end
@@ -56,5 +56,5 @@ end
 game = MiniGame.new
 game.show
 loop do
-    game.await
+  game.await
 end

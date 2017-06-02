@@ -60,10 +60,6 @@ class Input
     when /^.$/
       c
     else
-      # \e[1;2A Shift Up
-      # \e[1;2B Shift Down
-      # \e[1;2C Shift Right
-      # \e[1;2D Shift Left
       puts "SOMETHING ELSE: #{c.inspect}"
     end
   end
