@@ -11,8 +11,8 @@
     $(document).ready(function() {
 
       var millisecond = 1, second = 1000 * millisecond, minute = 60 * second, hour = 60 * minute, day = 24 * hour, week = 7 * day;
-      if (last_updated > (Date.now() + week)) {
-        $("body").prepend("Last updated over a week ago. Renew?");
+      if (last_updated < (Date.now() - week)) {
+        $("body").prepend("Last updated over a week ago. Call `ruby ~/code/games/dragontoys.rb` to renew.");
       }
 
       function unique(array){

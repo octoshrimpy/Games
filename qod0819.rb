@@ -1,5 +1,5 @@
 # Color List: http://xkcd.com/color/rgb.txt
-require 'rspec'
+
 
 def convert_color(color)
 end
