@@ -1,10 +1,3 @@
-def months_between(date_str1, date_str2)
-  date1 = date_str1.to_datetime
-  date2 = date_str2.to_datetime
-  (date2.year - date1.year) * 12 + date2.month - date1.month - (date2.day >= date1.day ? 0 : 1)
-end
-
-
 @empty = "  "
 @mark = "▒▒"
 # •▒
