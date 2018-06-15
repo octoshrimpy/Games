@@ -1,9 +1,9 @@
-  #cd C:\Ruby193\Scripts
+#cd C:\Ruby193\Scripts
 
-# cond ? T : F
-
+require 'pry'
 require 'io/console'
 require 'io/wait'
+
 class Snake
 
   def initialize
@@ -95,9 +95,7 @@ class Snake
   end
 end
 
-
-File.new "./Saves/s_sh.txt", "w+" if !(File.exists?("./Saves/s_sh.txt"))
-old = File.read("./Saves/s_sh.txt").to_i
+old = File.read("/Users/zoro/code/games/Saves/s_sh.txt").to_i rescue 0
 puts "The old high score is: #{old}"
 sleep 3
 game = Snake.new
@@ -132,6 +130,6 @@ else
   puts "No records broken. Your final score is: #{game.instance_variable_get(:@lon)}"
 end
 puts "#{new_score} is the high score"
-File.open("./Saves/s_sh.txt", 'w+') { |f| f.puts("#{new_score}") }
+File.open("/Users/zoro/code/games/Saves/s_sh.txt", 'w+') { |f| f.puts("#{new_score}") }
 
 exit

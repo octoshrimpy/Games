@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      div { box-sizing: border-box; }
+      .grid {
+        height: 100%;
+        width: 100%;
+        background: white;
+        border: 2px solid red;
+        display: grid;
+        grid-template-columns: 250px auto;
+        grid-template-rows: max-content auto max-content;
+        grid-template-areas:
+          "sidebar header"
+          "sidebar content"
+          "sidebar footer";
+      }
+      .sidebar, .header, .content, .footer {
+        border: 5px dashed darkgrey;
+      }
+      .sidebar {
+        grid-area: sidebar;
+        background: lightgreen;
+      }
+      .header {
+        grid-area: header;
+        background: yellow;
+        min-height: 100px;
+      }
+      .content {
+        grid-area: content;
+        background: lightblue;
+      }
+      .footer {
+        grid-area: footer;
+        background: pink;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid">
+      <div class="sidebar"></div>
+      <div class="header"></div>
+      <div class="content"></div>
+      <div class="footer"></div>
+    </div>
+  </body>
+</html>

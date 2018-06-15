@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <style media="screen">
+    .grid {
+      display: grid;
+      grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+      width: 600px; /* These control the sizes of the entire game */
+      height: 600px; /* These control the sizes of the entire game */
+      margin: 0 auto;
+    }
+    .grid .cell .img-container {
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .grid .cell .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .hidden { display: none !important; }
+    /* ----------- vv - This is the stuff you can play with to change how things look - vv ----------- */
+    .grid .cell {
+      /* How the cell looks normally */
+      text-align: center;
+      line-height: 200px;
+      font-size: 100px; /* Change the size of the numbers  */
+      background: red; /* set the color of the background */
+      font-family: monospace; /* Select the font */
+    }
+    .grid .cell:hover {
+      /* How the cell looks while your mouse is over it */
+      background: blue;
+    }
+    .grid .cell.disabled {
+      /* How the cell looks after you've clicked on it  */
+      background: grey;
+    }
+    /* ----------- ^^ - ^^ ----------- */
+  </style>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).on("click", ".cell:not(.disabled)", function() {
+      $(this).addClass("disabled")
+      $(this).find(".img-container").removeClass("hidden")
+    }).on("click", ".img-container", function() {
+      $(this).addClass("hidden")
+    })
+  </script>
+  <body>
+    <div class="grid">
+      <div class="cell">
+        <span>1</span>
+        <div class="img-container hidden"><img src="ruby_svg.svg"></div>
+      </div>
+      <div class="cell">
+        <span>2</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/jiCB44gfiMGeQ/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>3</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/jiCB44gfiMGeQ/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>4</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/roZg3KeB7Pzfq/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>5</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/jiCB44gfiMGeQ/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>6</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/roZg3KeB7Pzfq/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>7</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/jiCB44gfiMGeQ/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>8</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/roZg3KeB7Pzfq/giphy.gif"></div>
+      </div>
+      <div class="cell">
+        <span>9</span>
+        <div class="img-container hidden"><img src="https://media.giphy.com/media/roZg3KeB7Pzfq/giphy.gif"></div>
+      </div>
+    </div>
+  </body>
+</html>

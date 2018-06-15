@@ -1,9 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-46 -50 60 135" style="background: #FAFAFA;">
-<circle title='10 - 85 times' cx='15' cy='0' r='0.5' />
-<circle title='9 - 74 times' cx='14' cy='11' r='0.5' />
-<circle title='8 - 20 times' cx='13' cy='65' r='0.5' />
-<circle title='7 - 11 times' cx='12' cy='74' r='0.5' />
-<circle title='6 - 8 times' cx='11' cy='77' r='0.5' />
-<circle title='5 - 1 times' cx='10' cy='84' r='0.5' />
-<circle title='4 - 1 times' cx='9' cy='84' r='0.5' />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-47 -50 68 170" style="background: #FAFAFA;">
+<text x="-7" y="-45" font-size="14">Min: 3 | Max: 18 | Avg: 10 | Points: 16</text>
+<circle title='11 - 120 times' cx='16' cy='0' r='0.5' />
+<circle title='10 - 117 times' cx='15' cy='3' r='0.5' />
+<circle title='9 - 116 times' cx='14' cy='4' r='0.5' />
+<circle title='8 - 112 times' cx='13' cy='8' r='0.5' />
+<circle title='12 - 111 times' cx='17' cy='9' r='0.5' />
+<circle title='13 - 102 times' cx='18' cy='18' r='0.5' />
+<circle title='7 - 77 times' cx='12' cy='43' r='0.5' />
+<circle title='14 - 68 times' cx='19' cy='52' r='0.5' />
+<circle title='6 - 53 times' cx='11' cy='67' r='0.5' />
+<circle title='15 - 42 times' cx='20' cy='78' r='0.5' />
+<circle title='16 - 29 times' cx='21' cy='91' r='0.5' />
+<circle title='5 - 22 times' cx='10' cy='98' r='0.5' />
+<circle title='17 - 13 times' cx='22' cy='107' r='0.5' />
+<circle title='4 - 12 times' cx='9' cy='108' r='0.5' />
+<circle title='18 - 4 times' cx='23' cy='116' r='0.5' />
+<circle title='3 - 2 times' cx='8' cy='118' r='0.5' />
 </svg>
