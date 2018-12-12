@@ -8,34 +8,37 @@ require 'pry'
 # Some letters are shortcuts:
 # L\d+ Keep lowest X results
 # H\d+ Keep highest X results
-# 4d6L2 means roll 4, but drop the lowest 2 results and only add the high 2
+# 4d6L2: roll 4, but drop the lowest 2 results and only add the high 2
 # "d%" is shortcut for d100
 # Add explanations of all dice notation possibilities to page
 
 # Enter any operation to perform the results.
 
 # Dice
-# "d" can be used to simulate the roll of a virtual dice.
-# A number coming before the "d" represents the number of times to roll the dice. "2d" means roll a standard die 2 times and sum the results
-# A number coming after the "d" represents the number of sides on the dice. "d2" means roll a 2 sided dice - equivalent to a coin flip
-# "L" can be appended to a dice roll and means "drop the lowest result"
-# A number coming after the "L" means to drop that many results. "4dL2" means roll 4 dice and only count the highest 2 rolls
-# "H" is the opposite of "L" and means drop the HIGHEST result.
-# A number coming after the "H" means to drop that many results. "4dH2" means roll 4 dice and only count the lowest 2 rolls
-# "-L" means drop all results equal to or less than the number given (default is 1)
-# "-L3" means drop all results that are less than or equal to 3
-# "-H" means drop all results equal to or greater than the number given (default is the highest value of the die)
-# "-H3" means drop all results that are greater than or equal to 3
-# "!" can be used to roll the same dice again if the roll matches the number given (default is the highest value of the die) (The sum is used) - this results in a potentially infinite value
-# "+!" applies the same rules, but is valid if the number is greater than or equal to the given number.
-# "-!" applies the same rules, but is valid if the number is less than or equal to the given number.
+# Case does not matter.
+# D: used to simulate the roll of virtual dice.
+# nD: Roll the dice "n" times. (Default: 1)
+# Dn: Roll a dice with "n" sides. (Default: 6)
+# D%: Roll a dice with 100 sides.
+# !: Roll an additional time if the highest value is rolled (6 for a 6 sided die)
+# !n: Roll an additional time if "n" is rolled (Default: 1)
+# +!n: Roll an additional time if the roll is equal or greater than "n"
+# -!n: Roll an additional time if the roll is equal or less than "n"
+# L: Drop the lowest result. (Used when rolling one die multiple times)
+# Ln: Drop the lowest result "n" times.
+# H: Drop the highest result. (Used when rolling one die multiple times)
+# Hn: Drop the highest result "n" times.
+# K: Drop the highest result. (Used when rolling one die multiple times)
+# Kn: Drop the highest result "n" times.
+# -L: Drop all results equal to the lowest dice value (1)
+# -Ln: Drop all results equal to or less than "n"
+# -H: Drop all results equal to the highest dice value (6 for a 6 sided die)
+# -Hn: Drop all results equal to or greater than "n"
+
 # TODO: Allow decimals?
 # TODO: ^^ Allow "A" to be used to average rolls within a die?
 
-# TODO: Fix H/L
-# TODO: Add Rn() -- roll the same thing n times (Do not just multiply!!!)
-# TODO: Show which scores were dropped
-# TODO k keeps highest roll, kn keeps highest n rolls -kn keeps lowest n rolls
+# TODO: Add Rn() -- roll the same thing n times (Do not just multiply!!!)?
 
 # Operations
 # Addition (+), Subtraction (-), Multiplication (* - parentheses can also be used), Division (/), Exponent (**)
@@ -132,7 +135,7 @@ end
 class Dice
   attr_accessor :roll_str, :value, :iterations, :rolls
 
-  DIE_PARSE_REGEX = /(\d*)d(\d*%?)((?:!|[\-\+]?[HLK]\d*)*)/i
+  DIE_PARSE_REGEX = /(\d*)d(\d*%?)((?:[\-\+]?[!HKL]\d*)*)/i
 
   def self.roll(str, opts={})
     new(str, opts)
@@ -229,15 +232,16 @@ class Dice
 
   def evaluate_die(die)
     options = die_options(die)
+    sides = options[:sides]
     rolls = []
 
     roll_values = options[:roll_count].times.map do |t|
-      roll_val = roll(options[:sides])
+      roll_val = roll(sides)
       rolls << roll_val
       last_roll = roll_val
       rolls_to_repeat = [options[:repeat_roll]].compact.flatten
-      while rolls_to_repeat.include?(last_roll) && rolls.length < 100
-        roll_val += last_roll = roll(options[:sides])
+      while rolls_to_repeat.include?(last_roll) && rolls_to_repeat.length < sides
+        roll_val += last_roll = roll(sides)
         rolls << "+#{last_roll}"
       end
       roll_val
@@ -262,9 +266,9 @@ class Dice
     options[:roll_count] = roll_count = (raw_roll_count.presence || 1).to_i
     options[:sides] = sides = (raw_sides.gsub("%", "100").presence || 6).to_i
 
-    drop_lower, l_found, low_match = modifiers.scan(/(\-)?(L)(\d*)/).first
-    drop_higher, h_found, high_match = modifiers.scan(/(\-)?(H)(\d*)/).first
-    bang_modifier, bang_found, bang_match = modifiers.scan(/(\-|\+)?(\!)(\d*)/).first
+    drop_lower, l_found, low_match = modifiers.scan(/(\-)?(L)(\d*)/i).first
+    drop_higher, h_found, high_match = modifiers.scan(/(\-)?(H|K)(\d*)/i).first
+    bang_modifier, bang_found, bang_match = modifiers.scan(/(\-|\+)?(\!)(\d*)/i).first
 
     options[:leftover] = modifier_str
       .sub([raw_roll_count, :d, raw_sides].join(""), "")
