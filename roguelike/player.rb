@@ -161,10 +161,10 @@ class Player
           $auto_pilot_condition = 'true'
           tick = false
         else
-          is_creature = false
+          creature_in_the_way = false
           Creature.on_board.map do |creature|
             if creature.coords == {x: self.x + x_dest, y: self.y + y_dest, depth: self.depth}
-              is_creature = true
+              creature_in_the_way = true
               if self.energy > 0
                 loss = (rand(10) == 0 ? 1 : 0)
                 self.energy -= loss
@@ -185,7 +185,7 @@ class Player
               end
             end
           end
-          if is_creature
+          if creature_in_the_way
             $auto_pilot_condition = 'true'
           else
             loss = (rand(30) == 0 ? 1 : 0)
@@ -382,7 +382,7 @@ class Player
         Player.coords = Dungeon.current.search_for('> ').first.merge({depth: Player.depth})
         Game.draw
       when input == 't'
-        LightSource.new(4, 1000, coords)
+        # LightSource.new(4, 1000, coords)
         # --------------------------------------------------- / CHEATS ---------------------------
       end
       x_dest, y_dest = dest[0], dest[1] if dest

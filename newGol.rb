@@ -13,7 +13,7 @@ end
 
 class Board
   def initialize
-    @rows = Array.new(50) { Array.new(100) {Cell.new} }
+    @rows = Array.new(50) { Array.new(100) { Cell.new } }
   end
   def tick
     @rows.each_with_index do |row, y|

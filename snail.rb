@@ -32,6 +32,8 @@ def snail(fib)
   end
 end
 
+snail(7)
+
 
 # s,l,r=0,1,[]
 # (1..gets.to_i).map{|x|s+=l

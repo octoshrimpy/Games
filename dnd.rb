@@ -3,14 +3,6 @@ require 'pry'
 # require './svg_builder.rb'
 # http://anydice.com
 # TODO:
-# Operations on dice (+, -, *, /)
-# Complex operations USING dice: 3(1d8+2d6+10)+d4 is valid!
-# Some letters are shortcuts:
-# L\d+ Keep lowest X results
-# H\d+ Keep highest X results
-# 4d6L2: roll 4, but drop the lowest 2 results and only add the high 2
-# "d%" is shortcut for d100
-# Add explanations of all dice notation possibilities to page
 
 # Enter any operation to perform the results.
 
@@ -295,6 +287,12 @@ class Dice
   end
 end
 
+# dice = []
+# 1000.times do
+#   dice << Dice.roll(ARGV.join(" ").presence || "d").value.to_i
+# end
+# draw_svg(dice)
+
 results = Dice.roll(ARGV.join(" "))
 prev_result = results.roll_str.dup
 puts prev_result.to_s.colorize(:cyan)
@@ -311,9 +309,3 @@ end
 table.add_divider
 table.add_row("Total", results.roll_str, results.value)
 table.draw
-
-# dice = []
-# 1000.times do
-#   dice << Dice.roll(ARGV.join(" ").presence || "d").value.to_i
-# end
-# draw_svg(dice)

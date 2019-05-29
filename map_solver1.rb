@@ -38,7 +38,7 @@ def solve(map)
       solution = solution.join
       coords.each do |coord|
         x, y = coord
-        @map[y][x] = "\e[32m#{@map[y][x]}\e[0m"
+        @map[y][x] = "\e[32m#{@map[y][x] == '-' ? 'o' : @map[y][x]}\e[0m"
       end
     else
       if nexts.length == 0
@@ -187,3 +187,7 @@ S-X------X----
 --X--------X--
 --XXXXXXXXXX--
 --------------".split("\n").map{|row|row.split('')}
+start_time = Time.now.to_f
+solve(map)
+process_time = Time.now.to_f - start_time
+puts "Took #{process_time} seconds"

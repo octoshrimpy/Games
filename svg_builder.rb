@@ -64,6 +64,7 @@ end
 # scores = svg_from_rand(200, :normal_dist_with_bias, 1, 10, 10, weight: 4)
 # scores = svg_from_rand(10000, :linear_skewed_distribution, 0, 100)
 # scores = svg_from_rand(100, :linear_skewed_distribution, 1, 10)
+scores = svg_from_rand(1000, :normal_dist_with_bias, 1, 4, 1, weight: 1)
 # draw_svg(ARGV.join(",").split(",").map(&:to_i))
 # binding.pry
-puts ARGV#.join(",").split(",").map(&:to_i)
+# puts ARGV#.join(",").split(",").map(&:to_i)
