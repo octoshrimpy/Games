@@ -352,6 +352,7 @@ class Player
         if Dungeon.current[self.y + y_dest][self.x + x_dest].uncolor == "< "
           Game.use_stairs("UP")
           $spawn_creatures = true
+          
           Log.add "You go up the stairs..."
           tick = true
         end

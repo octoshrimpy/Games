@@ -1,0 +1,5 @@
+require_relative './equipment.rb'
+require_relative './magic_weapon.rb'
+require_relative './ranged_weapon.rb'
+require_relative './projectile.rb'
+require_relative './melee_weapon.rb'
