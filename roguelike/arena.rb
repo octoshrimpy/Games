@@ -2,7 +2,7 @@ class Arena
   attr_reader :left, :right, :top, :bottom
 
   def initialize
-    @arena = Hash.new {|h,k| h[k]=Hash.new("# ")}
+    @arena = Hash.new {|h,k| h[k]=Hash.new(TILESET[:WALL])}
     @left = @right = @top = @bottom = 0
   end
 

@@ -24,7 +24,7 @@ class AutomataCave
     @cells = Array.new(height) {Array.new(width) { Cell.new(percent_alive) }}
     @empty_space = '  '
     @solid_wall = "▒ "
-    @wall = "# "
+    @wall = "# " #FIXME: this doesn't do anything..?
     @up_stairs = '< '
     @down_stairs = '> '
   end
